@@ -1,5 +1,5 @@
 class Node:
-    def __init__(self, node_id_p, parents_p=None, children_p=None, coordinates_p=(0.0,0.0), active_p=False):
+    def __init__(self, node_id_p, parents_p=None, children_p=None, coordinates_p=[0.0,0.0], active_p=False, grid_coordinates_p=None):
         self.id = node_id_p
         self.parents = parents_p if parents_p is not None else []
         self.children = children_p if children_p is not None else []
@@ -7,7 +7,8 @@ class Node:
             'x': coordinates_p[0] if coordinates_p is not None else 0.0,
             'y': coordinates_p[1] if coordinates_p is not None else 0.0
         }
-        self.active = active_p
+        self.active = active_p if active_p is not None else False
+        self.grid_coordinates = grid_coordinates_p if grid_coordinates_p is not None else [0,0]
 
     def add_parent(self, parent_id):
         self.parents.append(parent_id)

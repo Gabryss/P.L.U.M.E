@@ -3,12 +3,33 @@ Display a graph using Plotly library
 """
 
 import plotly.graph_objs as go
+import os
 
+DUMB = True
 
-class display():
+class Display():
 
     def __init__(self, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
+        
         self.figure = go.Figure()
+        self.figure.update_layout(paper_bgcolor = 'darkgrey')
+        
+        self.figure.update_xaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black',
+            gridcolor='lightgrey',
+            tickfont=dict(family='Rockwell', color='black', size=14)
+        )
+        self.figure.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black',
+            gridcolor='lightgrey',
+            tickfont=dict(family='Rockwell', color='black', size=14)
+        )
         self.nodes = []
         self.edges = []
         self.nodes_color = node_color_p
@@ -17,7 +38,7 @@ class display():
         self.edges_width = edge_width_p
     
 
-    def save_as(self, path_p="graphs/graph1", format_p="png"):
+    def save_as(self, path_p="data/images/grap_h0", format_p="png"):
         """
         Path is without the format.
         Save the graph in the desired format
@@ -28,8 +49,23 @@ class display():
             -svg
             -json
         """
-        full_name = path_p + format_p
-        self.figure.write_image(full_name, engine="kaleido")
+        full_path = path_p + "." + format_p
+
+        if os.path.exists(full_path) and DUMB == False:
+            print("\nThis path already exist")
+            i = 0
+            path="data/images/graph_"
+            full_path = path+str(i)+"."+format_p
+            while os.path.exists(full_path):
+                i+=1
+                full_path = path+str(i)+"."+format_p
+            self.figure.write_image(full_path, engine="kaleido")
+            
+
+        else:
+            self.figure.write_image(full_path, engine="kaleido")
+
+        print("Graph exported at", full_path)
 
 
     def process_graph(self, graph_p):
@@ -45,13 +81,12 @@ class display():
         """
         Render the graph in the figure object
         """
-
         # Create a scatter plot for each node
         for node in self.nodes:
             self.figure.add_trace(go.Scatter(
-                x=[node.coordinates['x']],
-                y=[node.coordinates['y']],
-                text=[node.id],
+                x=[self.nodes[node].coordinates['x']],
+                y=[self.nodes[node].coordinates['y']],
+                text=[self.nodes[node].id],
                 mode='markers',
                 marker=dict(size=self.nodes_size, color=self.nodes_color)
             ))
