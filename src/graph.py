@@ -2,7 +2,6 @@ from node import Node
 import random as rd
 import numpy as np
 
-RAW = False
 DEFAULT_CSV_PATH = "data/csv_data/grid_data.csv"
 
 class Graph:
@@ -157,31 +156,37 @@ class Graph:
         node = self.nodes[node_ip]
         possible_coordinates = []
 
+       
         # Increase the grid in case the algorithm is close to a border. Update the coordinates
         if node.grid_coordinates[0] + 1 >= self.grid.shape[0] or node.grid_coordinates[0] - 1 <= 0 or node.grid_coordinates[1] + 1 >= self.grid.shape[0] or node.grid_coordinates[1] -1 <= 0:
             self.grid = np.pad(self.grid, ((1,1),(1,1)), mode='constant', constant_values=0)
+            self.grid_size = self.grid.ndim
             for node in self.nodes:
                 node = self.nodes[node]
                 node.grid_coordinates[0] += 1
                 node.grid_coordinates[1] += 1
+        
+        #   In numpy values are stored in a particular way which is: m[y][x]
+        print("Node:", node.id, "stalk neighbours")
+        print("Node", node.id, "coordinates", node.grid_coordinates)
 
-        # Check up
+        # Check right
         if self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] == 0:
             possible_coordinates.append([node.grid_coordinates[0], node.grid_coordinates[1] + 1])
         
-        # Check down
+        # Check left
         if self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] == 0:
             possible_coordinates.append([node.grid_coordinates[0], node.grid_coordinates[1] - 1])
 
-        # Check right
+        # Check up
         if self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] == 0:
             possible_coordinates.append([node.grid_coordinates[0] + 1, node.grid_coordinates[1]])
 
-        # Check left
+        # Check down
         if self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] == 0:
             possible_coordinates.append([node.grid_coordinates[0] - 1, node.grid_coordinates[1]])
 
-        return possible_coordinates
+        return possible_coordinates            
 
 
     def save_grid(self):
@@ -189,3 +194,10 @@ class Graph:
         using numpy library, save the actual state of the grid in a csv file.
         """
         np.savetxt(DEFAULT_CSV_PATH, self.grid, delimiter=",", fmt='%s')
+    
+    
+    def save_graph(self):
+        """
+        In progress
+        """
+        pass
