@@ -55,3 +55,6 @@ class Node:
                     visited.add(node)
                     queue.append((node, path + [node]))
         return None
+    
+    def get_list_coordinates(self):
+        return [self.coordinates['x'], self.coordinates['y']]
