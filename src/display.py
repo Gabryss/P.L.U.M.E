@@ -4,8 +4,9 @@ Display a graph using Plotly library
 
 import plotly.graph_objs as go
 import os
+from tools import Color
 
-DUMB = True
+DUMB = False
 
 class Display():
 
@@ -52,7 +53,7 @@ class Display():
         full_path = path_p + "." + format_p
 
         if os.path.exists(full_path) and DUMB == False:
-            print("\nThis path already exist")
+            print(f"\n{Color.WARNING.value}This path already exist\nGenerate auto path{Color.ENDC.value}")
             i = 0
             path="data/images/graph_"
             full_path = path+str(i)+"."+format_p
@@ -65,7 +66,7 @@ class Display():
         else:
             self.figure.write_image(full_path, engine="kaleido")
 
-        print("Graph exported at", full_path)
+        print(f"{Color.BOLD.value}Graph exported at", full_path,f"{Color.ENDC.value}")
 
 
     def process_graph(self, graph_p):
@@ -115,14 +116,3 @@ class Display():
                 unique_tuples.append(t)
 
         return unique_tuples
-
-
-
-
-
-# nodes = [{'id': 0, 'x': 0, 'y': 0},
-#          {'id': 1, 'x': 1, 'y': 0},
-#          {'id': 2, 'x': 1, 'y': 2},
-#          {'id': 3, 'x': 3, 'y': 3}]
-
-# edges = [(0, 1), (0, 2), (1, 3)]
