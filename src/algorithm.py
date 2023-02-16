@@ -1,46 +1,71 @@
 import random as rd
-
+from tools import Tools
+import numpy as np
 class Algorithm():
     
     def __init__(self):
-        pass
+        self.iterations = 0
+        self.stop_algorithm = False
 
-    def probabilistic(self, graph_p, nb_iteration):
-        for i in range(nb_iteration):
+
+    def probabilistic(self, graph_p, nb_iterations):
+        """
+        With a given number of iteration/or once all nodes are dead, create a graph based on the invert of Manhattan distance.
+        """
+
+        while self.iterations < nb_iterations and not self.stop_algorithm:
 
             for node in list(graph_p.nodes):
                 # print(graph_p.nodes)
                 node = graph_p.nodes[node]
+
+                # Check if the node is active
+                if not node.active:
+                    continue
+
                 # Check if new nodes are possibles among neighbours
                 probabilities=[]
                 possibilities = graph_p.get_possible_new_nodes(node.id)
-                print(possibilities)
 
 
-                # Check if active node
-                if not node.active or len(possibilities) == 0:
+                # Check if possible new nodes
+                if len(possibilities) == 0:
                     continue
                     
                 else:
-
+                    print("node :", node.id, "possibilities :", possibilities)
                     # Calculate the probability according to the distance to the original node
                     for possibility in possibilities:
-                        probabilities.append(1 / self.manhattan_distance(graph_p.nodes[1].grid_coordinates, possibility))
-
+                        probabilities.append(1 / len(possibilities))
+                    print(probabilities)
                     # Apply probability to our list of created nodes
                     nb_created_nodes_choice = rd.choice(range(len(possibilities)))
-                    coordinates_choice = rd.choices(possibilities, weights=probabilities, k=nb_created_nodes_choice)
+                    # coordinates_choice = rd.sample(possibilities, nb_created_nodes_choice)
+                    
+                    # coordinates_choice = rd.choices(possibilities, weights=probabilities, k=nb_created_nodes_choice)
+                    index_list = np.random.choice(range(len(possibilities)), nb_created_nodes_choice, replace=False, p=probabilities)
+                    coordinates_choice = []
+                    for index in index_list:
+                        coordinates_choice.append(possibilities[index])
 
                     # Create new nodes
                     for i in range(nb_created_nodes_choice):
+                        print(graph_p.grid)
                         coord = coordinates_choice.pop()
-                        correction_coordinates = self.substract_list(coord, [graph_p.grid_size//2, graph_p.grid_size//2])
-                        coordinates_new_node = self.substract_list(correction_coordinates, [node.coordinates['x'],node.coordinates['y']])
-                        graph_p.add_node(graph_p.num_nodes+1,None, None, coordinates_p=[node.coordinates['x'] + coordinates_new_node[0], node.coordinates['y'] + coordinates_new_node[1]], active_p=True, grid_coordinates_p=coord)
+                        child_graph_coordinates = self.calculate_right_graph_coordinates(node, coord)
+                        
+                        graph_p.add_node(graph_p.num_nodes+1, [node.id], None, coordinates_p=child_graph_coordinates, active_p=True, grid_coordinates_p=coord)
                         graph_p.add_edge(node.id, graph_p.nodes[graph_p.num_nodes].id)
+                        print("Distance entre parent",node.id, " et enfant ", graph_p.num_nodes, "est de ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
+
+                    graph_p.nodes[node.id].active = False
+                    graph_p.nb_deactivated_nodes += 1
+
+                    # Check if all nodes are dead
+                    if graph_p.nb_deactivated_nodes == len(graph_p.nodes):
+                        self.stop_algorithm = True
 
 
-                    # node.active = False
 
 
     def voronoi(self, graph_p):
@@ -66,11 +91,24 @@ class Algorithm():
         manhattan_distance = abs(coord1[0] - coord2[0]) + abs(coord1[1] - coord2[1])
         return manhattan_distance
     
-    def substract_list(self, list1, list2):
+
+    # Tools
+
+    def calculate_right_graph_coordinates(self, parent_node_p, grid_coordinates_p):
         """
-        Substract two list and return the resulting list
+        Based on the parent coordinates and the new child coordinates, return the coordinates of the child on the graph
         """
-        result = []
-        for i,j in zip(list1, list2):
-            result.append(i-j)
-        return result
+        # Get parent coordinate
+        parent_grid_coordinates = parent_node_p.grid_coordinates
+        parent_graph_coordinates = parent_node_p.get_list_coordinates()
+
+        # Get the transform between the parent and the child
+        difference_grid_coordinates = Tools().substract_list(grid_coordinates_p, parent_grid_coordinates)
+        difference_grid_coordinates[0] = -difference_grid_coordinates[0]
+        difference_grid_coordinates.reverse()
+
+        # Get the child graph coordinates
+        child_graph_coordinates = [parent_graph_coordinates[0]+difference_grid_coordinates[0], parent_graph_coordinates[1]+difference_grid_coordinates[1]]
+        return child_graph_coordinates
+
+    
