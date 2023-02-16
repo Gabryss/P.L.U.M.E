@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 import os
 from tools import Color
 
-DUMB = False
+DUMB = True
 
 class Display():
 
