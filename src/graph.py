@@ -14,6 +14,7 @@ class Graph:
         self.num_nodes = 0
         self.grid = np.zeros((grid_size_p, grid_size_p), dtype=object)
         self.grid_size = grid_size_p
+        self.nb_deactivated_nodes = 0
 
 
     def add_node(self, node_id_p, parents_p=None, children_p=None, coordinates_p=None, active_p=False, grid_coordinates_p=None):
@@ -21,10 +22,18 @@ class Graph:
         Create a node with the given parameters. The node by itself is a dictionary and will be
         stored in a dictionary that contains all the nodes of the graph.
         """
-        self.nodes[node_id_p] = Node(node_id_p, parents_p, children_p, coordinates_p, active_p, grid_coordinates_p)
-        self.grid[grid_coordinates_p[0]][grid_coordinates_p[1]] = node_id_p
-        self.num_nodes += 1
-        print(self.grid)
+        
+        if self.grid[grid_coordinates_p[0]][grid_coordinates_p[1]] != 0:
+            print("Coordinates", grid_coordinates_p)
+            print("Node ID", node_id_p)
+            print("Parent ID", parents_p)
+            print("Parent coordinates", self.nodes[parents_p[0]].grid_coordinates)
+            raise AssertionError
+        else:
+            self.nodes[node_id_p] = Node(node_id_p, parents_p, children_p, coordinates_p, active_p, grid_coordinates_p)
+            self.grid[grid_coordinates_p[0]][grid_coordinates_p[1]] = node_id_p
+            self.num_nodes += 1
+            # print(self.grid)
 
 
     def add_edge(self, parent_id, child_id):
