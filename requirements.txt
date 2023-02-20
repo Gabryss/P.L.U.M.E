@@ -1,0 +1,4 @@
+kaleido==0.2.1
+numpy==1.24.2
+plotly==5.13.0
+tenacity==8.2.1
