@@ -88,8 +88,9 @@ class Display():
                 x=[self.nodes[node].coordinates['x']],
                 y=[self.nodes[node].coordinates['y']],
                 text=[self.nodes[node].id],
-                mode='markers',
-                marker=dict(size=self.nodes_size, color=self.nodes_color)
+                mode='markers+text',
+                # marker=dict(size=self.nodes_size, color=self.nodes_color),
+                textposition="bottom center"
             ))
 
         # Create a line plot for each edge
@@ -102,6 +103,8 @@ class Display():
                 y1=self.nodes[edge[1]].coordinates['y'],
                 line=dict(width=self.edges_width, color=self.edges_color)
             )
+        
+        self.figure.update_traces(textposition='top center')
 
 
     def remove_dupliacte_tuples(self,tuple_list_p):
