@@ -89,7 +89,6 @@ class Display():
                 y=[self.nodes[node].coordinates['y']],
                 text=[self.nodes[node].id],
                 mode='markers+text',
-                # marker=dict(size=self.nodes_size, color=self.nodes_color),
                 textposition="bottom center"
             ))
 

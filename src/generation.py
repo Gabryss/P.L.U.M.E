@@ -4,9 +4,8 @@ from algorithm import Algorithm
 from tools import Color
 import sys
 
-GRID_SIZE = 3
-DEFAULT_PATH = "data/images/graph_0"
-
+DEFAULT_GRID_SIZE = 3
+DEFAULT_GRID_PATH = "data/images/graph_0"
 
 def generation_logic(graph):
     """
@@ -23,13 +22,14 @@ def generation_logic(graph):
 
     # Save the graph
     graph.save_grid()
-
+    graph.save_graph()
+    
 
 def main(argv):
     # Check parameters  
     if len(argv) == 1 or len(argv) > 2:
         print(f"{Color.WARNING.value}Wrong number of arguments provided.\nDefault grid size selected{Color.ENDC.value}\n\n")
-        grid_size = GRID_SIZE
+        grid_size = DEFAULT_GRID_SIZE
 
     else:
         try:
@@ -46,15 +46,13 @@ def main(argv):
 
     # Create the graph with the implemented logic
     generation_logic(graph)
-    # grap.create_random_graph(25)
-
 
     # Display graph
     print(f"\n{Color.OKBLUE.value}End of generation.. Exporting the graph{Color.ENDC.value}")
     display = Display()
     display.process_graph(graph)
     display.create_figure()
-    display.save_as(DEFAULT_PATH,"png")
+    display.save_as(DEFAULT_GRID_PATH,"png")
 
 
 if __name__ == '__main__':

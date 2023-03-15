@@ -1,8 +1,10 @@
 from node import Node
 import random as rd
 import numpy as np
+import json 
 
-DEFAULT_CSV_PATH = "data/csv_data/grid_data.csv"
+DEFAULT_CSV_PATH = "data/raw_data/grid_data.csv"
+DEFAULT_GRAPH_PATH = "data/raw_data/data.json"
 
 class Graph:
     def __init__(self, grid_size_p):
@@ -33,7 +35,6 @@ class Graph:
             self.nodes[node_id_p] = Node(node_id_p, parents_p, children_p, coordinates_p, active_p, grid_coordinates_p)
             self.grid[grid_coordinates_p[0]][grid_coordinates_p[1]] = node_id_p
             self.num_nodes += 1
-            # print(self.grid)
 
 
     def add_edge(self, parent_id, child_id):
@@ -203,10 +204,11 @@ class Graph:
         using numpy library, save the actual state of the grid in a csv file.
         """
         np.savetxt(DEFAULT_CSV_PATH, self.grid, delimiter=",", fmt='%s')
-    
-    
+
+
     def save_graph(self):
         """
-        In progress
+        Save the graph in a json file. All child connections are conserved
         """
-        pass
+        with open(DEFAULT_GRAPH_PATH, "w") as outfile:
+                json.dump(self.nodes, outfile, default=lambda o: o.__dict__, sort_keys=True, indent=4)

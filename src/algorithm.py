@@ -22,7 +22,7 @@ class Algorithm():
                 # Check if the node is active
                 if not node.active:
                     continue
-
+                
                 # Check if new nodes are possibles among neighbours
                 probabilities=[]
                 possibilities = graph_p.get_possible_new_nodes(node.id)
@@ -57,6 +57,11 @@ class Algorithm():
                         graph_p.add_node(graph_p.num_nodes+1, [node.id], None, coordinates_p=child_graph_coordinates, active_p=True, grid_coordinates_p=coord)
                         graph_p.add_edge(node.id, graph_p.nodes[graph_p.num_nodes].id)
                         print("Distance entre parent",node.id, " et enfant ", graph_p.num_nodes, "est de ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
+
+                    # if len(graph_p.nodes) < 10 :
+                    #     continue
+
+                    # else:
 
                     graph_p.nodes[node.id].active = False
                     graph_p.nb_deactivated_nodes += 1

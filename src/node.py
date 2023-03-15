@@ -1,3 +1,5 @@
+import json
+
 class Node:
     def __init__(self, node_id_p, parents_p=None, children_p=None, coordinates_p=[0.0,0.0], active_p=False, grid_coordinates_p=None):
         self.id = node_id_p
@@ -58,3 +60,15 @@ class Node:
     
     def get_list_coordinates(self):
         return [self.coordinates['x'], self.coordinates['y']]
+    
+    # def __json__(self):
+    #     return {"id": self.id, 
+    #             "parents": self.parents, 
+    #             "children": self.children,
+    #             "coordinates": self.coordinates,
+    #             "active": self.active,
+    #             "grid_coordinates": self.grid_coordinates}
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
