@@ -10,22 +10,24 @@
             "y": 0.0
         },
         "grid_coordinates": [
-            4,
-            4
+            1,
+            1
         ],
         "id": 1,
         "parents": []
     },
     "2": {
         "active": false,
-        "children": [],
+        "children": [
+            4
+        ],
         "coordinates": {
             "x": 0.0,
-            "y": 1.0
+            "y": -1.0
         },
         "grid_coordinates": [
-            3,
-            4
+            2,
+            1
         ],
         "id": 2,
         "parents": [
@@ -36,15 +38,15 @@
     "3": {
         "active": false,
         "children": [
-            4
+            5
         ],
         "coordinates": {
-            "x": -1.0,
+            "x": 1.0,
             "y": 0.0
         },
         "grid_coordinates": [
-            4,
-            3
+            1,
+            2
         ],
         "id": 3,
         "parents": [
@@ -55,41 +57,1577 @@
     "4": {
         "active": false,
         "children": [
-            5,
-            6
+            6,
+            7,
+            8
         ],
         "coordinates": {
-            "x": -2.0,
-            "y": 0.0
+            "x": 1.0,
+            "y": -1.0
         },
         "grid_coordinates": [
-            4,
+            2,
             2
         ],
         "id": 4,
         "parents": [
-            3,
-            3
+            2,
+            2
         ]
     },
     "5": {
         "active": false,
         "children": [],
         "coordinates": {
-            "x": -2.0,
+            "x": 1.0,
             "y": -1.0
         },
         "grid_coordinates": [
-            5,
+            2,
             2
         ],
         "id": 5,
+        "parents": [
+            3,
+            3
+        ]
+    },
+    "6": {
+        "active": false,
+        "children": [
+            9
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            2
+        ],
+        "id": 6,
         "parents": [
             4,
             4
         ]
     },
-    "6": {
+    "7": {
+        "active": false,
+        "children": [
+            10,
+            11,
+            12
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 7,
+        "parents": [
+            4,
+            4
+        ]
+    },
+    "8": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            3
+        ],
+        "id": 8,
+        "parents": [
+            4,
+            4
+        ]
+    },
+    "9": {
+        "active": false,
+        "children": [
+            13,
+            14
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            2
+        ],
+        "id": 9,
+        "parents": [
+            6,
+            6
+        ]
+    },
+    "10": {
+        "active": false,
+        "children": [
+            15,
+            16,
+            17
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            1
+        ],
+        "id": 10,
+        "parents": [
+            7,
+            7
+        ]
+    },
+    "11": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            2
+        ],
+        "id": 11,
+        "parents": [
+            7,
+            7
+        ]
+    },
+    "12": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 12,
+        "parents": [
+            7,
+            7
+        ]
+    },
+    "13": {
+        "active": false,
+        "children": [
+            18,
+            19,
+            20
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            3
+        ],
+        "id": 13,
+        "parents": [
+            9,
+            9
+        ]
+    },
+    "14": {
+        "active": false,
+        "children": [
+            21,
+            22
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            2
+        ],
+        "id": 14,
+        "parents": [
+            9,
+            9
+        ]
+    },
+    "15": {
+        "active": false,
+        "children": [
+            23
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 15,
+        "parents": [
+            10,
+            10
+        ]
+    },
+    "16": {
+        "active": false,
+        "children": [
+            24
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            1
+        ],
+        "id": 16,
+        "parents": [
+            10,
+            10
+        ]
+    },
+    "17": {
+        "active": false,
+        "children": [
+            25
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            0
+        ],
+        "id": 17,
+        "parents": [
+            10,
+            10
+        ]
+    },
+    "18": {
+        "active": false,
+        "children": [
+            26,
+            27
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 18,
+        "parents": [
+            13,
+            13
+        ]
+    },
+    "19": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            3
+        ],
+        "id": 19,
+        "parents": [
+            13,
+            13
+        ]
+    },
+    "20": {
+        "active": false,
+        "children": [
+            28
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            3
+        ],
+        "id": 20,
+        "parents": [
+            13,
+            13
+        ]
+    },
+    "21": {
+        "active": false,
+        "children": [
+            29,
+            30
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            2
+        ],
+        "id": 21,
+        "parents": [
+            14,
+            14
+        ]
+    },
+    "22": {
+        "active": false,
+        "children": [
+            31,
+            32
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            2
+        ],
+        "id": 22,
+        "parents": [
+            14,
+            14
+        ]
+    },
+    "23": {
+        "active": false,
+        "children": [
+            33,
+            34,
+            35
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            1
+        ],
+        "id": 23,
+        "parents": [
+            15,
+            15
+        ]
+    },
+    "24": {
+        "active": false,
+        "children": [
+            36
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            1
+        ],
+        "id": 24,
+        "parents": [
+            16,
+            16
+        ]
+    },
+    "25": {
+        "active": false,
+        "children": [
+            37,
+            38,
+            39
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 25,
+        "parents": [
+            17,
+            17
+        ]
+    },
+    "26": {
+        "active": false,
+        "children": [
+            40,
+            41
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            4
+        ],
+        "id": 26,
+        "parents": [
+            18,
+            18
+        ]
+    },
+    "27": {
+        "active": false,
+        "children": [
+            42,
+            43,
+            44
+        ],
+        "coordinates": {
+            "x": 4.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            5
+        ],
+        "id": 27,
+        "parents": [
+            18,
+            18
+        ]
+    },
+    "28": {
+        "active": false,
+        "children": [
+            45
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            4
+        ],
+        "id": 28,
+        "parents": [
+            20,
+            20
+        ]
+    },
+    "29": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            3
+        ],
+        "id": 29,
+        "parents": [
+            21,
+            21
+        ]
+    },
+    "30": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            2
+        ],
+        "id": 30,
+        "parents": [
+            21,
+            21
+        ]
+    },
+    "31": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            3
+        ],
+        "id": 31,
+        "parents": [
+            22,
+            22
+        ]
+    },
+    "32": {
+        "active": false,
+        "children": [
+            46,
+            47,
+            48
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            2
+        ],
+        "id": 32,
+        "parents": [
+            22,
+            22
+        ]
+    },
+    "33": {
+        "active": false,
+        "children": [
+            49,
+            50,
+            51
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 33,
+        "parents": [
+            23,
+            23
+        ]
+    },
+    "34": {
+        "active": false,
+        "children": [
+            52,
+            53
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            0
+        ],
+        "id": 34,
+        "parents": [
+            23,
+            23
+        ]
+    },
+    "35": {
+        "active": false,
+        "children": [
+            54
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            2
+        ],
+        "id": 35,
+        "parents": [
+            23,
+            23
+        ]
+    },
+    "36": {
+        "active": false,
+        "children": [
+            55,
+            56,
+            57
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            0
+        ],
+        "id": 36,
+        "parents": [
+            24,
+            24
+        ]
+    },
+    "37": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            0
+        ],
+        "id": 37,
+        "parents": [
+            25,
+            25
+        ]
+    },
+    "38": {
+        "active": false,
+        "children": [
+            58,
+            59,
+            60
+        ],
+        "coordinates": {
+            "x": -2.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -1
+        ],
+        "id": 38,
+        "parents": [
+            25,
+            25
+        ]
+    },
+    "39": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            0
+        ],
+        "id": 39,
+        "parents": [
+            25,
+            25
+        ]
+    },
+    "40": {
+        "active": false,
+        "children": [
+            61
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            4
+        ],
+        "id": 40,
+        "parents": [
+            26,
+            26
+        ]
+    },
+    "41": {
+        "active": false,
+        "children": [
+            62
+        ],
+        "coordinates": {
+            "x": 4.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            5
+        ],
+        "id": 41,
+        "parents": [
+            26,
+            26
+        ]
+    },
+    "42": {
+        "active": false,
+        "children": [
+            63
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 42,
+        "parents": [
+            27,
+            27
+        ]
+    },
+    "43": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 4.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            5
+        ],
+        "id": 43,
+        "parents": [
+            27,
+            27
+        ]
+    },
+    "44": {
+        "active": false,
+        "children": [
+            64,
+            65
+        ],
+        "coordinates": {
+            "x": 4.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            5
+        ],
+        "id": 44,
+        "parents": [
+            27,
+            27
+        ]
+    },
+    "45": {
+        "active": false,
+        "children": [
+            66
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 45,
+        "parents": [
+            28,
+            28
+        ]
+    },
+    "46": {
+        "active": false,
+        "children": [
+            67,
+            68,
+            69
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            2
+        ],
+        "id": 46,
+        "parents": [
+            32,
+            32
+        ]
+    },
+    "47": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            1
+        ],
+        "id": 47,
+        "parents": [
+            32,
+            32
+        ]
+    },
+    "48": {
+        "active": false,
+        "children": [
+            70
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            3
+        ],
+        "id": 48,
+        "parents": [
+            32,
+            32
+        ]
+    },
+    "49": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 49,
+        "parents": [
+            33,
+            33
+        ]
+    },
+    "50": {
+        "active": false,
+        "children": [
+            71,
+            72
+        ],
+        "coordinates": {
+            "x": 1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            2
+        ],
+        "id": 50,
+        "parents": [
+            33,
+            33
+        ]
+    },
+    "51": {
+        "active": false,
+        "children": [
+            73,
+            74
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            1
+        ],
+        "id": 51,
+        "parents": [
+            33,
+            33
+        ]
+    },
+    "52": {
+        "active": false,
+        "children": [
+            75,
+            76,
+            77
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 52,
+        "parents": [
+            34,
+            34
+        ]
+    },
+    "53": {
+        "active": false,
+        "children": [
+            78
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -3.0
+        },
+        "grid_coordinates": [
+            4,
+            0
+        ],
+        "id": 53,
+        "parents": [
+            34,
+            34
+        ]
+    },
+    "54": {
+        "active": false,
+        "children": [
+            79
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            3
+        ],
+        "id": 54,
+        "parents": [
+            35,
+            35
+        ]
+    },
+    "55": {
+        "active": false,
+        "children": [
+            80,
+            81
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            1
+        ],
+        "id": 55,
+        "parents": [
+            36,
+            36
+        ]
+    },
+    "56": {
+        "active": false,
+        "children": [
+            82,
+            83
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 56,
+        "parents": [
+            36,
+            36
+        ]
+    },
+    "57": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 57,
+        "parents": [
+            36,
+            36
+        ]
+    },
+    "58": {
+        "active": false,
+        "children": [
+            84,
+            85,
+            86
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 58,
+        "parents": [
+            38,
+            38
+        ]
+    },
+    "59": {
+        "active": false,
+        "children": [
+            87
+        ],
+        "coordinates": {
+            "x": -2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -1
+        ],
+        "id": 59,
+        "parents": [
+            38,
+            38
+        ]
+    },
+    "60": {
+        "active": false,
+        "children": [
+            88,
+            89,
+            90
+        ],
+        "coordinates": {
+            "x": -3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -2
+        ],
+        "id": 60,
+        "parents": [
+            38,
+            38
+        ]
+    },
+    "61": {
+        "active": false,
+        "children": [
+            91
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            4
+        ],
+        "id": 61,
+        "parents": [
+            40,
+            40
+        ]
+    },
+    "62": {
+        "active": false,
+        "children": [
+            92
+        ],
+        "coordinates": {
+            "x": 5.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            6
+        ],
+        "id": 62,
+        "parents": [
+            41,
+            41
+        ]
+    },
+    "63": {
+        "active": false,
+        "children": [
+            93,
+            94
+        ],
+        "coordinates": {
+            "x": 4.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            5
+        ],
+        "id": 63,
+        "parents": [
+            42,
+            42
+        ]
+    },
+    "64": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 4.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            5
+        ],
+        "id": 64,
+        "parents": [
+            44,
+            44
+        ]
+    },
+    "65": {
+        "active": false,
+        "children": [
+            95,
+            96
+        ],
+        "coordinates": {
+            "x": 3.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            4
+        ],
+        "id": 65,
+        "parents": [
+            44,
+            44
+        ]
+    },
+    "66": {
+        "active": false,
+        "children": [
+            97,
+            98
+        ],
+        "coordinates": {
+            "x": 4.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            5
+        ],
+        "id": 66,
+        "parents": [
+            45,
+            45
+        ]
+    },
+    "67": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            2
+        ],
+        "id": 67,
+        "parents": [
+            46,
+            46
+        ]
+    },
+    "68": {
+        "active": false,
+        "children": [
+            99,
+            100
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            1
+        ],
+        "id": 68,
+        "parents": [
+            46,
+            46
+        ]
+    },
+    "69": {
+        "active": false,
+        "children": [
+            101
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            3
+        ],
+        "id": 69,
+        "parents": [
+            46,
+            46
+        ]
+    },
+    "70": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            3
+        ],
+        "id": 70,
+        "parents": [
+            48,
+            48
+        ]
+    },
+    "71": {
+        "active": false,
+        "children": [
+            102,
+            103,
+            104
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 71,
+        "parents": [
+            50,
+            50
+        ]
+    },
+    "72": {
+        "active": false,
+        "children": [
+            105,
+            106
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            3
+        ],
+        "id": 72,
+        "parents": [
+            50,
+            50
+        ]
+    },
+    "73": {
+        "active": false,
+        "children": [
+            107,
+            108
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            0
+        ],
+        "id": 73,
+        "parents": [
+            51,
+            51
+        ]
+    },
+    "74": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 74,
+        "parents": [
+            51,
+            51
+        ]
+    },
+    "75": {
+        "active": false,
+        "children": [
+            109
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            0
+        ],
+        "id": 75,
+        "parents": [
+            52,
+            52
+        ]
+    },
+    "76": {
+        "active": false,
+        "children": [
+            110,
+            111,
+            112
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            1
+        ],
+        "id": 76,
+        "parents": [
+            52,
+            52
+        ]
+    },
+    "77": {
+        "active": false,
+        "children": [
+            113,
+            114
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            0
+        ],
+        "id": 77,
+        "parents": [
+            52,
+            52
+        ]
+    },
+    "78": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            0
+        ],
+        "id": 78,
+        "parents": [
+            53,
+            53
+        ]
+    },
+    "79": {
+        "active": false,
+        "children": [
+            115
+        ],
+        "coordinates": {
+            "x": 2.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            3
+        ],
+        "id": 79,
+        "parents": [
+            54,
+            54
+        ]
+    },
+    "80": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            0
+        ],
+        "id": 80,
+        "parents": [
+            55,
+            55
+        ]
+    },
+    "81": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            2
+        ],
+        "id": 81,
+        "parents": [
+            55,
+            55
+        ]
+    },
+    "82": {
+        "active": false,
+        "children": [
+            116,
+            117
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            0
+        ],
+        "id": 82,
+        "parents": [
+            56,
+            56
+        ]
+    },
+    "83": {
+        "active": false,
+        "children": [
+            118,
+            119
+        ],
+        "coordinates": {
+            "x": -2.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            -1
+        ],
+        "id": 83,
+        "parents": [
+            56,
+            56
+        ]
+    },
+    "84": {
+        "active": false,
+        "children": [
+            120,
+            121
+        ],
+        "coordinates": {
+            "x": -1.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            0
+        ],
+        "id": 84,
+        "parents": [
+            58,
+            58
+        ]
+    },
+    "85": {
+        "active": false,
+        "children": [
+            122,
+            123
+        ],
+        "coordinates": {
+            "x": 0.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            1
+        ],
+        "id": 85,
+        "parents": [
+            58,
+            58
+        ]
+    },
+    "86": {
         "active": false,
         "children": [],
         "coordinates": {
@@ -97,13 +1635,789 @@
             "y": 1.0
         },
         "grid_coordinates": [
-            3,
+            0,
+            -1
+        ],
+        "id": 86,
+        "parents": [
+            58,
+            58
+        ]
+    },
+    "87": {
+        "active": false,
+        "children": [],
+        "coordinates": {
+            "x": -3.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -2
+        ],
+        "id": 87,
+        "parents": [
+            59,
+            59
+        ]
+    },
+    "88": {
+        "active": false,
+        "children": [
+            124,
+            125,
+            126
+        ],
+        "coordinates": {
+            "x": -4.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -3
+        ],
+        "id": 88,
+        "parents": [
+            60,
+            60
+        ]
+    },
+    "89": {
+        "active": false,
+        "children": [
+            127,
+            128
+        ],
+        "coordinates": {
+            "x": -3.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -2
+        ],
+        "id": 89,
+        "parents": [
+            60,
+            60
+        ]
+    },
+    "90": {
+        "active": false,
+        "children": [
+            129,
+            130,
+            131
+        ],
+        "coordinates": {
+            "x": -2.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -1
+        ],
+        "id": 90,
+        "parents": [
+            60,
+            60
+        ]
+    },
+    "91": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 4.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            5
+        ],
+        "id": 91,
+        "parents": [
+            61,
+            61
+        ]
+    },
+    "92": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 5.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            6
+        ],
+        "id": 92,
+        "parents": [
+            62,
+            62
+        ]
+    },
+    "93": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 4.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            5
+        ],
+        "id": 93,
+        "parents": [
+            63,
+            63
+        ]
+    },
+    "94": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 94,
+        "parents": [
+            63,
+            63
+        ]
+    },
+    "95": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 4.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            5
+        ],
+        "id": 95,
+        "parents": [
+            65,
+            65
+        ]
+    },
+    "96": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 96,
+        "parents": [
+            65,
+            65
+        ]
+    },
+    "97": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 5.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            6
+        ],
+        "id": 97,
+        "parents": [
+            66,
+            66
+        ]
+    },
+    "98": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            4
+        ],
+        "id": 98,
+        "parents": [
+            66,
+            66
+        ]
+    },
+    "99": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 99,
+        "parents": [
+            68,
+            68
+        ]
+    },
+    "100": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
             2
         ],
-        "id": 6,
+        "id": 100,
         "parents": [
-            4,
+            68,
+            68
+        ]
+    },
+    "101": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            3
+        ],
+        "id": 101,
+        "parents": [
+            69,
+            69
+        ]
+    },
+    "102": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            1
+        ],
+        "id": 102,
+        "parents": [
+            71,
+            71
+        ]
+    },
+    "103": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            2
+        ],
+        "id": 103,
+        "parents": [
+            71,
+            71
+        ]
+    },
+    "104": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 104,
+        "parents": [
+            71,
+            71
+        ]
+    },
+    "105": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            2
+        ],
+        "id": 105,
+        "parents": [
+            72,
+            72
+        ]
+    },
+    "106": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 3.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
             4
+        ],
+        "id": 106,
+        "parents": [
+            72,
+            72
+        ]
+    },
+    "107": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -3.0
+        },
+        "grid_coordinates": [
+            4,
+            0
+        ],
+        "id": 107,
+        "parents": [
+            73,
+            73
+        ]
+    },
+    "108": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            1
+        ],
+        "id": 108,
+        "parents": [
+            73,
+            73
+        ]
+    },
+    "109": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            -1
+        ],
+        "id": 109,
+        "parents": [
+            75,
+            75
+        ]
+    },
+    "110": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            2
+        ],
+        "id": 110,
+        "parents": [
+            76,
+            76
+        ]
+    },
+    "111": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 111,
+        "parents": [
+            76,
+            76
+        ]
+    },
+    "112": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            1
+        ],
+        "id": 112,
+        "parents": [
+            76,
+            76
+        ]
+    },
+    "113": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            -1
+        ],
+        "id": 113,
+        "parents": [
+            77,
+            77
+        ]
+    },
+    "114": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 114,
+        "parents": [
+            77,
+            77
+        ]
+    },
+    "115": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 2.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            3
+        ],
+        "id": 115,
+        "parents": [
+            79,
+            79
+        ]
+    },
+    "116": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            0
+        ],
+        "id": 116,
+        "parents": [
+            82,
+            82
+        ]
+    },
+    "117": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": -2.0
+        },
+        "grid_coordinates": [
+            3,
+            1
+        ],
+        "id": 117,
+        "parents": [
+            82,
+            82
+        ]
+    },
+    "118": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -3.0,
+            "y": -1.0
+        },
+        "grid_coordinates": [
+            2,
+            -2
+        ],
+        "id": 118,
+        "parents": [
+            83,
+            83
+        ]
+    },
+    "119": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            -1
+        ],
+        "id": 119,
+        "parents": [
+            83,
+            83
+        ]
+    },
+    "120": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            0
+        ],
+        "id": 120,
+        "parents": [
+            84,
+            84
+        ]
+    },
+    "121": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -1
+        ],
+        "id": 121,
+        "parents": [
+            84,
+            84
+        ]
+    },
+    "122": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 122,
+        "parents": [
+            85,
+            85
+        ]
+    },
+    "123": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": 0.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            1
+        ],
+        "id": 123,
+        "parents": [
+            85,
+            85
+        ]
+    },
+    "124": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -4.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            -3
+        ],
+        "id": 124,
+        "parents": [
+            88,
+            88
+        ]
+    },
+    "125": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -5.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -4
+        ],
+        "id": 125,
+        "parents": [
+            88,
+            88
+        ]
+    },
+    "126": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -4.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -3
+        ],
+        "id": 126,
+        "parents": [
+            88,
+            88
+        ]
+    },
+    "127": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -3.0,
+            "y": 3.0
+        },
+        "grid_coordinates": [
+            -2,
+            -2
+        ],
+        "id": 127,
+        "parents": [
+            89,
+            89
+        ]
+    },
+    "128": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -3.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            -2
+        ],
+        "id": 128,
+        "parents": [
+            89,
+            89
+        ]
+    },
+    "129": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": 0.0
+        },
+        "grid_coordinates": [
+            1,
+            -1
+        ],
+        "id": 129,
+        "parents": [
+            90,
+            90
+        ]
+    },
+    "130": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -2.0,
+            "y": 2.0
+        },
+        "grid_coordinates": [
+            -1,
+            -1
+        ],
+        "id": 130,
+        "parents": [
+            90,
+            90
+        ]
+    },
+    "131": {
+        "active": true,
+        "children": [],
+        "coordinates": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "grid_coordinates": [
+            0,
+            0
+        ],
+        "id": 131,
+        "parents": [
+            90,
+            90
         ]
     }
 }
