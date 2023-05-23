@@ -1,6 +1,8 @@
 import random as rd
 from tools import Tools
 import numpy as np
+
+
 class Algorithm():
     
     def __init__(self):
@@ -14,6 +16,7 @@ class Algorithm():
         """
 
         while self.iterations < nb_iterations and not self.stop_algorithm:
+            print("\n\nIteration number: ", self.iterations)
 
             for node in list(graph_p.nodes):
                 # print(graph_p.nodes)
@@ -27,13 +30,12 @@ class Algorithm():
                 probabilities=[]
                 possibilities = graph_p.get_possible_new_nodes(node.id)
 
-
                 # Check if possible new nodes
                 if len(possibilities) == 0:
                     continue
                     
                 else:
-                    print("node :", node.id, "possibilities :", possibilities)
+                    print("node id :", node.id, "possibilities :", possibilities)
                     # Calculate the probability according to the distance to the original node
                     for possibility in possibilities:
                         probabilities.append(1 / len(possibilities))
@@ -56,7 +58,7 @@ class Algorithm():
                         
                         graph_p.add_node(graph_p.num_nodes+1, [node.id], None, coordinates_p=child_graph_coordinates, active_p=True, grid_coordinates_p=coord)
                         graph_p.add_edge(node.id, graph_p.nodes[graph_p.num_nodes].id)
-                        print("Distance entre parent",node.id, " et enfant ", graph_p.num_nodes, "est de ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
+                        print("Distance from parent",node.id, " to child ", graph_p.num_nodes, " is ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
 
                     # if len(graph_p.nodes) < 10 :
                     #     continue
@@ -69,6 +71,7 @@ class Algorithm():
                     # Check if all nodes are dead
                     if graph_p.nb_deactivated_nodes == len(graph_p.nodes):
                         self.stop_algorithm = True
+            self.iterations += 1
 
 
 

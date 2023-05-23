@@ -17,6 +17,7 @@ class Graph:
         self.grid = np.zeros((grid_size_p, grid_size_p), dtype=object)
         self.grid_size = grid_size_p
         self.nb_deactivated_nodes = 0
+        self.index_resizer = 0
 
 
     def add_node(self, node_id_p, parents_p=None, children_p=None, coordinates_p=None, active_p=False, grid_coordinates_p=None):
@@ -157,6 +158,24 @@ class Graph:
             if neighbour == 0:
                 neighbours.remove(neighbour)
         return neighbours
+    
+
+    def check_edge(self, node):
+        """
+        Check if the node is close to an edge.
+        If the node is close to an edge, increase the size of the grid by 1 on every direction
+        """
+        if node.grid_coordinates[0] + self.index_resizer +1 >= self.grid.shape[0] or node.grid_coordinates[0] - self.index_resizer -1 <= 0 or node.grid_coordinates[1] + self.index_resizer +1 >= self.grid.shape[1] or node.grid_coordinates[1] - self.index_resizer -1 <= 0:
+            self.grid = np.pad(self.grid, ((1,1),(1,1)), mode='constant', constant_values=0)
+            self.grid_size = self.grid.ndim
+            self.index_resizer += 1
+            print("Grid rezised")
+
+            # for node in self.nodes:
+            #     node = self.nodes[node]
+            #     node.grid_coordinates[0] += self.index_resizer
+            #     node.grid_coordinates[1] += self.index_resizer
+
 
     
     def get_possible_new_nodes(self, node_ip):
@@ -166,15 +185,9 @@ class Graph:
         node = self.nodes[node_ip]
         possible_coordinates = []
 
-       
-        # Increase the grid in case the algorithm is close to a border. Update the coordinates
-        if node.grid_coordinates[0] + 1 >= self.grid.shape[0] or node.grid_coordinates[0] - 1 <= 0 or node.grid_coordinates[1] + 1 >= self.grid.shape[0] or node.grid_coordinates[1] -1 <= 0:
-            self.grid = np.pad(self.grid, ((1,1),(1,1)), mode='constant', constant_values=0)
-            self.grid_size = self.grid.ndim
-            for node in self.nodes:
-                node = self.nodes[node]
-                node.grid_coordinates[0] += 1
-                node.grid_coordinates[1] += 1
+        self.check_edge(node)
+
+            
         
         #   In numpy values are stored in a particular way which is: m[y][x]
         print("Node:", node.id, "stalk neighbours")
