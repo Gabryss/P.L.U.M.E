@@ -160,56 +160,130 @@ class Graph:
         return neighbours
     
 
-    def check_edge(self, node):
+    def check_edge(self, node, direction="All"):
         """
         Check if the node is close to an edge.
         If the node is close to an edge, increase the size of the grid by 1 on every direction
+        Return 1 if there is a wall, else return 0
         """
-        if node.grid_coordinates[0] + self.index_resizer +1 >= self.grid.shape[0] or node.grid_coordinates[0] - self.index_resizer -1 <= 0 or node.grid_coordinates[1] + self.index_resizer +1 >= self.grid.shape[1] or node.grid_coordinates[1] - self.index_resizer -1 <= 0:
-            self.grid = np.pad(self.grid, ((1,1),(1,1)), mode='constant', constant_values=0)
-            self.grid_size = self.grid.ndim
-            self.index_resizer += 1
-            print("Grid rezised")
+        if direction == "All":
+            if node.grid_coordinates[0] >= self.grid.shape[0] - 1 or node.grid_coordinates[0] <= 0 or node.grid_coordinates[1] >= self.grid.shape[1] - 1 or node.grid_coordinates[1] <= 0:
+                return 1
+            else:
+                return 0
+        
+        if direction == "Down":
+            if node.grid_coordinates[0] >= self.grid.shape[0] - 1:
+                return 1
+            else:
+                return 0
+        
+        if direction == "Up":
+            if node.grid_coordinates[0] <= 0 :
+                return 1
+            else:
+                return 0
+            
+        if direction == "Right":
+            if node.grid_coordinates[1] >= self.grid.shape[1] - 1 :
+                return 1
+            else:
+                return 0
+        
+        if direction == "Left":
+            if node.grid_coordinates[1] <= 0 :
+                return 1
+            else:
+                return 0
 
-            # for node in self.nodes:
-            #     node = self.nodes[node]
-            #     node.grid_coordinates[0] += self.index_resizer
-            #     node.grid_coordinates[1] += self.index_resizer
 
+    def increase_grid_size(self):
+        """
+        Increase the grid size on each side.
+        The coordinates are also updated to match the position on the previous grid 
+        """
+        self.grid = np.pad(self.grid, ((1,1),(1,1)), mode='constant', constant_values=0)
+        self.grid_size = self.grid.ndim
+        self.index_resizer += 1
 
+        # Updating the coodinates according to the new grid
+        for node in self.nodes:
+            node = self.nodes[node]
+            node.grid_coordinates[0] += 1
+            node.grid_coordinates[1] += 1
+
+        print("Grid rezised, new grid size :", self.grid.shape)
+        print("Index size :", self.index_resizer)
+
+        
+    def check_neighbors_safe(self, node, direction=["Left", "Right", "Up", "Down"]):
+        """
+        Check if there are neighbors nodes around the input node
+        Return a list of neighbors coordinates
+        """
+        possible_neighbors = []
+
+        # Check right
+        if "Right" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] == 0:
+            possible_neighbors.append([node.grid_coordinates[0], node.grid_coordinates[1] + 1])
+        
+        # Check left
+        if "Left" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] == 0:
+            possible_neighbors.append([node.grid_coordinates[0], node.grid_coordinates[1] - 1])
+
+        # Check up
+        if "Up" in direction and self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] == 0:
+            possible_neighbors.append([node.grid_coordinates[0] - 1, node.grid_coordinates[1]])
+
+        # Check down
+        if "Down" in direction and self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] == 0:
+            possible_neighbors.append([node.grid_coordinates[0] + 1, node.grid_coordinates[1]])
+
+        return possible_neighbors      
     
+
     def get_possible_new_nodes(self, node_ip):
         """
         Get a list of possible coordinates for new nodes
         """
         node = self.nodes[node_ip]
-        possible_coordinates = []
+        possible_neighbors = []
+        wall = self.check_edge(node)
 
-        self.check_edge(node)
-
-            
+        if wall:
+            self.increase_grid_size()
         
         #   In numpy values are stored in a particular way which is: m[y][x]
         print("Node:", node.id, "stalk neighbours")
         print("Node", node.id, "coordinates", node.grid_coordinates)
 
-        # Check right
-        if self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] == 0:
-            possible_coordinates.append([node.grid_coordinates[0], node.grid_coordinates[1] + 1])
+        possible_neighbors = self.check_neighbors_safe(node)
+
+        return possible_neighbors
+
+    def get_neighbors_node_coordinates_based(self, coordinates=None, list_of_coordinates=None):
+        """
+        Get the neighbors node based on the input coordinates
+        Return either a node or a list of nodes based on their input order
+        """
+        if coordinates == None and list_of_coordinates == None or coordinates == None and list_of_coordinates == [] or coordinates == [] and list_of_coordinates == [] or coordinates == [] and list_of_coordinates == None:
+            return None
         
-        # Check left
-        if self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] == 0:
-            possible_coordinates.append([node.grid_coordinates[0], node.grid_coordinates[1] - 1])
+        if coordinates:
+            node_id = self.grid[coordinates[0][1]]
+            print("DEBUGGING MODE GRID",self.grid)
+            print("DEBUGGING MODE NODEIN",node_id)
+            node = self.nodes[node_id]
+            return node
 
-        # Check up
-        if self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] == 0:
-            possible_coordinates.append([node.grid_coordinates[0] + 1, node.grid_coordinates[1]])
 
-        # Check down
-        if self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] == 0:
-            possible_coordinates.append([node.grid_coordinates[0] - 1, node.grid_coordinates[1]])
-
-        return possible_coordinates            
+        if list_of_coordinates:
+            list_of_nodes = []
+            for coordinates in list_of_coordinates:
+                node_id = self.grid[coordinates[0][1]]
+                node = self.nodes[node_id]
+                list_of_nodes.append(node)
+            return list_of_nodes
 
 
     def save_grid(self):
