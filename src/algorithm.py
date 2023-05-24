@@ -60,11 +60,6 @@ class Algorithm():
                         graph_p.add_edge(node.id, graph_p.nodes[graph_p.num_nodes].id)
                         print("Distance from parent",node.id, " to child ", graph_p.num_nodes, " is ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
 
-                    # if len(graph_p.nodes) < 10 :
-                    #     continue
-
-                    # else:
-
                     graph_p.nodes[node.id].active = False
                     graph_p.nb_deactivated_nodes += 1
 
@@ -73,7 +68,44 @@ class Algorithm():
                         self.stop_algorithm = True
             self.iterations += 1
 
+        self.loopclosure(graph_p)
 
+
+    def loopclosure(self, graph_p):
+        print("Post processing...")
+        directions = ["Left", "Right", "Up", "Down"]
+
+        for node_id in graph_p.nodes:
+            node = graph_p.nodes[node_id]
+
+            # Check for edges
+            walls = graph_p.check_edge(node)
+            if walls:
+                possible_neighbors = directions.copy()
+                for direction in directions:
+                    wall = graph_p.check_edge(node, direction)
+                    if wall:
+                        possible_neighbors.remove(direction)
+            
+            # Check neighbors on the remaining coordinates
+            neighbors_coordinates = graph_p.check_neighbors_safe(node)
+            print("DEBUGGING MODE ",neighbors_coordinates)
+
+            neighbors = graph_p.get_neighbors_node_coordinates_based(neighbors_coordinates)
+
+            if neighbors == None:
+                continue
+
+            else:
+                for neighbor in neighbors:
+                    if node.id in neighbor.children or node.id in neighbor.parents:
+                        continue
+                    elif neighbor.id in node.children or neighbor.id in node.parents:
+                        continue
+                    
+                    else:
+                        if rd.randint(0,1):
+                            node.children.append(neighbor.id)
 
 
     def voronoi(self, graph_p):
