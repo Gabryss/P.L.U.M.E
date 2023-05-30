@@ -5,9 +5,10 @@ import numpy as np
 
 class Algorithm():
     
-    def __init__(self):
+    def __init__(self, min_nodes_p = 4):
         self.iterations = 0
         self.stop_algorithm = False
+        self.min_nodes = min_nodes_p
 
 
     def probabilistic(self, graph_p, nb_iterations):
@@ -16,7 +17,7 @@ class Algorithm():
         """
 
         while self.iterations < nb_iterations and not self.stop_algorithm:
-            print("\n\nIteration number: ", self.iterations)
+            print("\nIteration number: ", self.iterations)
 
             for node in list(graph_p.nodes):
                 # print(graph_p.nodes)
@@ -39,12 +40,10 @@ class Algorithm():
                     # Calculate the probability according to the distance to the original node
                     for possibility in possibilities:
                         probabilities.append(1 / len(possibilities))
-                    print(probabilities)
+                    
                     # Apply probability to our list of created nodes
                     nb_created_nodes_choice = rd.choice(range(len(possibilities)))
-                    # coordinates_choice = rd.sample(possibilities, nb_created_nodes_choice)
                     
-                    # coordinates_choice = rd.choices(possibilities, weights=probabilities, k=nb_created_nodes_choice)
                     index_list = np.random.choice(range(len(possibilities)), nb_created_nodes_choice, replace=False, p=probabilities)
                     coordinates_choice = []
                     for index in index_list:
@@ -60,18 +59,23 @@ class Algorithm():
                         graph_p.add_edge(node.id, graph_p.nodes[graph_p.num_nodes].id)
                         print("Distance from parent",node.id, " to child ", graph_p.num_nodes, " is ", self.node_manhattan_distance(node,graph_p.nodes[graph_p.num_nodes]))
 
-                    graph_p.nodes[node.id].active = False
-                    graph_p.nb_deactivated_nodes += 1
+                    if len(graph_p.nodes) >= self.min_nodes :
+                        graph_p.nodes[node.id].active = False
+                        graph_p.nb_deactivated_nodes += 1
 
                     # Check if all nodes are dead
-                    if graph_p.nb_deactivated_nodes == len(graph_p.nodes):
+                    elif graph_p.nb_deactivated_nodes == len(graph_p.nodes):
                         self.stop_algorithm = True
+
             self.iterations += 1
 
-        self.loopclosure(graph_p)
+        self.loop_closure(graph_p)
 
 
-    def loopclosure(self, graph_p):
+    def loop_closure(self, graph_p):
+        """
+        Post processing loop closure creation
+        """
         print("Post processing...")
         directions = ["Left", "Right", "Up", "Down"]
 
@@ -88,10 +92,9 @@ class Algorithm():
                         possible_neighbors.remove(direction)
             
             # Check neighbors on the remaining coordinates
-            neighbors_coordinates = graph_p.check_neighbors_safe(node)
-            print("DEBUGGING MODE ",neighbors_coordinates)
+            neighbors_coordinates = graph_p.check_neighboors_safe(node)
 
-            neighbors = graph_p.get_neighbors_node_coordinates_based(neighbors_coordinates)
+            neighbors = graph_p.get_node_coordinates_based(neighbors_coordinates)
 
             if neighbors == None:
                 continue
@@ -104,7 +107,7 @@ class Algorithm():
                         continue
                     
                     else:
-                        if rd.randint(0,1):
+                        if rd.randint(0,5):
                             node.children.append(neighbor.id)
 
 
