@@ -60,14 +60,6 @@ class Node:
     
     def get_list_coordinates(self):
         return [self.coordinates['x'], self.coordinates['y']]
-    
-    # def __json__(self):
-    #     return {"id": self.id, 
-    #             "parents": self.parents, 
-    #             "children": self.children,
-    #             "coordinates": self.coordinates,
-    #             "active": self.active,
-    #             "grid_coordinates": self.grid_coordinates}
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
