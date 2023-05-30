@@ -216,7 +216,33 @@ class Graph:
         print("Index size :", self.index_resizer)
 
         
-    def check_neighbors_safe(self, node, direction=["Left", "Right", "Up", "Down"]):
+    def check_empty_safe(self, node, direction=["Left", "Right", "Up", "Down"]):
+        """
+        Check if there are empty space nodes around the input node
+        Return a list of possible coordinates
+        """
+        empty_space = []
+
+        # Check right
+        if "Right" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] == 0:
+            empty_space.append([node.grid_coordinates[0], node.grid_coordinates[1] + 1])
+        
+        # Check left
+        if "Left" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] == 0:
+            empty_space.append([node.grid_coordinates[0], node.grid_coordinates[1] - 1])
+
+        # Check up
+        if "Up" in direction and self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] == 0:
+            empty_space.append([node.grid_coordinates[0] - 1, node.grid_coordinates[1]])
+
+        # Check down
+        if "Down" in direction and self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] == 0:
+            empty_space.append([node.grid_coordinates[0] + 1, node.grid_coordinates[1]])
+
+        return empty_space      
+    
+
+    def check_neighboors_safe(self, node, direction=["Left", "Right", "Up", "Down"]):
         """
         Check if there are neighbors nodes around the input node
         Return a list of neighbors coordinates
@@ -224,23 +250,23 @@ class Graph:
         possible_neighbors = []
 
         # Check right
-        if "Right" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] == 0:
+        if "Right" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] + 1] != 0:
             possible_neighbors.append([node.grid_coordinates[0], node.grid_coordinates[1] + 1])
         
         # Check left
-        if "Left" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] == 0:
+        if "Left" in direction and self.grid[node.grid_coordinates[0]][node.grid_coordinates[1] - 1] != 0:
             possible_neighbors.append([node.grid_coordinates[0], node.grid_coordinates[1] - 1])
 
         # Check up
-        if "Up" in direction and self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] == 0:
+        if "Up" in direction and self.grid[node.grid_coordinates[0] - 1][node.grid_coordinates[1]] != 0:
             possible_neighbors.append([node.grid_coordinates[0] - 1, node.grid_coordinates[1]])
 
         # Check down
-        if "Down" in direction and self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] == 0:
+        if "Down" in direction and self.grid[node.grid_coordinates[0] + 1][node.grid_coordinates[1]] != 0:
             possible_neighbors.append([node.grid_coordinates[0] + 1, node.grid_coordinates[1]])
 
-        return possible_neighbors      
-    
+        return possible_neighbors   
+
 
     def get_possible_new_nodes(self, node_ip):
         """
@@ -257,30 +283,22 @@ class Graph:
         print("Node:", node.id, "stalk neighbours")
         print("Node", node.id, "coordinates", node.grid_coordinates)
 
-        possible_neighbors = self.check_neighbors_safe(node)
+        possible_neighbors = self.check_empty_safe(node)
 
         return possible_neighbors
 
-    def get_neighbors_node_coordinates_based(self, coordinates=None, list_of_coordinates=None):
+    def get_node_coordinates_based(self, list_of_coordinates=None):
         """
-        Get the neighbors node based on the input coordinates
-        Return either a node or a list of nodes based on their input order
+        Get the node based on the input coordinates
+        Return either a node or a list of nodes based on the input
         """
-        if coordinates == None and list_of_coordinates == None or coordinates == None and list_of_coordinates == [] or coordinates == [] and list_of_coordinates == [] or coordinates == [] and list_of_coordinates == None:
+        if list_of_coordinates == None or list_of_coordinates == []:
             return None
         
-        if coordinates:
-            node_id = self.grid[coordinates[0][1]]
-            print("DEBUGGING MODE GRID",self.grid)
-            print("DEBUGGING MODE NODEIN",node_id)
-            node = self.nodes[node_id]
-            return node
-
-
-        if list_of_coordinates:
+        else:
             list_of_nodes = []
             for coordinates in list_of_coordinates:
-                node_id = self.grid[coordinates[0][1]]
+                node_id = self.grid[coordinates[0]][coordinates[1]]
                 node = self.nodes[node_id]
                 list_of_nodes.append(node)
             return list_of_nodes
