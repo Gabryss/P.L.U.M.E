@@ -5,8 +5,9 @@ from tools import Color
 import sys
 
 DEFAULT_GRID_SIZE = 3
-DEFAULT_NB_ITERATION = 5
+DEFAULT_NB_ITERATION = 20
 DEFAULT_GRID_PATH = "data/images/graph_0"
+DEFAULT_MIN_NODES = 10
 
 def generation_logic(graph):
     """
@@ -18,7 +19,7 @@ def generation_logic(graph):
     graph.add_node(1, coordinates_p=[0.0,0.0], grid_coordinates_p=[starting_point, starting_point], active_p=True)
 
     # Main logic
-    algorithm = Algorithm()
+    algorithm = Algorithm(DEFAULT_MIN_NODES)
     algorithm.probabilistic(graph, DEFAULT_NB_ITERATION)
 
     # Save the graph
