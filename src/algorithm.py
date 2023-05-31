@@ -5,10 +5,11 @@ import numpy as np
 
 class Algorithm():
     
-    def __init__(self, min_nodes_p = 4):
+    def __init__(self, min_nodes_p = 4, loop_closure_probability_p = 10):
         self.iterations = 0
         self.stop_algorithm = False
         self.min_nodes = min_nodes_p
+        self.loop_closure_probability = loop_closure_probability_p
 
 
     def probabilistic(self, graph_p, nb_iterations):
@@ -107,7 +108,8 @@ class Algorithm():
                         continue
                     
                     else:
-                        if rd.randint(0,5):
+                        loop_closure_probability = rd.randint(0,self.loop_closure_probability)
+                        if loop_closure_probability == 1:
                             node.children.append(neighbor.id)
 
 
