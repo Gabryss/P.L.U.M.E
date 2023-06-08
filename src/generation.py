@@ -3,12 +3,15 @@ from display import Display
 from algorithm import Algorithm
 from tools import Color
 import sys
+import subprocess
 
 DEFAULT_GRID_SIZE = 3
-DEFAULT_NB_ITERATION = 50
+DEFAULT_NB_ITERATION = 100
 DEFAULT_GRID_PATH = "data/images/graph_0"
-DEFAULT_MIN_NODES = 10
+DEFAULT_MIN_NODES = 15000
 DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
+DEFAULT_GUI_DISPLAY = False
+DEFAULT_GENERATE_PNG = False
 
 def generation_logic(graph):
     """
@@ -51,11 +54,19 @@ def main(argv):
     generation_logic(graph)
 
     # Display graph
-    print(f"\n{Color.OKBLUE.value}End of generation.. Exporting the graph{Color.ENDC.value}")
-    display = Display()
-    display.process_graph(graph)
-    display.create_figure()
-    display.save_as(DEFAULT_GRID_PATH,"png")
+    if DEFAULT_GENERATE_PNG:
+        print(f"\n{Color.OKBLUE.value}End of generation.. Exporting the graph{Color.ENDC.value}")
+        display = Display()
+        display.process_graph(graph)
+        display.create_figure()
+        display.save_as(DEFAULT_GRID_PATH,"png")
+
+    print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
+    if DEFAULT_GUI_DISPLAY:
+        subprocess.run("/home/gabriel/Documents/blender-3.5.1-linux-x64/blender --python src/blender.py", shell=True, check=True)
+    else:
+        subprocess.run("/home/gabriel/Documents/blender-3.5.1-linux-x64/blender --background --python src/blender.py", shell=True, check=True)
+
 
 
 if __name__ == '__main__':
