@@ -63,9 +63,21 @@ bpy.context.view_layer.objects.active = obj
 
 mesh.from_pydata(verts, edges, [])
 
+# Create modifiers
+mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
 mod_skin = obj.modifiers.new('Skin', 'SKIN')
 mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
 
+# Apply modifiers
+# apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+# apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+# apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+
+
+# Flip the normals
+bpy.ops.object.editmode_toggle()
+bpy.ops.mesh.select_all(action='SELECT') # Select all faces
+bpy.ops.mesh.flip_normals() # just flip normals
 
 
 # Export the mesh
