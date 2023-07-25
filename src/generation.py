@@ -1,73 +1,114 @@
 from graph import Graph
 from display import Display
 from algorithm import Algorithm
-from tools import Color
-import sys
+from config import Color, Config
 import subprocess
-
-DEFAULT_GRID_SIZE = 3
-DEFAULT_NB_ITERATION = 50
-DEFAULT_GRID_PATH = "data/images/graph_0"
-DEFAULT_MIN_NODES = 500
-DEFAULT_LOOP_CLOSURE_PROBABILITY = 70
-DEFAULT_GUI_DISPLAY = True
-DEFAULT_GENERATE_PNG = False
-
-def generation_logic(graph):
-    """
-    Main logic of the graph generation
-    """
-
-    # Starting point
-    starting_point = graph.grid_size // 2
-    graph.add_node(1, coordinates_p=[0.0,0.0], grid_coordinates_p=[starting_point, starting_point], active_p=True)
-
-    # Main logic
-    algorithm = Algorithm(DEFAULT_MIN_NODES, DEFAULT_LOOP_CLOSURE_PROBABILITY)
-    algorithm.probabilistic(graph, DEFAULT_NB_ITERATION)
-
-    # Save the graph
-    graph.save_grid()
-    graph.save_graph()
+import argparse
+import datetime
 
 
-def main(argv):
-    # Check parameters  
-    if len(argv) == 1 or len(argv) > 2:
-        print(f"{Color.WARNING.value}Wrong number of arguments provided.\nDefault grid size selected{Color.ENDC.value}\n\n")
-        grid_size = DEFAULT_GRID_SIZE
+class Generator:
 
-    else:
-        try:
-            argv[1] = int(argv[1])
-        except:
-            return print(f"{Color.WARNING.value}Please provide an integer{Color.ENDC.value}")
+    def __init__(self, grid_size_p, nb_graphs_p, name_p) -> None:
+        # Get the grid size
+        if grid_size_p == None or '':
+            self.grid_size = Config.INITIAL_GRID_SIZE.value
+        else:
+            self.grid_size = grid_size_p
+        
+        # Get the number of graphs
+        if nb_graphs_p == None or '':
+            self.nb_graphs = Config.DEFAULT_NB_GRAPHS.value
+        else:
+            self.nb_graphs = nb_graphs_p
+        
+        # Get the name of the current graph generation
+        if name_p == None or '':
+            self.name = Config.DEFAULT_NAME.value
+        else:
+            self.name = name_p +"_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        
 
-        grid_size = argv[1]
+        self.graphs=[]
+        # Make n graphs
+        for index in range(self.nb_graphs):
+            self.graphs.append(self.generate_graph(index))
+            current_graph  = self.graphs[index]
+            
+            # Create picture for n graphs
+            if Config.SAVE_GRAPH_IMAGE.value:
+                    self.create_graph_picture(current_graph, index)
+
+            # Create the mesh
+            if Config.DEFAULT_MESH_GENERATION.value:
+                    self.create_mesh()
 
 
-    # Graph generation
-    print(f"{Color.OKBLUE.value}Generation begins{Color.ENDC.value}\n")
-    graph = Graph(grid_size)
+    def generate_graph(self, index_p):
+        """
+        Main logic of the graph generation
+        """
+        
+        print(f"{Color.OKBLUE.value} == Graph generation begins == {Color.ENDC.value}\n")
+        
+        # Graph generation
+        index = index_p
+        graph = Graph(self.grid_size, self.name, index)
 
-    # Create the graph with the implemented logic
-    generation_logic(graph)
+        # Starting point
+        starting_point = graph.grid_size // 2
+        graph.add_node(1, coordinates_p=[0.0,0.0], grid_coordinates_p=[starting_point, starting_point], active_p=True)
 
-    # Display graph
-    if DEFAULT_GENERATE_PNG:
-        print(f"\n{Color.OKBLUE.value}End of generation.. Exporting the graph{Color.ENDC.value}")
-        display = Display()
+        # Main logic
+        algorithm = Algorithm(Config.DEFAULT_MIN_NODES.value, Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
+        algorithm.probabilistic(graph, Config.DEFAULT_NB_ITERATION.value)
+
+        # Save the graph
+        graph.save_grid()
+        graph.save_graph()
+        print(f"\n{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
+        return graph
+
+
+    def create_graph_picture(self, graph_p, index_p):
+        """
+        Display the created graph
+        """
+        graph = graph_p
+        index = index_p
+        print(f"\n{Color.OKBLUE.value} == Exporting the graph == {Color.ENDC.value}")
+        display = Display(nb_graphs_p=index, generation_name_p=self.name)
         display.process_graph(graph)
         display.create_figure()
-        display.save_as(DEFAULT_GRID_PATH,"png")
+        display.create_image_from_graph()
+        print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
 
-    print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
-    if DEFAULT_GUI_DISPLAY:
-        subprocess.run("/home/gabriel/Documents/blender-3.5.1-linux-x64/blender --python src/blender.py", shell=True, check=True)
-    else:
-        subprocess.run("/home/gabriel/Documents/blender-3.5.1-linux-x64/blender --background --python src/blender.py", shell=True, check=True)
+    
+    def create_mesh(self, graph_p):
+        """
+        Create the mesh using Blender
+        """
+        graph = graph_p
+        print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
+        if Config.DEFAULT_GUI_DISPLAY.value:
+            subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --python src/blender.py", shell=True, check=True)
+        else:
+            subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --background --python src/blender.py", shell=True, check=True)
+
 
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    parser = argparse.ArgumentParser(
+                                description="PLUME project. Procedural Lava-Tube Underground Modeling Engine: A generator that uses procedural generation techniques and graph algorithms to create detailed and visually appealing lava tube structures. ",
+                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
+    parser.add_argument("-s", help="Initial grid size", type=int)
+    parser.add_argument("-nb_g", help="Number of graphs to generate", type=int)
+    parser.add_argument("-name", help="Name of the current graph generation", type=str)
+
+    args = parser.parse_args()
+    arguments = vars(args)
+    generator = Generator(grid_size_p=arguments['s'],
+                          nb_graphs_p=arguments['nb_g'],
+                          name_p=arguments['name'])
