@@ -2,12 +2,13 @@ from node import Node
 import random as rd
 import numpy as np
 import json 
+import os
 
-DEFAULT_CSV_PATH = "data/raw_data/grid_data.csv"
-DEFAULT_GRAPH_PATH = "data/raw_data/data.json"
+from config import Config
+
 
 class Graph:
-    def __init__(self, grid_size_p):
+    def __init__(self, grid_size_p, generation_name_p, nb_graphs_p):
         """
         Create an instace of everything needed to create a graph.
         grid_size_p should be an integer.
@@ -18,6 +19,10 @@ class Graph:
         self.grid_size = grid_size_p
         self.nb_deactivated_nodes = 0
         self.index_resizer = 0
+        self.generation_name = generation_name_p
+        self.nb_graphs = f"/{str(nb_graphs_p)}"
+        self.save_grid_path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+self.nb_graphs+"/grid_data.csv"
+        self.save_graph_path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+self.nb_graphs+"/data.json"
 
 
     def add_node(self, node_id_p, parents_p=None, children_p=None, coordinates_p=None, active_p=False, grid_coordinates_p=None):
@@ -166,6 +171,8 @@ class Graph:
         If the node is close to an edge, increase the size of the grid by 1 on every direction
         Return 1 if there is a wall, else return 0
         """
+        
+
         if direction == "All":
             if node.grid_coordinates[0] >= self.grid.shape[0] - 1 or node.grid_coordinates[0] <= 0 or node.grid_coordinates[1] >= self.grid.shape[1] - 1 or node.grid_coordinates[1] <= 0:
                 return 1
@@ -173,25 +180,27 @@ class Graph:
                 return 0
         
         if direction == "Down":
-            if node.grid_coordinates[0] >= self.grid.shape[0] - 1:
+            coord = node.grid_coordinates[0] + 1
+            if self.grid.shape[0] - coord == 0:
                 return 1
             else:
                 return 0
         
         if direction == "Up":
-            if node.grid_coordinates[0] <= 0 :
+            if node.grid_coordinates[0] == 0 :
                 return 1
             else:
                 return 0
             
         if direction == "Right":
-            if node.grid_coordinates[1] >= self.grid.shape[1] - 1 :
+            coord = node.grid_coordinates[1] + 1
+            if self.grid.shape[1] - coord == 0 :
                 return 1
             else:
                 return 0
         
         if direction == "Left":
-            if node.grid_coordinates[1] <= 0 :
+            if node.grid_coordinates[1] == 0 :
                 return 1
             else:
                 return 0
@@ -308,12 +317,18 @@ class Graph:
         """
         using numpy library, save the actual state of the grid in a csv file.
         """
-        np.savetxt(DEFAULT_CSV_PATH, self.grid, delimiter=",", fmt='%s')
+        # Create the target directory if it does not exist
+        if not os.path.exists(os.path.dirname(self.save_grid_path)):
+            os.makedirs(os.path.dirname(self.save_grid_path))
+        np.savetxt(self.save_grid_path, self.grid, delimiter=",", fmt='%s')
 
 
     def save_graph(self):
         """
         Save the graph in a json file. All child connections are conserved
         """
-        with open(DEFAULT_GRAPH_PATH, "w") as outfile:
+        # Create the target directory if it does not exist
+        if not os.path.exists(os.path.dirname(self.save_graph_path)):
+            os.makedirs(os.path.dirname(self.save_graph_path))
+        with open(self.save_graph_path, "w") as outfile:
                 json.dump(self.nodes, outfile, default=lambda o: o.__dict__, sort_keys=True, indent=4)
