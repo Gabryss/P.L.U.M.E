@@ -4,16 +4,17 @@ Display a graph using Plotly library
 
 import plotly.graph_objs as go
 import os
-from tools import Color
+from config import Config
 
-DUMB = True
+
 
 class Display():
 
-    def __init__(self, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
-        
+    def __init__(self, nb_graphs_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
+        self.nb_graphs = f"/{str(nb_graphs_p)}"
         self.figure = go.Figure()
         self.figure.update_layout(paper_bgcolor = 'darkgrey')
+        self.generation_name = generation_name_p
         
         self.figure.update_xaxes(
             mirror=True,
@@ -37,9 +38,10 @@ class Display():
         self.edges_color = edge_color_p
         self.nodes_size = node_width_p
         self.edges_width = edge_width_p
+        self.save_image_path = Config.PLUME_DIR.value+"/data/images/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
     
 
-    def save_as(self, path_p="data/images/grap_h0", format_p="png"):
+    def create_image_from_graph(self):
         """
         Path is without the format.
         Save the graph in the desired format
@@ -50,23 +52,10 @@ class Display():
             -svg
             -json
         """
-        full_path = path_p + "." + format_p
-
-        if os.path.exists(full_path) and DUMB == False:
-            print(f"\n{Color.WARNING.value}This path already exist\nGenerate auto path{Color.ENDC.value}")
-            i = 0
-            path="data/images/graph_"
-            full_path = path+str(i)+"."+format_p
-            while os.path.exists(full_path):
-                i+=1
-                full_path = path+str(i)+"."+format_p
-            self.figure.write_image(full_path, engine="kaleido")
-            
-
-        else:
-            self.figure.write_image(full_path, engine="kaleido")
-
-        print(f"{Color.BOLD.value}Graph exported at", full_path,f"{Color.ENDC.value}")
+        if not os.path.exists(os.path.dirname(self.save_image_path)):
+            os.makedirs(os.path.dirname(self.save_image_path))
+    
+        self.figure.write_image(self.save_image_path, engine="kaleido")
 
 
     def process_graph(self, graph_p):
