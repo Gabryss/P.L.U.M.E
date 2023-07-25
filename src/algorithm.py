@@ -79,23 +79,25 @@ class Algorithm():
         """
         print("Post processing...")
         directions = ["Left", "Right", "Up", "Down"]
+        graph = graph_p
 
-        for node_id in graph_p.nodes:
-            node = graph_p.nodes[node_id]
+        for node_id in graph.nodes:
+            node = graph.nodes[node_id]
 
             # Check for edges
-            walls = graph_p.check_edge(node)
-            if walls:
-                possible_neighbors = directions.copy()
+            edge_node = graph.check_edge(node)
+            possible_directions = directions.copy()
+
+            if edge_node:
                 for direction in directions:
-                    wall = graph_p.check_edge(node, direction)
+                    wall = graph.check_edge(node, direction)
                     if wall:
-                        possible_neighbors.remove(direction)
+                        possible_directions.remove(direction)
             
             # Check neighbors on the remaining coordinates
-            neighbors_coordinates = graph_p.check_neighboors_safe(node)
+            neighbors_coordinates = graph.check_neighboors_safe(node, possible_directions)
 
-            neighbors = graph_p.get_node_coordinates_based(neighbors_coordinates)
+            neighbors = graph.get_node_coordinates_based(neighbors_coordinates)
 
             if neighbors == None:
                 continue
