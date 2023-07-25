@@ -3,14 +3,21 @@ import os
 import bpy
 import json
 
+# Get the path of the PLUME directory
+if os.path.dirname(__file__) not in sys.path:
+   sys.path.append(os.path.dirname(__file__))
+
+
+from config import Config
+
+
 # Fetch the blender directory
 blend_dir = os.path.dirname(bpy.data.filepath)
 if blend_dir not in sys.path:
    sys.path.append(blend_dir)
 
-print(blend_dir)
 # Open the data file
-json_file = open('/home/gabriel/Documents/PhD/Lava_tubes/python/P.L.U.M.E/data/raw_data/data.json')
+json_file = open(f'{Config.PLUME_DIR.value}/data/raw_data/data.json')
 
 # Load the data into a variable
 data = json.load(json_file)
