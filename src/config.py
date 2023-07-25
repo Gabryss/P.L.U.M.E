@@ -1,30 +1,36 @@
 from enum import Enum
 import os
 import sys
-import bpy
-import glob
 from tools import Tools
+import datetime
 
 class Config(Enum):
     PLUME_DIR = os.path.dirname(os.path.dirname(__file__))
+    DEFAULT_NAME = "Generation_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
     # Append the PLUME path to the python path:
     if PLUME_DIR not in sys.path:
         sys.path.append(PLUME_DIR)
 
-    DEFAULT_CSV_PATH = PLUME_DIR + "/data/raw_data/grid_data.csv"
-    DEFAULT_GRAPH_PATH = PLUME_DIR +"/data/raw_data/data.json"
 
-    DEFAULT_GRID_SIZE = 3
-    DEFAULT_NB_ITERATION = 50
-    DEFAULT_GRID_PATH = "data/images/graph_0"
-    DEFAULT_MIN_NODES = 500
-    DEFAULT_LOOP_CLOSURE_PROBABILITY = 70
-    DEFAULT_GUI_DISPLAY = True
-    DEFAULT_GENERATE_PNG = False
+
+
+    # Paths
+    DEFAULT_IMAGE_PATH = PLUME_DIR + "data/images/graph_0"
     DEFAULT_BLENDER_PATH = Tools.find_file("blender")
 
+    DEFAULT_NB_GRAPHS = 3
+    INITIAL_GRID_SIZE = 3
+    DEFAULT_NB_ITERATION = 5
 
+    DEFAULT_MIN_NODES = 10
+    DEFAULT_LOOP_CLOSURE_PROBABILITY = 70
+    
+    # Booleans
+    DEFAULT_GUI_DISPLAY = True
+    DEFAULT_MESH_GENERATION = False
+    SAVE_GRAPH_IMAGE = True
+    IMAGE_FORMAT = ".png"
 
 
 class Color(Enum):
