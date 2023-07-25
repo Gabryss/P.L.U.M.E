@@ -1,18 +1,4 @@
-from enum import Enum
-
-
-class Color(Enum):
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
+import subprocess
 
 class Tools():
 
@@ -32,3 +18,12 @@ class Tools():
         for i in range(len(list_p)):
             list_p[i]=-list_p[i]
         return list_p
+    
+
+    def find_file(file_name):
+        command = f"locate -b '\{file_name}' | xargs -r -I % find % -prune -type f -executable"
+        output = subprocess.check_output(command, shell=True, text=True)
+        search_results = output.strip().split('\n')
+        if len(search_results) > 1:
+            print(f"Multiple {file_name} files found, executing the first one only.")
+        return search_results[0]
