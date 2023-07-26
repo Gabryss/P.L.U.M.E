@@ -5,7 +5,7 @@ from config import Color, Config
 import subprocess
 import argparse
 import datetime
-
+import multiprocessing
 
 class Generator:
 
@@ -31,17 +31,39 @@ class Generator:
 
         self.graphs=[]
         # Make n graphs
-        for index in range(self.nb_graphs):
-            self.graphs.append(self.generate_graph(index))
-            current_graph  = self.graphs[index]
+        list_process = [i for i in range(self.nb_graphs)]
+        with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+            result = pool.map(self.generator, list_process)
+        
+        # for index in range(self.nb_graphs):
+        #     self.graphs.append(self.generate_graph(index))
+        #     current_graph  = self.graphs[index]
             
-            # Create picture for n graphs
-            if Config.SAVE_GRAPH_IMAGE.value:
-                    self.create_graph_picture(current_graph, index)
+        #     # Create picture for n graphs
+        #     if Config.SAVE_GRAPH_IMAGE.value:
+        #             self.create_graph_picture(current_graph, index)
 
-            # Create the mesh
-            if Config.DEFAULT_MESH_GENERATION.value:
-                    self.create_mesh()
+        #     # Create the mesh
+        #     if Config.DEFAULT_MESH_GENERATION.value:
+        #             self.create_mesh(index)
+    
+    def generator(self, index_p):
+        """
+        Main generation frame. Used for multiprocessing
+        """
+        index = index_p
+        # self.graphs.append(self.generate_graph(index))
+        # current_graph  = self.graphs[index]
+        current_graph = self.generate_graph(index)
+        
+        # Create picture for n graphs
+        if Config.SAVE_GRAPH_IMAGE.value:
+                self.create_graph_picture(current_graph, index)
+
+        # Create the mesh
+        if Config.DEFAULT_MESH_GENERATION.value:
+                self.create_mesh(index)
+    
 
 
     def generate_graph(self, index_p):
@@ -84,17 +106,25 @@ class Generator:
         print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
 
     
-    def create_mesh(self, graph_p):
+    def create_mesh(self, index_p):
         """
         Create the mesh using Blender
         """
-        graph = graph_p
+        index = index_p
         print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
+        print("DEBUG", Config.DEFAULT_BLENDER_PATH.value)
         if Config.DEFAULT_GUI_DISPLAY.value:
-            subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --python src/blender.py", shell=True, check=True)
+            result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
         else:
-            subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --background --python src/blender.py", shell=True, check=True)
+            result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
 
+        success = result.stdout
+        if success:
+            print("Success: ", success)
+        
+        error = result.stderr
+        if error:
+            print("Error: ", error)
 
 
 
