@@ -1,4 +1,6 @@
 import subprocess
+import os
+import json
 
 class Tools():
 
@@ -22,14 +24,42 @@ class Tools():
 
     def find_file(file_name_p):
         """
-        Find an executable file given it's name given as a parameter
+        Given an executable's name file given as a paramete check if the path exist in the path.json file.
+        If the path.json file or the path doesn't exist find it over the /home/ directory.
         """
-        print("TOOLS DEBUG", file_name_p)
-        command = f"find /home/ -type f -name {file_name_p} -executable 2>/dev/null | grep -vE '/\.local/share/Trash/'"
-        output = subprocess.check_output(command, shell=True, text=True)
-        search_results = output.strip().split('\n')
-        print("DEBUG SEARCH",search_results)
-        # 1/0
-        if len(search_results) > 1:
-            print(f"Multiple {file_name_p} files found, executing the first one only.")
-        return search_results[0]
+        file_name = file_name_p
+        command = f"find /home/ -type f -name {file_name} -executable 2>/dev/null | grep -vE '/\.local/share/Trash/'"
+        path_file_path = os.path.dirname(__file__)+"/path.json"
+        if not os.path.exists(path_file_path):
+            # path.json file doesn't exist
+            output = subprocess.check_output(command, shell=True, text=True)
+            search_results = output.strip().split('\n')
+            if len(search_results) > 1:
+                print(f"Multiple {file_name} files found, executing the first one only.")
+            file_path = {
+                    f"{file_name}":search_results[0]
+                }
+            json_object = json.dumps(file_path, indent=4)
+            with open(path_file_path,"w") as outfile:
+                outfile.write(json_object)
+            return search_results[0]
+            
+
+        else:
+            # path.json exist
+            with open(path_file_path,'r') as openfile:
+                json_object = json.load(openfile)
+            
+            for key in json_object:
+                if key == file_name:
+                    return json_object[key]
+                else:
+                    output = subprocess.check_output(command, shell=True, text=True)
+                    search_results = output.strip().split('\n')
+                    if len(search_results) > 1:
+                        print(f"Multiple {file_name} files found, executing the first one only.")
+                    json_object[file_name] = search_results[0]
+
+                    with open(path_file_path,"w") as outfile:
+                        outfile.write(json.dumps(json_object, sort_keys=True, indent=4, separators=(',', ': ')))
+                    return search_results[0]
