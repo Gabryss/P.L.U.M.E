@@ -13,13 +13,9 @@ class Config(Enum):
         sys.path.append(PLUME_DIR)
 
 
-
-
     # Paths
     DEFAULT_IMAGE_PATH = PLUME_DIR + "data/images/graph_0"
-    DEFAULT_BLENDER_PATH = Tools.find_file("blender")
-
-    DEFAULT_NB_GRAPHS = 3
+    DEFAULT_NB_GRAPHS = 10
     INITIAL_GRID_SIZE = 3
     DEFAULT_NB_ITERATION = 5
 
@@ -27,8 +23,8 @@ class Config(Enum):
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 70
     
     # Booleans
-    DEFAULT_GUI_DISPLAY = True
-    DEFAULT_MESH_GENERATION = False
+    DEFAULT_GUI_DISPLAY = False
+    DEFAULT_MESH_GENERATION = True
     SAVE_GRAPH_IMAGE = True
     IMAGE_FORMAT = ".png"
 
