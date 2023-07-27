@@ -13,7 +13,7 @@ blend_dir = os.path.dirname(bpy.data.filepath)
 if blend_dir not in sys.path:
    sys.path.append(blend_dir)
 
-from config import Config
+from config import Config, Color
 
 class MeshGeneration:
    def __init__(self, generation_name_p, index_p) -> None:
@@ -35,7 +35,10 @@ class MeshGeneration:
       """
       self.initial_cleanup()
       verts, edges = self.extract_mesh_data()
-      self.load_mesh_in_blender(verts_p=verts, edges_p=edges)
+      result_loading = self.load_mesh_in_blender(verts_p=verts, edges_p=edges)
+      if result_loading == -1:
+         print(f"{Color.FAIL.value}There was a problem while creating the mesh{Color.ENDC.value}")
+         exit()
       self.blender_modifiers()
       self.flip_normals()
       self.export_mesh()
@@ -57,7 +60,8 @@ class MeshGeneration:
 
    def extract_mesh_data(self):
       """
-      Load graph data into python variables
+      Load graph data into python variables (from a dictionary)
+      -Use [node_id]["coordinates"]["x"] or ["y"]
       """
       verts, edges = [], []
       for i in self.data:
@@ -70,16 +74,13 @@ class MeshGeneration:
             edges.append([
                self.data[i]['id']-1,
                child-1
-            ])
-         
-         # print(data[i])
-         # print(data[i]["coordinates"])
-      print("Verts :", verts," \nEdges :", edges)
+            ])         
       return verts, edges
    
 
    def load_mesh_in_blender(self, verts_p, edges_p):
       """
+      Load the verticies and edges in blender
       """
       verts = verts_p
       edges = edges_p
@@ -90,10 +91,13 @@ class MeshGeneration:
       bpy.context.view_layer.objects.active = self.obj
 
       self.mesh.from_pydata(verts, edges, [])
+      if not self.mesh:
+         return -1
 
 
    def blender_modifiers(self):
       """
+      Create and apply modifiers
       """
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
       mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
@@ -118,10 +122,6 @@ class MeshGeneration:
       """
       Export the mesh in the desired format
       """
-      blend_file_path = bpy.data.filepath
-      directory = os.path.dirname(blend_file_path)
-      target_file = os.path.join(directory, 'myfile.obj')
-      print(target_file)
       bpy.data.objects['Underground'].select_set(True)
 
       # Make sure the directory exist
