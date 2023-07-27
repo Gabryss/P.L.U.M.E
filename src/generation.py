@@ -6,6 +6,8 @@ import subprocess
 import argparse
 import datetime
 import multiprocessing
+import os
+from tools import Tools
 
 class Generator:
 
@@ -51,7 +53,6 @@ class Generator:
         if Config.DEFAULT_MESH_GENERATION.value:
                 self.create_mesh(index)
     
-
 
     def generate_graph(self, index_p):
         """
@@ -99,19 +100,39 @@ class Generator:
         """
         index = index_p
         print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
-        print("DEBUG", Config.DEFAULT_BLENDER_PATH.value)
-        if Config.DEFAULT_GUI_DISPLAY.value:
-            result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
-        else:
-            result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
-
-        success = result.stdout
-        if success:
-            print("Success: ", success)
+        result = None
         
-        error = result.stderr
-        if error:
-            print("Error: ", error)
+        try:
+            if Config.DEFAULT_GUI_DISPLAY.value:
+                result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+            else:
+                result = subprocess.run(f"{Config.DEFAULT_BLENDER_PATH.value} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+        
+        except Exception as e:
+            # If something went wrong, remove the path.json file and recreate it
+            try:
+                os.remove(Config.PLUME_DIR.value+"/src/path.json")
+                blender_path = Tools.find_file("blender")
+                if Config.DEFAULT_GUI_DISPLAY.value:
+                    result = subprocess.run(f"{blender_path} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+                else:
+                    result = subprocess.run(f"{blender_path} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+            except Exception as e:
+                print(f"\n{Color.FAIL.value}An issue occured: ",e)
+                print(f"The blender path might be wrong: ", Config.DEFAULT_BLENDER_PATH.value)
+                print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+
+        finally:
+            if result:
+                success = result.stdout
+                if success:
+                    print("Success: ", success)
+                
+                error = result.stderr
+                if error:
+                    print("Error: ", error)
+            print(f"\n{Color.OKBLUE.value}Mesh generation finished{Color.ENDC.value}")
+            
 
 
 
