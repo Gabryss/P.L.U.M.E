@@ -30,30 +30,17 @@ class Generator:
         
 
         self.graphs=[]
-        # Make n graphs
+        # Make n graphs in different CPU cores
         list_process = [i for i in range(self.nb_graphs)]
         with multiprocessing.Pool(processes=self.nb_graphs) as pool:
             result = pool.map(self.generator, list_process)
         
-        # for index in range(self.nb_graphs):
-        #     self.graphs.append(self.generate_graph(index))
-        #     current_graph  = self.graphs[index]
-            
-        #     # Create picture for n graphs
-        #     if Config.SAVE_GRAPH_IMAGE.value:
-        #             self.create_graph_picture(current_graph, index)
-
-        #     # Create the mesh
-        #     if Config.DEFAULT_MESH_GENERATION.value:
-        #             self.create_mesh(index)
     
     def generator(self, index_p):
         """
         Main generation frame. Used for multiprocessing
         """
         index = index_p
-        # self.graphs.append(self.generate_graph(index))
-        # current_graph  = self.graphs[index]
         current_graph = self.generate_graph(index)
         
         # Create picture for n graphs
