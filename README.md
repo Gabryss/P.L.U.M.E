@@ -30,9 +30,8 @@ During this project, I decided to use Blender API to create the mesh based on th
 - numpy >= 1.21.4
 - pyglet >= 1.5.21
 
-### Launch the simulation
-In order to launch the simulation the `simulation.py` file has to be run with a pyglet version greater or equal to 1.5.21. Also this simulation does not support Python 2.x.
-
+### Launch the generator
+To initiate procedural generation, run the `generation.py` file using pyglet version 1.5.21 or higher. It's important to note that this generator is not compatible with Python 2.x.
 
 ## Results
 
