@@ -140,9 +140,9 @@ if __name__ == '__main__':
     
    parser.add_argument("-index", help="Index used for the path", type=int)
    parser.add_argument("-name", help="Name of the current graph generation", type=str)
-   parser.add_argument("--background", action="store_true", help="Name of the current graph generation")
-   parser.add_argument("--python", action="store_true", help="Name of the current graph generation")
-   parser.add_argument("file", help="Name of the current graph generation")
+   parser.add_argument("--background", action="store_true", help="Run the script without GUI")
+   parser.add_argument("--python", action="store_true", help="Run blender with a python file")
+   parser.add_argument("file", help="Path and name of the python file")
    
 
    args = parser.parse_args()
