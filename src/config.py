@@ -11,6 +11,9 @@ class Config(Enum):
     if PLUME_DIR not in sys.path:
         sys.path.append(PLUME_DIR)
 
+    # Select an algorithm
+    # -gaussian_perlin
+    SELECTED_ALGORITHM = "gaussian_perlin"
 
     # Integers
     DEFAULT_NB_GRAPHS = 1
