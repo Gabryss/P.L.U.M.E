@@ -62,8 +62,8 @@ class Generator:
         graph.add_node(node_id_p=1, coordinates_p=[0.0,0.0], active_p=True)
 
         # Main logic
-        algorithm = Algorithm(Config.DEFAULT_MIN_NODES.value, Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
-        # algorithm.probabilistic(graph, Config.DEFAULT_NB_ITERATION.value)
+        algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
+        algorithm.algorithm(Config.SELECTED_ALGORITHM.value)
 
         # Save the graph
         graph.save_graph()
