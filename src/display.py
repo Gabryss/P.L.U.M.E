@@ -100,10 +100,15 @@ class Display():
         Takes a list of tuple in parameter and return a list of unique tuples irrespective of 
         their order.
         """
-        unique_tuples = []
+        if tuple_list_p:
+            unique_tuples = []
 
-        for t in tuple_list_p:
-            if sorted(t) not in [sorted(x) for x in unique_tuples]:
-                unique_tuples.append(t)
+            for t in tuple_list_p:
+                if not all(t):
+                    continue
+                if sorted(t) not in [sorted(x) for x in unique_tuples]:
+                    unique_tuples.append(t)
 
-        return unique_tuples
+            return unique_tuples
+        else:
+            return None
