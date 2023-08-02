@@ -1,7 +1,6 @@
 from enum import Enum
 import os
 import sys
-from tools import Tools
 import datetime
 
 class Config(Enum):
@@ -13,10 +12,8 @@ class Config(Enum):
         sys.path.append(PLUME_DIR)
 
 
-    # Paths
-    DEFAULT_IMAGE_PATH = PLUME_DIR + "data/images/graph_0"
-    DEFAULT_NB_GRAPHS = 3
-    INITIAL_GRID_SIZE = 10
+    # Integers
+    DEFAULT_NB_GRAPHS = 1
     DEFAULT_NB_ITERATION = 50
 
     DEFAULT_MIN_NODES = 100
@@ -24,7 +21,7 @@ class Config(Enum):
     
     # Booleans
     DEFAULT_GUI_DISPLAY = False
-    DEFAULT_MESH_GENERATION = True
+    DEFAULT_MESH_GENERATION = False
     SAVE_GRAPH_IMAGE = True
     IMAGE_FORMAT = ".png"
 
