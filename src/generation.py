@@ -10,13 +10,7 @@ from tools import Tools
 
 class Generator:
 
-    def __init__(self, grid_size_p, nb_graphs_p, name_p) -> None:
-        # Get the grid size
-        if grid_size_p == None or '':
-            self.grid_size = Config.INITIAL_GRID_SIZE.value
-        else:
-            self.grid_size = grid_size_p
-        
+    def __init__(self, nb_graphs_p, name_p) -> None:       
         # Get the number of graphs
         if nb_graphs_p == None or '':
             self.nb_graphs = Config.DEFAULT_NB_GRAPHS.value
@@ -62,18 +56,16 @@ class Generator:
         
         # Graph generation
         index = index_p
-        graph = Graph(self.grid_size, self.name, index)
+        graph = Graph(self.name, index)
 
         # Starting point
-        starting_point = graph.grid_size // 2
-        graph.add_node(1, coordinates_p=[0.0,0.0], grid_coordinates_p=[starting_point, starting_point], active_p=True)
+        graph.add_node(node_id_p=1, coordinates_p=[0.0,0.0], active_p=True)
 
         # Main logic
         algorithm = Algorithm(Config.DEFAULT_MIN_NODES.value, Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
-        algorithm.probabilistic(graph, Config.DEFAULT_NB_ITERATION.value)
+        # algorithm.probabilistic(graph, Config.DEFAULT_NB_ITERATION.value)
 
         # Save the graph
-        graph.save_grid()
         graph.save_graph()
         print(f"\n{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
         return graph
@@ -131,12 +123,10 @@ if __name__ == '__main__':
                                 description="PLUME project. Procedural Lava-Tube Underground Modeling Engine: A generator that uses procedural generation techniques and graph algorithms to create detailed and visually appealing lava tube structures. ",
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument("-s", help="Initial grid size", type=int)
     parser.add_argument("-nb_g", help="Number of graphs to generate", type=int)
     parser.add_argument("-name", help="Name of the current graph generation", type=str)
 
     args = parser.parse_args()
     arguments = vars(args)
-    generator = Generator(grid_size_p=arguments['s'],
-                          nb_graphs_p=arguments['nb_g'],
+    generator = Generator(nb_graphs_p=arguments['nb_g'],
                           name_p=arguments['name'])
