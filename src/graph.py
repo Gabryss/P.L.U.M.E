@@ -12,7 +12,8 @@ class Graph:
     def __init__(self, generation_name_p, nb_graphs_p):
         """
         Create an instace of everything needed to create a graph.
-        grid_size_p should be an integer.
+        generation_name_p should be a string.
+        nb_graphs_p should be an integer.
         """
         self.nodes = {}
         self.num_nodes = 0
@@ -107,23 +108,6 @@ class Graph:
             self.add_node(i,None,None,coordinates_p=(rd.randint(0,nb_nodes_p-1), rd.randint(0,nb_nodes_p-1)))
         for node in self.nodes:
             self.add_edge(rd.randint(0,nb_nodes_p-1), rd.randint(0,nb_nodes_p-1))
-
-
-    def get_node_coordinates_based(self, list_of_coordinates=None):
-        """
-        Get the node based on the input coordinates
-        Return either a node or a list of nodes based on the input
-        """
-        if list_of_coordinates == None or list_of_coordinates == []:
-            return None
-        
-        else:
-            list_of_nodes = []
-            for coordinates in list_of_coordinates:
-                node_id = self.grid[coordinates[0]][coordinates[1]]
-                node = self.nodes[node_id]
-                list_of_nodes.append(node)
-            return list_of_nodes
 
 
     def save_graph(self):
