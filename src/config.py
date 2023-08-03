@@ -17,10 +17,20 @@ class Config(Enum):
 
     # Integers
     DEFAULT_NB_GRAPHS = 1
-    DEFAULT_NB_ITERATION = 50
+    MAX_CREATED_NODE_ON_CIRCLE = 2
 
     DEFAULT_MIN_NODES = 100
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
+    MAX_RADIUS_NODE = 5.0
+
+    #Gaussian
+    STANDARD_DEVIATION = 0.1
+
+    # Perlin
+    MAX_SCALE = 10.0
+    MAX_OCTAVES = 1.0
+    MAX_PERSISTENCE = 5.0
+    MAX_LACUNARITY = 2.0
     
     # Booleans
     DEFAULT_GUI_DISPLAY = False
