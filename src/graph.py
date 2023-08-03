@@ -9,7 +9,7 @@ from config import Config
 
 
 class Graph:
-    def __init__(self, generation_name_p, nb_graphs_p):
+    def __init__(self, generation_name_p, nb_graphs_p, max_created_node_on_circle_p):
         """
         Create an instace of everything needed to create a graph.
         generation_name_p should be a string.
@@ -23,6 +23,7 @@ class Graph:
         self.nb_graphs = f"/{str(nb_graphs_p)}"
         self.save_graph_path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+self.nb_graphs+"/data.json"
         self.adj_matrix = None
+        self.max_created_node_on_circle = max_created_node_on_circle_p
     
     
     def create_adjency_matrix(self, nb_nodes_p):
@@ -44,12 +45,21 @@ class Graph:
             self.adj_matrix[v][u] = 1
 
 
-    def add_node(self, node_id_p, parents_p=None, edges_p=None, coordinates_p=None, active_p=True):
+    def add_node(self, node_id_p, parent_p=None, edges_p=None, coordinates_p=None,  radius_p=None, active_p=True):
         """
         A node is created with the specified parameters. 
         Each node is represented as a dictionary and will be stored within another dictionary that encompasses all nodes in the graph.
         """
-        self.nodes[node_id_p] = Node(node_id_p, parents_p, edges_p, coordinates_p, active_p)
+        self.nodes[node_id_p] = Node(node_id_p, parent_p, edges_p, coordinates_p, radius_p, active_p)
+        if parent_p != None and edges_p != None:
+            self.add_edge(node_id_p, parent_p)
+        
+        if parent_p != None:
+            self.add_edge(node_id_p, parent_p)
+        
+        if edges_p != None:
+            for edge in edges_p:
+                self.add_edge(node_id_p, edge)
         self.num_nodes += 1
 
 
@@ -57,6 +67,7 @@ class Graph:
         """
         Takes two integers (representing the nodes ids) and add respectively a child an a parent.
         """
+        print("GRAPH DEBUG", node_1_id, node_2_id)
         self.nodes[node_1_id].add_edge(node_2_id)
         self.nodes[node_2_id].add_edge(node_1_id)
 
@@ -85,7 +96,8 @@ class Graph:
         edges_list = []
         for node in self.nodes.values():
             for edge in node.edges:
-                edges_list.append((node.id, edge))
+                if edge != None:
+                    edges_list.append((node.id, edge))
         return edges_list
 
 
