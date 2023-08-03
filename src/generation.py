@@ -7,6 +7,7 @@ import argparse
 import datetime
 import multiprocessing
 from tools import Tools
+import random as rd
 
 class Generator:
 
@@ -56,10 +57,10 @@ class Generator:
         
         # Graph generation
         index = index_p
-        graph = Graph(self.name, index)
+        graph = Graph(self.name, index, Config.MAX_CREATED_NODE_ON_CIRCLE.value)
 
         # Starting point
-        graph.add_node(node_id_p=1, coordinates_p=[0.0,0.0], active_p=True)
+        graph.add_node(node_id_p=0, coordinates_p=[0.0,0.0], radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
 
         # Main logic
         algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
@@ -82,6 +83,8 @@ class Generator:
         display.process_graph(graph)
         display.create_figure()
         display.create_image_from_graph()
+        graph.create_adjency_matrix(graph.num_nodes)
+        print(graph.adj_matrix)
         print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
 
 
