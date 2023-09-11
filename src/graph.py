@@ -16,7 +16,7 @@ class Graph:
         nb_graphs_p should be an integer.
         """
         self.nodes = {}
-        self.num_nodes = 0
+        self.nb_nodes = 0
         self.nb_deactivated_nodes = 0
         self.index_resizer = 0
         self.generation_name = generation_name_p
@@ -60,14 +60,13 @@ class Graph:
         if edges_p != None:
             for edge in edges_p:
                 self.add_edge(node_id_p, edge)
-        self.num_nodes += 1
+        self.nb_nodes += 1
 
 
     def add_edge(self, node_1_id, node_2_id):
         """
         Takes two integers (representing the nodes ids) and add respectively a child an a parent.
         """
-        print("GRAPH DEBUG", node_1_id, node_2_id)
         self.nodes[node_1_id].add_edge(node_2_id)
         self.nodes[node_2_id].add_edge(node_1_id)
 

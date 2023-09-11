@@ -70,10 +70,10 @@ class MeshGeneration:
             self.data[i]["coordinates"]['y'],
             0.0
          ])
-         for child in self.data[i]['children']:
+         for edge in self.data[i]['edges']:
             edges.append([
                self.data[i]['id']-1,
-               child-1
+               edge-1
             ])         
       return verts, edges
    

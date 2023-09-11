@@ -38,12 +38,8 @@ class Algorithm():
         """
         Execute the Gaussian-Perlin algorithm
         """
-        self.current_node_index = self.graph.num_nodes-1
-        print(self.current_node_index)
-        print(self.graph.nodes)
-        for i in range(self.min_nodes):
-            
-
+        self.current_node_index = self.graph.nb_nodes-1
+        for i in range(self.min_nodes):           
             current_node = self.graph.nodes[self.current_node_index]
             
             parent_node = self.graph.nodes[self.graph.nodes[current_node.id].parent]
@@ -78,13 +74,12 @@ class Algorithm():
             nb_nodes = rd.randint(0,self.graph.max_created_node_on_circle)
             for i in range(nb_nodes):
                 chosen_angle = np.random.choice(self.angles, p=probability_final[0])
-                self.graph.add_node(node_id_p=self.graph.num_nodes, parent_p=self.current_node_index, coordinates_p=self.get_coordinates_on_circle(radius_p=self.graph.nodes[self.current_node_index].radius, theta_p=chosen_angle, index_p=self.current_node_index), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
-            
-            
-            print(self.current_node_index)
-            print(self.graph.nodes)
-            
+                self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=self.current_node_index, coordinates_p=self.get_coordinates_on_circle(radius_p=self.graph.nodes[self.current_node_index].radius, theta_p=chosen_angle, index_p=self.current_node_index), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                        
             self.current_node_index += 1
+
+            if self.current_node_index >= len(self.graph.nodes):
+                break
 
 
     def gaussian_distribution_circle(self, direction_p):

@@ -19,7 +19,7 @@ class Config(Enum):
     DEFAULT_NB_GRAPHS = 1
     MAX_CREATED_NODE_ON_CIRCLE = 2
 
-    DEFAULT_MIN_NODES = 100
+    DEFAULT_MIN_NODES = 10
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     MAX_RADIUS_NODE = 5.0
 
@@ -34,7 +34,7 @@ class Config(Enum):
     
     # Booleans
     DEFAULT_GUI_DISPLAY = False
-    DEFAULT_MESH_GENERATION = False
+    DEFAULT_MESH_GENERATION = True
     SAVE_GRAPH_IMAGE = True
     IMAGE_FORMAT = ".png"
 

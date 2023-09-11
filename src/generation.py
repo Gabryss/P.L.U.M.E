@@ -27,9 +27,12 @@ class Generator:
 
         self.graphs=[]
         # Make n graphs in different CPU cores
-        list_process = [i for i in range(self.nb_graphs)]
-        with multiprocessing.Pool(processes=self.nb_graphs) as pool:
-            result = pool.map(self.generator, list_process)
+        if self.nb_graphs==1:
+            self.generator(0)
+        else:
+            list_process = [i for i in range(self.nb_graphs)]
+            with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+                result = pool.map(self.generator, list_process)
 
 
     def generator(self, index_p):
@@ -37,6 +40,7 @@ class Generator:
         Main generation frame. Used for multiprocessing
         """
         index = index_p
+        print("DEBUG",index)
         current_graph = self.generate_graph(index)
         
         # Create picture for n graphs
@@ -83,7 +87,7 @@ class Generator:
         display.process_graph(graph)
         display.create_figure()
         display.create_image_from_graph()
-        graph.create_adjency_matrix(graph.num_nodes)
+        graph.create_adjency_matrix(graph.nb_nodes)
         print(graph.adj_matrix)
         print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
 
@@ -104,7 +108,7 @@ class Generator:
         
         except Exception as e:
             print(f"\n{Color.FAIL.value}An issue occured: ",e)
-            print(f"The blender path might be wrong: ", Config.DEFAULT_BLENDER_PATH.value)
+            print(f"The blender path might be wrong, please check the path.json file")
             print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
 
         finally:
