@@ -40,7 +40,6 @@ class Generator:
         Main generation frame. Used for multiprocessing
         """
         index = index_p
-        print("DEBUG",index)
         current_graph = self.generate_graph(index)
         
         # Create picture for n graphs
@@ -69,12 +68,26 @@ class Generator:
         # Main logic
         algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
         algorithm.algorithm(Config.SELECTED_ALGORITHM.value)
-
+        
+        processed_graph = self.post_processing_graph(graph_p=graph)
         # Save the graph
-        graph.save_graph()
+        processed_graph.save_graph()
         print(f"\n{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
-        return graph
+        return processed_graph
 
+
+    def post_processing_graph(self, graph_p):
+        """
+        Various post process solition applied to the graph. Currently:
+        - Remove edge duplicates
+        """
+        # Remove duplicates
+        graph = graph_p
+        for node in graph.nodes:
+            graph.nodes[node].set_edges(Tools.remove_duplicate_none_list(graph.nodes[node].get_edges()))
+        
+        return graph
+    
 
     def create_graph_picture(self, graph_p, index_p):
         """
