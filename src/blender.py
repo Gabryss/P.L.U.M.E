@@ -103,24 +103,21 @@ class MeshGeneration:
    def blender_modifiers(self):
       """
       Create and apply modifiers
-      """
-      # mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
-      # print("SUBSURF DONE")
-      
+      """      
       mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
       print("SKIN DONE")
 
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
       print("SUBSURF DONE")
       
-      # self.geometry_nodes()
+      self.geometry_nodes()
 
-      # mod_sub_1 = bpy.ops.object.modifier_add(type='SUBSURF')
+      mod_sub_1 = bpy.ops.object.modifier_add(type='SUBSURF')
 
       # Apply modifiers
       apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
       apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision001')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision001')
 
 
    def geometry_nodes(self):
@@ -169,6 +166,7 @@ class MeshGeneration:
       # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
       node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
       node_tree.links.new(volume_to_mesh_node.outputs["Mesh"], group_output.inputs["Geometry"])
+      print("GEOMETRY NODE DONE")
 
 
    def flip_normals(self):
