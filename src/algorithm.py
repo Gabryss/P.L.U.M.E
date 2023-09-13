@@ -1,5 +1,4 @@
 import random as rd
-from tools import Tools
 import numpy as np
 import math
 from noise import snoise2
@@ -22,7 +21,6 @@ class Algorithm():
         Starting node already defined
         """
         if selected_algorithm=="gaussian_perlin":
-
             # Nodes around the starting node
             first_node_probability = self.perlin_distribution_circle()
             nb_nodes = rd.randint(2, self.graph.max_created_node_on_circle)
@@ -79,7 +77,8 @@ class Algorithm():
             self.current_node_index += 1
 
             if self.current_node_index >= len(self.graph.nodes):
-                break
+                self.current_node_index -= 1
+                continue
 
 
     def gaussian_distribution_circle(self, direction_p):
