@@ -35,14 +35,19 @@ class MeshGeneration:
       """
       self.initial_cleanup()
       verts, edges = self.extract_mesh_data()
+      print("EXTRACT DONE")
       result_loading = self.load_mesh_in_blender(verts_p=verts, edges_p=edges)
       if result_loading == -1:
          print(f"{Color.FAIL.value}There was a problem while creating the mesh{Color.ENDC.value}")
          exit()
+      print("LOAD MESH DONE")
       self.blender_modifiers()
+      print("MODIFIER DONE")
       self.flip_normals()
+      print("FLIP NORMALS DONE")
       self.export_mesh()
       self.json_file.close()
+      print("EXPORT MESH DONE")
 
 
    def initial_cleanup(self):
@@ -72,9 +77,9 @@ class MeshGeneration:
          ])
          for edge in self.data[i]['edges']:
             edges.append([
-               self.data[i]['id']-1,
-               edge-1
-            ])         
+               self.data[i]['id'],
+               edge
+            ])
       return verts, edges
    
 
@@ -99,14 +104,71 @@ class MeshGeneration:
       """
       Create and apply modifiers
       """
-      mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
+      # mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
+      # print("SUBSURF DONE")
+      
       mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
+      print("SKIN DONE")
+
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
+      print("SUBSURF DONE")
+      
+      # self.geometry_nodes()
+
+      # mod_sub_1 = bpy.ops.object.modifier_add(type='SUBSURF')
 
       # Apply modifiers
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision001')
+
+
+   def geometry_nodes(self):
+      """
+      Add geometry nodes
+      - Mesh to volume
+      - Volume to mesh
+      """
+
+      # Add a Geometry Nodes modifier to the object
+      geom_modifier = self.obj.modifiers.new(name="GeometryNodes", type='NODES')
+
+      # Create a new Geometry Nodes tree
+      node_tree_name = "UndergroundTree"
+      if not bpy.data.node_groups.get(node_tree_name):
+         node_tree = bpy.data.node_groups.new(name=node_tree_name, type='GeometryNodeTree')
+      else:
+         node_tree = bpy.data.node_groups[node_tree_name]
+
+      # Link the tree to the modifier
+      geom_modifier.node_group = node_tree
+
+      # Clear default nodes
+      for node in node_tree.nodes:
+         node_tree.nodes.remove(node)
+
+      # Add a Mesh to Volume node
+      mesh_to_volume_node = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
+      mesh_to_volume_node.location = (100, 200)
+
+      # Add a Volume to Mesh node
+      volume_to_mesh_node = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
+      volume_to_mesh_node.location = (300, 200)
+
+      # Connect nodes
+      node_tree.links.new(mesh_to_volume_node.outputs["Volume"], volume_to_mesh_node.inputs["Volume"])
+
+      # Add Group Input and Output nodes for completeness
+      group_input = node_tree.nodes.new(type="NodeGroupInput")
+      node_tree.outputs.new("NodeSocketGeometry","Geometry")
+      group_input.location = (-100, 200)
+      group_output = node_tree.nodes.new(type="NodeGroupOutput")
+      node_tree.inputs.new("NodeSocketGeometry","Geometry")
+      group_output.location = (500, 200)
+
+      # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
+      node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
+      node_tree.links.new(volume_to_mesh_node.outputs["Mesh"], group_output.inputs["Geometry"])
 
 
    def flip_normals(self):
