@@ -12,6 +12,10 @@ class Node:
         self.radius = radius_p if radius_p is not None else 1.0
         self.active = active_p if active_p is not None else False
 
+    def __repr__(self):
+        return (f"Node(ID: {self.id}, Parents: {self.parent}, Edges: {self.edges}, "
+                f"Coordinates: {self.coordinates}, Radius: {self.radius}, Active: {self.active})")
+
     def set_parent(self, parent_p):
         self.parent = parent_p
     
