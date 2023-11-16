@@ -19,9 +19,8 @@ if blend_dir not in sys.path:
 
 
 # PATH="~Document/PhD/Lava_tubes/python/P.L.U.M.E/data/raw_data/small_grid2_2023_09_25_13_25_26/0/"
-PATH="./data/raw_data/small_grid2_2023_09_25_13_25_26/0/"
-
-
+# PATH="./data/raw_data/small_grid2_2023_09_25_13_25_26/0/"
+PATH="./data/raw_data/grid_large_2023_11_15_15_44_42/0/"
 
 
 class MineGeneration:
@@ -208,7 +207,26 @@ class MineGeneration:
             return 180
             
         
+if __name__ == '__main__':
+   
+   print(sys.argv)
+
+#    parser = argparse.ArgumentParser(
+#                                 description="PLUME project. Mesh generation based on a json file that provide data as x,y,z coordinates. Then based on the created structure, apply a circular skin around it to create the edges of the underground mesh.",
+#                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
+#    parser.add_argument("-index", help="Index used for the path", type=int)
+#    parser.add_argument("-name", help="Name of the current graph generation", type=str)
+#    parser.add_argument("- -", help="Test", type=str)
+#    parser.add_argument("--background", action="store_true", help="Run the script without GUI")
+#    parser.add_argument("--python", action="store_true", help="Run blender with a python file")
+#    parser.add_argument("file", help="Path and name of the python file")
+   
+
+#    args = parser.parse_args()
+#    arguments = vars(args)
+#    print(arguments)
+   generator = MineGeneration()
 
 
-
-mine = MineGeneration()
+# mine = MineGeneration()
