@@ -1,7 +1,6 @@
 from enum import Enum
 import os
 import sys
-from tools import Tools
 import datetime
 
 class Config(Enum):
@@ -12,21 +11,20 @@ class Config(Enum):
     if PLUME_DIR not in sys.path:
         sys.path.append(PLUME_DIR)
 
+    # General settings
+    NB_GENERATION = 1
+    IMAGE_FORMAT = ".png"
+    OPEN_BLENDER = True
+    GENERATE_MESH = True
+    SAVE_GRAPH_IMAGE = True
+    TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE
 
-    # Paths
-    DEFAULT_IMAGE_PATH = PLUME_DIR + "data/images/graph_0"
-    DEFAULT_NB_GRAPHS = 3
+    # Advanced settings
     INITIAL_GRID_SIZE = 10
     DEFAULT_NB_ITERATION = 50
-
-    DEFAULT_MIN_NODES = 100
+    DEFAULT_MIN_NODES = 1000
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
-    
-    # Booleans
-    DEFAULT_GUI_DISPLAY = False
-    DEFAULT_MESH_GENERATION = True
-    SAVE_GRAPH_IMAGE = True
-    IMAGE_FORMAT = ".png"
+    GPU_ACCELERATION = True 
 
 
 class Color(Enum):
