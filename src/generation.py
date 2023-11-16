@@ -10,18 +10,9 @@ from tools import Tools
 
 class Generator:
 
-    def __init__(self, grid_size_p, nb_graphs_p, name_p) -> None:
-        # Get the grid size
-        if grid_size_p == None or '':
-            self.grid_size = Config.INITIAL_GRID_SIZE.value
-        else:
-            self.grid_size = grid_size_p
-        
+    def __init__(self, name_p) -> None:        
         # Get the number of graphs
-        if nb_graphs_p == None or '':
-            self.nb_graphs = Config.DEFAULT_NB_GRAPHS.value
-        else:
-            self.nb_graphs = nb_graphs_p
+        self.nb_graphs = Config.NB_GENERATION.value
         
         # Get the name of the current graph generation
         if name_p == None or '':
@@ -49,7 +40,7 @@ class Generator:
                 self.create_graph_picture(current_graph, index)
 
         # Create the mesh
-        if Config.DEFAULT_MESH_GENERATION.value:
+        if Config.GENERATE_MESH.value:
                 self.create_mesh(index)
 
 
@@ -62,7 +53,7 @@ class Generator:
         
         # Graph generation
         index = index_p
-        graph = Graph(self.grid_size, self.name, index)
+        graph = Graph(Config.INITIAL_GRID_SIZE.value, self.name, index)
 
         # Starting point
         starting_point = graph.grid_size // 2
@@ -101,16 +92,18 @@ class Generator:
         print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
         result = None
         blender_path = Tools.find_file("blender")
+        
         try:
-            if Config.DEFAULT_GUI_DISPLAY.value:
-                result = subprocess.run(f"{blender_path} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+            if Config.OPEN_BLENDER.value:
+                result = subprocess.run(f"{blender_path} --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
             else:
-                result = subprocess.run(f"{blender_path} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+                result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
         
         except Exception as e:
             print(f"\n{Color.FAIL.value}An issue occured: ",e)
             print(f"The blender path might be wrong: ", Config.DEFAULT_BLENDER_PATH.value)
             print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+            exit()
 
         finally:
             if result:
@@ -131,12 +124,8 @@ if __name__ == '__main__':
                                 description="PLUME project. Procedural Lava-Tube Underground Modeling Engine: A generator that uses procedural generation techniques and graph algorithms to create detailed and visually appealing lava tube structures. ",
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument("-s", help="Initial grid size", type=int)
-    parser.add_argument("-nb_g", help="Number of graphs to generate", type=int)
     parser.add_argument("-name", help="Name of the current graph generation", type=str)
 
     args = parser.parse_args()
     arguments = vars(args)
-    generator = Generator(grid_size_p=arguments['s'],
-                          nb_graphs_p=arguments['nb_g'],
-                          name_p=arguments['name'])
+    generator = Generator(name_p=arguments['name'])

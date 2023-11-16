@@ -2,7 +2,6 @@ import sys
 import os
 import bpy
 import json
-import argparse
 
 # Get the path of the PLUME directory
 if os.path.dirname(__file__) not in sys.path:
@@ -26,7 +25,6 @@ class MeshGeneration:
       self.obj = None
       self.mesh = None
       self.generate_mesh()
-      exit()
 
 
    def generate_mesh(self):
@@ -104,9 +102,9 @@ class MeshGeneration:
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
 
       # Apply modifiers
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
 
 
    def flip_normals(self):
@@ -134,18 +132,5 @@ class MeshGeneration:
 
 
 if __name__ == '__main__':
-   parser = argparse.ArgumentParser(
-                                description="PLUME project. Mesh generation based on a json file that provide data as x,y,z coordinates. Then based on the created structure, apply a circular skin around it to create the edges of the underground mesh.",
-                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
-   parser.add_argument("-index", help="Index used for the path", type=int)
-   parser.add_argument("-name", help="Name of the current graph generation", type=str)
-   parser.add_argument("--background", action="store_true", help="Run the script without GUI")
-   parser.add_argument("--python", action="store_true", help="Run blender with a python file")
-   parser.add_argument("file", help="Path and name of the python file")
-   
-
-   args = parser.parse_args()
-   arguments = vars(args)
-   generator = MeshGeneration(index_p=arguments['index'],
-                              generation_name_p=arguments['name'])
+   generator = MeshGeneration(index_p=sys.argv[-3],
+                              generation_name_p= sys.argv[-1])
