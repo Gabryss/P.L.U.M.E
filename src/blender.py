@@ -2,7 +2,6 @@ import sys
 import os
 import bpy
 import json
-import argparse
 
 # Get the path of the PLUME directory
 if os.path.dirname(__file__) not in sys.path:
@@ -20,13 +19,13 @@ class MeshGeneration:
       self.generation_name = str(generation_name_p)
       self.index = str(index_p)
       self.path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+"/"+self.index+"/data.json"
-      self.saved_mesh_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index+"/mesh.obj"
+      self.saved_mesh_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
       self.json_file = open(self.path)
       self.data = json.load(self.json_file)
       self.obj = None
       self.mesh = None
+      self.material = None
       self.generate_mesh()
-      exit()
 
 
    def generate_mesh(self):
@@ -43,11 +42,10 @@ class MeshGeneration:
       print("LOAD MESH DONE")
       self.blender_modifiers()
       print("MODIFIER DONE")
-      self.flip_normals()
-      print("FLIP NORMALS DONE")
-      self.export_mesh()
+      if Config.SAVE_MESH.value:
+         self.export_mesh()
       self.json_file.close()
-      print("EXPORT MESH DONE")
+      print(self.path)
 
 
    def initial_cleanup(self):
@@ -114,10 +112,29 @@ class MeshGeneration:
 
       mod_sub_1 = bpy.ops.object.modifier_add(type='SUBSURF')
 
+      mod_displacement = bpy.ops.object.modifier_add(type='DISPLACE')
+      bpy.context.object.modifiers["Displace"].strength = 0.05
+      bpy.context.object.modifiers["Displace"].texture = self.create_voronoi_texture()
+
+
       # Apply modifiers
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision001')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+
+
+   def create_voronoi_texture(self):
+      """
+      Create voronoi texture
+      """
+      bpy.ops.texture.new()
+      bpy.data.textures["Texture"].type = 'CLOUDS'
+      bpy.data.textures["Texture"].noise_basis = 'VORONOI_CRACKLE'
+      bpy.data.textures["Texture"].noise_type = 'SOFT_NOISE'
+      bpy.data.textures["Texture"].noise_scale = 1
+      return bpy.data.textures["Texture"]
 
 
    def geometry_nodes(self):
@@ -146,14 +163,126 @@ class MeshGeneration:
 
       # Add a Mesh to Volume node
       mesh_to_volume_node = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
+      mesh_to_volume_node.resolution_mode = 'VOXEL_AMOUNT'
+      mesh_to_volume_node.inputs[1].default_value = 1     # Density
+      mesh_to_volume_node.inputs[3].default_value = 128   # Voxel Amount
+      mesh_to_volume_node.inputs[4].default_value = 0.1   # Exterior Band Width
+      mesh_to_volume_node.inputs[5].default_value = 0.1   # Interior Band Width
+      mesh_to_volume_node.inputs[6].default_value = True  # Fill volume
       mesh_to_volume_node.location = (100, 200)
 
       # Add a Volume to Mesh node
       volume_to_mesh_node = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
-      volume_to_mesh_node.location = (300, 200)
+      volume_to_mesh_node.resolution_mode = 'GRID'
+      volume_to_mesh_node.inputs[3].default_value = 0.1   # Threshold
+      volume_to_mesh_node.inputs[4].default_value = 0.8   # Adaptivity
+      volume_to_mesh_node.location = (400, 200)
+
+
+
+      # Add a Mesh to Volume node
+      mesh_to_volume_node_2 = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
+      mesh_to_volume_node_2.resolution_mode = 'VOXEL_AMOUNT'
+      mesh_to_volume_node_2.inputs[1].default_value = 0.5   # Density
+      mesh_to_volume_node_2.inputs[3].default_value = 120   # Voxel Amount
+      mesh_to_volume_node_2.inputs[4].default_value = 0.1   # Exterior Band Width
+      mesh_to_volume_node_2.inputs[5].default_value = 0.1   # Interior Band Width
+      mesh_to_volume_node_2.inputs[6].default_value = True  # Fill volume
+      mesh_to_volume_node_2.location = (600, 200)
+
+      # Add a Volume to Mesh node
+      volume_to_mesh_node_2 = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
+      volume_to_mesh_node_2.resolution_mode = 'VOXEL_AMOUNT'
+      volume_to_mesh_node_2.inputs[2].default_value = 120   # Voxel Amount
+      volume_to_mesh_node_2.inputs[3].default_value = 0.1   # Threshold
+      volume_to_mesh_node_2.inputs[4].default_value = 0     # Adaptivity
+      volume_to_mesh_node_2.location = (900, 200)
+
+
+      subdivide_mesh = node_tree.nodes.new(type='GeometryNodeSubdivideMesh')
+      subdivide_mesh.location = (1100, 200)
+
+      subdivide_surface = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
+      subdivide_surface.location = (1300, 200)
+      subdivide_surface.uv_smooth = 'SMOOTH_ALL'
+
+      # Noise
+      texture_noise = node_tree.nodes.new(type='ShaderNodeTexNoise')
+      texture_noise.noise_dimensions = '4D'
+      texture_noise.inputs[1].default_value = 2.70 # W
+      texture_noise.inputs[2].default_value = 10   # Scale
+      texture_noise.inputs[3].default_value = 1    # Detail
+      texture_noise.inputs[4].default_value = 1    # Roughness
+      texture_noise.inputs[5].default_value = 0.0    # Distortion
+      texture_noise.location = (500, -400)
+
+      value = node_tree.nodes.new(type="ShaderNodeValue")
+      value.outputs[0].default_value = 0.1
+      value.location = (700, -450)
+
+      add = node_tree.nodes.new(type="ShaderNodeMath")
+      add.operation = 'ADD'
+      add.inputs[1].default_value = 0.5
+      add.location = (900, -500)
+
+
+      multiply = node_tree.nodes.new(type="ShaderNodeMath")
+      multiply.operation = 'MULTIPLY'
+      multiply.use_clamp = True
+      multiply.inputs[1].default_value = 1
+      multiply.location = (1100, -450)
+
+      multiply_add = node_tree.nodes.new(type="ShaderNodeVectorMath")
+      multiply_add.operation = 'MULTIPLY_ADD'
+      multiply_add.location = (1300, -400)
+
+      # End noise
+
+      set_position = node_tree.nodes.new(type='GeometryNodeSetPosition')
+      set_position.location = (1500, 200)
+
+      subdivide_surface_2 = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
+      subdivide_surface_2.location = (1700, 200)
+
+
+      set_shade_smooth = node_tree.nodes.new(type='GeometryNodeSetShadeSmooth')
+      set_shade_smooth.location = (1900, 200)
+
+      flip_faces = node_tree.nodes.new(type='GeometryNodeFlipFaces')
+      flip_faces.location = (2100, 200)
+
+      # Material
+      material_node = node_tree.nodes.new(type="GeometryNodeInputMaterial")
+      material_node.material = self.shader_material()
+      material_node.location = (2000, -200)
+      # End Material
+
+      set_material = node_tree.nodes.new(type='GeometryNodeSetMaterial')
+      set_material.location = (2300, 200)
 
       # Connect nodes
       node_tree.links.new(mesh_to_volume_node.outputs["Volume"], volume_to_mesh_node.inputs["Volume"])
+      node_tree.links.new(volume_to_mesh_node.outputs["Mesh"], mesh_to_volume_node_2.inputs["Mesh"])
+      node_tree.links.new(mesh_to_volume_node_2.outputs["Volume"], volume_to_mesh_node_2.inputs["Volume"])
+      node_tree.links.new(volume_to_mesh_node_2.outputs["Mesh"], subdivide_mesh.inputs["Mesh"])
+      node_tree.links.new(subdivide_mesh.outputs["Mesh"], subdivide_surface.inputs["Mesh"])
+      node_tree.links.new(subdivide_surface.outputs["Mesh"], set_position.inputs["Geometry"])
+      node_tree.links.new(set_position.outputs["Geometry"], subdivide_surface_2.inputs["Mesh"])
+      node_tree.links.new(subdivide_surface_2.outputs["Mesh"], set_shade_smooth.inputs["Geometry"])
+      node_tree.links.new(set_shade_smooth.outputs["Geometry"], flip_faces.inputs["Mesh"])
+      node_tree.links.new(flip_faces.outputs["Mesh"], set_material.inputs["Geometry"])
+      node_tree.links.new(material_node.outputs["Material"], set_material.inputs["Material"])
+
+      # Noise connection
+      node_tree.links.new(texture_noise.outputs["Color"], multiply_add.inputs["Vector"])
+      node_tree.links.new(multiply_add.outputs["Vector"], set_position.inputs["Offset"])
+      node_tree.links.new(value.outputs["Value"], multiply_add.inputs[1])
+      node_tree.links.new(value.outputs["Value"], add.inputs["Value"])
+      node_tree.links.new(add.outputs["Value"], multiply.inputs["Value"])
+      node_tree.links.new(multiply.outputs["Value"], multiply_add.inputs[2])
+
+
+
 
       # Add Group Input and Output nodes for completeness
       group_input = node_tree.nodes.new(type="NodeGroupInput")
@@ -161,21 +290,133 @@ class MeshGeneration:
       group_input.location = (-100, 200)
       group_output = node_tree.nodes.new(type="NodeGroupOutput")
       node_tree.inputs.new("NodeSocketGeometry","Geometry")
-      group_output.location = (500, 200)
+      group_output.location = (2500, 200)
 
       # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
       node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
-      node_tree.links.new(volume_to_mesh_node.outputs["Mesh"], group_output.inputs["Geometry"])
+      node_tree.links.new(set_material.outputs["Geometry"], group_output.inputs["Geometry"])
       print("GEOMETRY NODE DONE")
 
 
-   def flip_normals(self):
+   def shader_material(self):
       """
-      Flip the normals
+      Proceduraly create rocky texture for the cave
       """
-      bpy.ops.object.editmode_toggle()
-      bpy.ops.mesh.select_all(action='SELECT') # Select all faces
-      bpy.ops.mesh.flip_normals() # just flip normals
+      material = bpy.data.materials.new(name="rock")
+      material.use_nodes = True
+
+      principled_bsdf_node = material.node_tree.nodes["Principled BSDF"]
+      principled_bsdf_node.inputs["Metallic"].default_value = 0.0
+      principled_bsdf_node.inputs["Roughness"].default_value = 0.650
+      principled_bsdf_node.location = (2300, 0)
+
+
+      # First mix
+      texture_coordinate_node_1 = material.node_tree.nodes.new(type='ShaderNodeTexCoord')
+      texture_coordinate_node_1.location = (450,250)
+
+      mapping_node_1 = material.node_tree.nodes.new(type='ShaderNodeMapping')
+      mapping_node_1.location = (650, 250)
+
+      noise_texture_node_1 = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
+      noise_texture_node_1.inputs['Scale'].default_value = 80.0
+      noise_texture_node_1.inputs['Detail'].default_value = 16.0
+      noise_texture_node_1.location = (850, 300)
+
+      noise_texture_node_2 = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
+      noise_texture_node_2.inputs['Scale'].default_value = 4.0
+      noise_texture_node_2.inputs['Detail'].default_value = 16.0
+      noise_texture_node_2.location = (850, 600)
+
+      color_ramp_node_1 = material.node_tree.nodes.new(type='ShaderNodeValToRGB')
+      color_ramp_node_1.color_ramp.elements.new(0.632)
+      color_ramp_node_1.color_ramp.elements[0].position = 0.429
+      color_ramp_node_1.color_ramp.elements[0].color = (0.0563574, 0.0563574, 0.0563574, 1)
+      color_ramp_node_1.color_ramp.elements[1].position = 0.555
+      color_ramp_node_1.color_ramp.elements[1].color = (0.0846343, 0.104185, 0.115044, 1)
+      color_ramp_node_1.color_ramp.elements[2].position = 0.632
+      color_ramp_node_1.color_ramp.elements[2].color = (0.173731, 0.1653, 0.159337, 1)
+      color_ramp_node_1.location = (1050, 300)
+
+      color_ramp_node_2 = material.node_tree.nodes.new(type='ShaderNodeValToRGB')
+      color_ramp_node_2.color_ramp.elements[0].position = 0.429
+      color_ramp_node_2.color_ramp.elements[0].color = (0.020863, 0.020863, 0.020863, 1)
+      color_ramp_node_2.color_ramp.elements[1].position = 0.632
+      color_ramp_node_2.color_ramp.elements[1].color = (0.218045, 0.207349, 0.199787, 1)
+      color_ramp_node_2.location = (1050, 600)
+
+      mix_color_node_1 = material.node_tree.nodes.new(type="ShaderNodeMix")
+      mix_color_node_1.data_type = 'RGBA'
+      mix_color_node_1.blend_type = 'DARKEN'
+      mix_color_node_1.inputs['Factor'].default_value = 0.657
+      mix_color_node_1.location = (1400, 350)
+
+
+      # Second mix
+      geometry_node = material.node_tree.nodes.new(type='ShaderNodeNewGeometry')
+      geometry_node.location = (900,-200)
+
+      color_ramp_node_3 = material.node_tree.nodes.new(type='ShaderNodeValToRGB')
+      color_ramp_node_3.color_ramp.elements[0].position = 0.442
+      color_ramp_node_3.color_ramp.elements[1].position = 0.534
+      color_ramp_node_3.location = (1100, -200)
+
+      mix_color_node_2 = material.node_tree.nodes.new(type="ShaderNodeMix")
+      mix_color_node_2.data_type = 'RGBA'
+      mix_color_node_2.blend_type = 'MIX'
+      mix_color_node_2.inputs[6].default_value = (0,0,0,1)
+      mix_color_node_2.location = (1700, 0)
+
+
+      # Normals
+      texture_coordinate_node_2 = material.node_tree.nodes.new(type='ShaderNodeTexCoord')
+      texture_coordinate_node_2.location = (900,-600)
+
+      mapping_node_2 = material.node_tree.nodes.new(type='ShaderNodeMapping')
+      mapping_node_2.location = (1100, -600)
+
+      noise_texture_node_3 = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
+      noise_texture_node_3.inputs['Scale'].default_value = 5.0
+      noise_texture_node_3.inputs['Detail'].default_value = 16.0
+      noise_texture_node_3.location = (1300, -600)
+
+      bump_node_1 = material.node_tree.nodes.new(type='ShaderNodeBump')
+      bump_node_1.location = (1700, -600)
+
+      bump_node_2 = material.node_tree.nodes.new(type='ShaderNodeBump')
+      bump_node_2.inputs['Strength'].default_value = 0.1
+      bump_node_2.location = (2000, -600)
+
+      #LINKS
+
+      #First Layer
+      material.node_tree.links.new(texture_coordinate_node_1.outputs["Object"], mapping_node_1.inputs["Vector"])
+      material.node_tree.links.new(mapping_node_1.outputs["Vector"], noise_texture_node_1.inputs["Vector"])
+      material.node_tree.links.new(mapping_node_1.outputs["Vector"], noise_texture_node_2.inputs["Vector"])
+      material.node_tree.links.new(noise_texture_node_1.outputs["Fac"], color_ramp_node_1.inputs["Fac"])
+      material.node_tree.links.new(noise_texture_node_2.outputs["Fac"], color_ramp_node_2.inputs["Fac"])
+
+      material.node_tree.links.new(color_ramp_node_1.outputs["Color"], mix_color_node_1.inputs[6])
+      material.node_tree.links.new(color_ramp_node_2.outputs["Color"], mix_color_node_1.inputs[7])
+
+      # Second Layer
+      material.node_tree.links.new(geometry_node.outputs["Pointiness"], color_ramp_node_3.inputs["Fac"])
+      material.node_tree.links.new(color_ramp_node_3.outputs["Color"], mix_color_node_2.inputs["Factor"])
+      material.node_tree.links.new(mix_color_node_1.outputs[2], mix_color_node_2.inputs[7])
+      material.node_tree.links.new(mix_color_node_2.outputs[2], principled_bsdf_node.inputs['Base Color'])
+
+
+      # Normal
+      material.node_tree.links.new(texture_coordinate_node_2.outputs["Object"], mapping_node_2.inputs["Vector"])
+      material.node_tree.links.new(mapping_node_2.outputs["Vector"], noise_texture_node_3.inputs["Vector"])
+      material.node_tree.links.new(noise_texture_node_3.outputs["Fac"], bump_node_1.inputs["Height"])
+      material.node_tree.links.new(bump_node_1.outputs["Normal"], bump_node_2.inputs["Normal"])
+      material.node_tree.links.new(mix_color_node_2.outputs["Result"], bump_node_2.inputs["Height"])
+      material.node_tree.links.new(bump_node_2.outputs["Normal"], principled_bsdf_node.inputs["Normal"])
+
+      self.material = material
+      return self.material
+
 
 
    def export_mesh(self):
@@ -184,28 +425,31 @@ class MeshGeneration:
       """
       bpy.data.objects['Underground'].select_set(True)
 
+      mesh_obj = bpy.context.active_object
+
+      mesh_obj.data.materials.append(self.material)
+
       # Make sure the directory exist
       if not os.path.exists(os.path.dirname(self.saved_mesh_path)):
             os.makedirs(os.path.dirname(self.saved_mesh_path))
 
       # Export the mesh
-      bpy.ops.wm.obj_export(filepath=self.saved_mesh_path,
-                            export_selected_objects=True)
+
+      if Config.MESH_FORMAT.value == 'obj':
+         bpy.ops.wm.obj_export(filepath=self.saved_mesh_path,
+                               export_selected_objects=True)
+      
+      elif Config.MESH_FORMAT.value == 'ply':
+         bpy.ops.export_mesh.ply(filepath=self.saved_mesh_path)
+      
+      else:
+         print("Problem with the export, wrong format")
+         return -1
+         
+      print("EXPORT MESH DONE")
+
 
 
 if __name__ == '__main__':
-   parser = argparse.ArgumentParser(
-                                description="PLUME project. Mesh generation based on a json file that provide data as x,y,z coordinates. Then based on the created structure, apply a circular skin around it to create the edges of the underground mesh.",
-                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
-   parser.add_argument("-index", help="Index used for the path", type=int)
-   parser.add_argument("-name", help="Name of the current graph generation", type=str)
-   parser.add_argument("--background", action="store_true", help="Run the script without GUI")
-   parser.add_argument("--python", action="store_true", help="Run blender with a python file")
-   parser.add_argument("file", help="Path and name of the python file")
-   
-
-   args = parser.parse_args()
-   arguments = vars(args)
-   generator = MeshGeneration(index_p=arguments['index'],
-                              generation_name_p=arguments['name'])
+   generator = MeshGeneration(index_p=sys.argv[-3],
+                              generation_name_p= sys.argv[-1])
