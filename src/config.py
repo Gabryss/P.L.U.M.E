@@ -9,19 +9,25 @@ class Config(Enum):
 
     # Append the PLUME path to the python path:
     if PLUME_DIR not in sys.path:
-        sys.path.append(PLUME_DIR)
+        sys.path.append(PLUME_DIR)  
 
-    # Select an algorithm
-    # -gaussian_perlin
-    SELECTED_ALGORITHM = "gaussian_perlin"
+    # ==== General settings ====
+    NB_GENERATION = 1
+    IMAGE_FORMAT = ".png"
+    MESH_FORMAT = 'obj'        # Available: obj, ply
+    OPEN_VISUALIZATION = True
+    GENERATE_MESH = True
+    SAVE_GRAPH_IMAGE = True
+    SAVE_MESH = True
+    TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE
 
-    # Integers
-    DEFAULT_NB_GRAPHS = 1
+    # ==== Advanced settings ====
+    DEFAULT_MIN_NODES = 100
     MAX_CREATED_NODE_ON_CIRCLE = 2
-
-    DEFAULT_MIN_NODES = 10
-    DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     MAX_RADIUS_NODE = 5.0
+    DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
+    GPU_ACCELERATION = True 
+    SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
 
     #Gaussian
     STANDARD_DEVIATION = 0.1
@@ -31,12 +37,6 @@ class Config(Enum):
     MAX_OCTAVES = 1.0
     MAX_PERSISTENCE = 5.0
     MAX_LACUNARITY = 2.0
-    
-    # Booleans
-    DEFAULT_GUI_DISPLAY = False
-    DEFAULT_MESH_GENERATION = True
-    SAVE_GRAPH_IMAGE = True
-    IMAGE_FORMAT = ".png"
 
 
 class Color(Enum):
