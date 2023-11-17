@@ -118,11 +118,11 @@ class MeshGeneration:
 
 
       # Apply modifiers
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
 
 
    def create_voronoi_texture(self):
