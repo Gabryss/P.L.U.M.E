@@ -17,17 +17,19 @@ class Config(Enum):
     MESH_FORMAT = 'obj'        # Available: obj, ply
     OPEN_VISUALIZATION = True
     GENERATE_MESH = True
-    SAVE_GRAPH_IMAGE = True
+    SAVE_GRAPH_IMAGE = False
     SAVE_MESH = True
     TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 100
+    DEFAULT_MIN_NODES = 10
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
-    GPU_ACCELERATION = True 
     SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
+    TEXTURE_SIZE = 1024      # 16384, 8192, 4096, 1024
+    GPU_ACCELERATION = True 
+
 
     #Gaussian
     STANDARD_DEVIATION = 0.1
