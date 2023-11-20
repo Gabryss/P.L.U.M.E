@@ -20,6 +20,7 @@ class MeshGeneration:
       self.index = str(index_p)
       self.path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+"/"+self.index+"/data.json"
       self.saved_mesh_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
+      self.saved_texture_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index
       self.json_file = open(self.path)
       self.data = json.load(self.json_file)
       self.obj = None
@@ -123,6 +124,10 @@ class MeshGeneration:
       apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+      
+      if Config.SAVE_MESH.value:
+         self.bake_texture(self.material)
+
 
 
    def create_voronoi_texture(self):
@@ -415,8 +420,136 @@ class MeshGeneration:
       material.node_tree.links.new(bump_node_2.outputs["Normal"], principled_bsdf_node.inputs["Normal"])
 
       self.material = material
+      self.principled_bsdf_node = principled_bsdf_node
+
       return self.material
 
+
+   def bake_texture(self, material_tree_p):
+      """
+      Bake and export the texture. Process:
+      - Create images for each attribute (Color, Normals, Roughness)
+      - Apply smart UV project to create the UV map of the model
+      - Use Cycle render and if needed use the GPU acceleration
+      - Bake each image
+      """
+
+      bpy.ops.object.editmode_toggle()
+      bpy.ops.mesh.select_all(action='SELECT')
+      uv_map = bpy.ops.uv.smart_project()
+      bpy.ops.object.editmode_toggle()
+
+      material = material_tree_p
+      color_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
+      color_image = bpy.data.images.new('color_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      color_image_node.image = color_image
+
+      normal_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
+      normal_image = bpy.data.images.new('normal_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      normal_image_node.image = normal_image
+
+      roughness_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
+      roughness_image = bpy.data.images.new('roughness_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      roughness_image_node.image = roughness_image
+
+      obj = bpy.context.active_object
+
+      # Set the device_type
+      bpy.context.preferences.addons[
+         "cycles"
+      ].preferences.compute_device_type = "CUDA" # or "OPENCL"
+      
+      print(bpy.context.object.active_material_index)
+      
+      # Set the device and feature set
+      bpy.context.scene.render.engine = 'CYCLES'
+      bpy.context.scene.cycles.device = 'GPU'
+      bpy.context.scene.cycles.bake_type = 'DIFFUSE'
+      bpy.context.scene.render.bake.use_pass_direct = False
+      bpy.context.scene.render.bake.use_pass_indirect = False
+      bpy.context.scene.render.bake.target = 'IMAGE_TEXTURES'
+
+      # get_devices() to let Blender detects GPU device
+      bpy.context.preferences.addons["cycles"].preferences.get_devices()
+      print(bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
+      for d in bpy.context.preferences.addons["cycles"].preferences.devices:
+         d["use"] = 1 # Using all devices, include GPU and CPU
+         print(d["name"], d["use"])
+
+
+      #Color image
+      color_image_node.select = True
+      material.node_tree.nodes.active = color_image_node
+      bpy.context.view_layer.objects.active = obj
+      bpy.ops.object.select_all(action='SELECT')
+      bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
+      print("BAKING COMPLETED")
+      color_image.save_render(filepath= self.saved_texture_path + '/color_texture.png')
+      print("COLORED IMAGE SAVED")
+      color_image_node.select = False
+
+      # Normal image
+      normal_image_node.select = True
+      material.node_tree.nodes.active = normal_image_node
+      bpy.context.scene.cycles.bake_type = 'NORMAL'
+      bpy.ops.object.select_all(action='SELECT')
+      bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
+      print("BAKING COMPLETED")
+      normal_image.save_render(filepath= self.saved_texture_path +'/normal_texture.png')
+      print("NORMAL IMAGE SAVED")
+      normal_image_node.select = False
+
+
+      # Roughness image
+      roughness_image_node.select = True
+      material.node_tree.nodes.active = roughness_image_node
+      bpy.context.scene.cycles.bake_type = 'ROUGHNESS'
+      bpy.ops.object.select_all(action='SELECT')
+      bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
+      print("BAKING COMPLETED")
+      roughness_image.save_render(filepath= self.saved_texture_path +'/roughness_texture.png')
+      print("ROUGHNESS IMAGE SAVED")
+      roughness_image_node.select = False
+
+
+      # Create new material for the export
+      bpy.ops.object.material_slot_remove()
+      bpy.ops.object.material_slot_remove()
+      material_export = bpy.data.materials.new(name="Rock")
+      material_export.use_nodes = True
+
+
+      principled_bsdf_node = material_export.node_tree.nodes["Principled BSDF"]
+      principled_bsdf_node.inputs["Metallic"].default_value = 0.0
+      
+
+      color_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
+      color_image = bpy.data.images.load(self.saved_texture_path + '/color_texture.png')
+      color_image_node.image = color_image
+
+
+      normal_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
+      normal_image = bpy.data.images.load(self.saved_texture_path +'/normal_texture.png')
+      normal_image_node.image = normal_image
+
+
+
+      roughness_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
+      roughness_image = bpy.data.images.load(self.saved_texture_path + '/roughness_texture.png')
+      roughness_image_node.image = roughness_image
+
+
+
+      # Apply materials for the texture
+      material_export.node_tree.links.new(color_image_node.outputs['Color'], principled_bsdf_node.inputs['Base Color'])
+
+      material_export.node_tree.links.new(normal_image_node.outputs["Color"], principled_bsdf_node.inputs["Normal"])
+
+      material_export.node_tree.links.new(roughness_image_node.outputs["Color"], principled_bsdf_node.inputs["Roughness"])
+
+      obj.active_material = bpy.data.materials.get("Rock")
+
+      bpy.ops.file.pack_all()
 
 
    def export_mesh(self):
