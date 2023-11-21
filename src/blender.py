@@ -116,7 +116,7 @@ class MeshGeneration:
       mod_displacement = bpy.ops.object.modifier_add(type='DISPLACE')
       bpy.context.object.modifiers["Displace"].strength = 0.05
       bpy.context.object.modifiers["Displace"].texture = self.create_voronoi_texture()
-
+      print("DISPLACEMENT DONE")
 
       # Apply modifiers
       apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
@@ -124,6 +124,9 @@ class MeshGeneration:
       apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+      print("MODIFIERS APPLIED")
+
+      self.decimate_mesh_polys()
       
       if Config.SAVE_MESH.value:
          self.bake_texture(self.material)
@@ -433,11 +436,16 @@ class MeshGeneration:
       - Use Cycle render and if needed use the GPU acceleration
       - Bake each image
       """
-
+      print("CREATION OF THE UV MAP")
+      0/0
       bpy.ops.object.editmode_toggle()
       bpy.ops.mesh.select_all(action='SELECT')
       uv_map = bpy.ops.uv.smart_project()
       bpy.ops.object.editmode_toggle()
+      print("UV MAP DONE")
+
+      print("START BAKING THE TEXTURE")
+
 
       material = material_tree_p
       color_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
@@ -447,10 +455,14 @@ class MeshGeneration:
       normal_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
       normal_image = bpy.data.images.new('normal_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
       normal_image_node.image = normal_image
+      normal_image_node.image.colorspace_settings.name = 'Non-Color'
+
 
       roughness_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
       roughness_image = bpy.data.images.new('roughness_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
       roughness_image_node.image = roughness_image
+      roughness_image_node.image.colorspace_settings.name = 'Non-Color'
+
 
       obj = bpy.context.active_object
 
@@ -458,12 +470,13 @@ class MeshGeneration:
       bpy.context.preferences.addons[
          "cycles"
       ].preferences.compute_device_type = "CUDA" # or "OPENCL"
-      
-      print(bpy.context.object.active_material_index)
-      
+            
       # Set the device and feature set
       bpy.context.scene.render.engine = 'CYCLES'
-      bpy.context.scene.cycles.device = 'GPU'
+      if Config.GPU_ACCELERATION.value:
+         bpy.context.scene.cycles.device = 'GPU'
+      else:
+         bpy.context.scene.cycles.device = 'CPU'
       bpy.context.scene.cycles.bake_type = 'DIFFUSE'
       bpy.context.scene.render.bake.use_pass_direct = False
       bpy.context.scene.render.bake.use_pass_indirect = False
@@ -473,7 +486,7 @@ class MeshGeneration:
       bpy.context.preferences.addons["cycles"].preferences.get_devices()
       print(bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
       for d in bpy.context.preferences.addons["cycles"].preferences.devices:
-         d["use"] = 1 # Using all devices, include GPU and CPU
+         # d["use"] = 1 # Using all devices, include GPU and CPU
          print(d["name"], d["use"])
 
 
@@ -531,25 +544,48 @@ class MeshGeneration:
       normal_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
       normal_image = bpy.data.images.load(self.saved_texture_path +'/normal_texture.png')
       normal_image_node.image = normal_image
+      normal_image_node.image.colorspace_settings.name = 'Non-Color'
+
+      normal_map_node = material_export.node_tree.nodes.new(type="ShaderNodeNormalMap")
 
 
 
       roughness_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
       roughness_image = bpy.data.images.load(self.saved_texture_path + '/roughness_texture.png')
       roughness_image_node.image = roughness_image
+      roughness_image_node.image.colorspace_settings.name = 'Non-Color'
 
 
 
       # Apply materials for the texture
       material_export.node_tree.links.new(color_image_node.outputs['Color'], principled_bsdf_node.inputs['Base Color'])
-
-      material_export.node_tree.links.new(normal_image_node.outputs["Color"], principled_bsdf_node.inputs["Normal"])
-
+      material_export.node_tree.links.new(normal_image_node.outputs["Color"], normal_map_node.inputs["Color"])
+      material_export.node_tree.links.new(normal_map_node.outputs["Normal"], principled_bsdf_node.inputs["Normal"])
       material_export.node_tree.links.new(roughness_image_node.outputs["Color"], principled_bsdf_node.inputs["Roughness"])
 
       obj.active_material = bpy.data.materials.get("Rock")
 
       bpy.ops.file.pack_all()
+      print("ALL TEXTURES BAKED")
+
+
+   def decimate_mesh_polys(self):
+      """
+      Decimate some polys in the mesh to fit with the max number of polys constraint in the config file
+      """
+      print("Start mesh decimation (Can take some time)")
+      obj = bpy.context.active_object
+      estimated_tri_count = sum([(len(p.vertices) - 2) for p in obj.data.polygons])
+      ratio = Config.MAX_MESH_TRIANGLES.value / estimated_tri_count
+      print("Initial number of triangles: ",estimated_tri_count)
+      print("Desired number of triangles: ", Config.MAX_MESH_TRIANGLES.value)
+      print("Ratio: ",ratio)
+
+      decimate_modifier = bpy.ops.object.modifier_add(type='DECIMATE')
+      bpy.context.object.modifiers["Decimate"].ratio = ratio
+
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Decimate')
+      print("Mesh decimated")
 
 
    def export_mesh(self):
