@@ -19,15 +19,16 @@ class Config(Enum):
     GENERATE_MESH = True
     SAVE_GRAPH_IMAGE = False
     SAVE_MESH = True
-    TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE
+    TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE #Not available yet
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 10
+    DEFAULT_MIN_NODES = 100
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
-    TEXTURE_SIZE = 1024      # 16384, 8192, 4096, 1024
+    TEXTURE_SIZE = 4096      # 16384, 8192, 4096, 1024 pixels
+    MAX_MESH_TRIANGLES = 1000000 # 1Million triangles: 1000000
     GPU_ACCELERATION = True 
 
 
