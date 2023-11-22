@@ -17,18 +17,18 @@ class Config(Enum):
     MESH_FORMAT = 'obj'        # Available: obj, ply, usd
     OPEN_VISUALIZATION = True
     GENERATE_MESH = True
-    SAVE_GRAPH_IMAGE = False
+    SAVE_GRAPH_IMAGE = True
     SAVE_MESH = True
     TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE #Not available yet
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 100
+    DEFAULT_MIN_NODES = 10
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
-    TEXTURE_SIZE = 8192      # 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
-    MAX_MESH_TRIANGLES = 1000000 # 1Million triangles: 1000000
+    TEXTURE_SIZE = 1024      # 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    MAX_MESH_TRIANGLES = 1000000 # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     GPU_ACCELERATION = True 
 
 
