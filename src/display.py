@@ -38,7 +38,7 @@ class Display():
         self.edges_color = edge_color_p
         self.nodes_size = node_width_p
         self.edges_width = edge_width_p
-        self.save_image_path = Config.PLUME_DIR.value+"/data/images/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
+        self.save_image_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
     
 
     def create_image_from_graph(self):

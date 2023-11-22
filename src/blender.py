@@ -14,13 +14,15 @@ if blend_dir not in sys.path:
 
 from config import Config, Color
 
+
+
 class MeshGeneration:
    def __init__(self, generation_name_p, index_p) -> None:
       self.generation_name = str(generation_name_p)
       self.index = str(index_p)
-      self.path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+"/"+self.index+"/data.json"
-      self.saved_mesh_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
-      self.saved_texture_path = Config.PLUME_DIR.value+"/data/mesh_files/"+self.generation_name+"/"+self.index
+      self.path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/data.json"
+      self.saved_mesh_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
+      self.saved_texture_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/textures/"
       self.json_file = open(self.path)
       self.data = json.load(self.json_file)
       self.obj = None
@@ -65,7 +67,7 @@ class MeshGeneration:
       Load graph data into python variables (from a dictionary)
       -Use [node_id]["coordinates"]["x"] or ["y"]
       """
-      print("\tBegin extraction of points")
+      print("\t-Begin extraction of points")
       verts, edges = [], []
       for i in self.data:
          verts.append([
@@ -78,7 +80,7 @@ class MeshGeneration:
                self.data[i]['id'],
                edge
             ])
-      print("\tExtraction done")
+      print("\t-Extraction done")
       return verts, edges
    
 
@@ -86,7 +88,7 @@ class MeshGeneration:
       """
       Load the verticies and edges in blender
       """
-      print("\tLoad the graph")
+      print("\t-Load the graph")
       verts = verts_p
       edges = edges_p
       self.mesh = bpy.data.meshes.new('Underground')
@@ -98,7 +100,7 @@ class MeshGeneration:
       self.mesh.from_pydata(verts, edges, [])
       if not self.mesh:
          return -1
-      print("\tGraph loaded")
+      print("\t-Graph loaded")
       
 
 
@@ -112,10 +114,10 @@ class MeshGeneration:
       """
       print(f"\n{Color.BOLD.value}Start modifiers{Color.ENDC.value}")
       mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
-      print("\tSKIN DONE")
+      print("\t-Skin done")
 
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
-      print("\tSUBSURF DONE")
+      print("\t-Subdivision surface done")
       
       self.geometry_nodes()
 
@@ -124,7 +126,7 @@ class MeshGeneration:
       mod_displacement = bpy.ops.object.modifier_add(type='DISPLACE')
       bpy.context.object.modifiers["Displace"].strength = 0.05
       bpy.context.object.modifiers["Displace"].texture = self.create_voronoi_texture()
-      print("\tDISPLACEMENT DONE")
+      print("\t-Displacement done")
 
       # Apply modifiers
       apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
@@ -172,7 +174,7 @@ class MeshGeneration:
       - Input material
       - Set material
       """
-      print(f"{Color.OKGREEN.value}\tStart geometry node{Color.ENDC.value}")
+      print(f"{Color.OKGREEN.value}\t-Start geometry node{Color.ENDC.value}")
 
       # Add a Geometry Nodes modifier to the object
       geom_modifier = self.obj.modifiers.new(name="GeometryNodes", type='NODES')
@@ -325,7 +327,7 @@ class MeshGeneration:
       # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
       node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
       node_tree.links.new(set_material.outputs["Geometry"], group_output.inputs["Geometry"])
-      print(f"{Color.OKGREEN.value}\tGeometry node process completed{Color.ENDC.value}")
+      print(f"{Color.OKGREEN.value}\t-Geometry node process completed{Color.ENDC.value}")
 
 
    def shader_material(self):
@@ -463,7 +465,7 @@ class MeshGeneration:
       bpy.ops.object.editmode_toggle()
       bpy.ops.mesh.select_all(action='SELECT')
       uv_map = bpy.ops.uv.smart_project()
-      print("\tUV map Done")
+      print("\t-UV map Done")
       bpy.ops.object.editmode_toggle()
       print(f"{Color.BOLD.value}UV map completed{Color.ENDC.value}")
 
@@ -506,10 +508,10 @@ class MeshGeneration:
       # get_devices() to let Blender detects GPU device
       print(f"\t{Color.UNDERLINE.value}Configuration:{Color.ENDC.value}")
       bpy.context.preferences.addons["cycles"].preferences.get_devices()
-      print("\t",bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
+      print("\t-",bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
       for d in bpy.context.preferences.addons["cycles"].preferences.devices:
          # d["use"] = 1 # Using all devices, include GPU and CPU
-         print("\t Device: ", d["name"], " Used:", d["use"])
+         print("\t -Device: ", d["name"], " Used:", d["use"])
       print("\n")
 
       #Color image
@@ -519,9 +521,9 @@ class MeshGeneration:
       bpy.context.view_layer.objects.active = obj
       bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
-      print("\tTexture baked")
-      color_image.save_render(filepath= self.saved_texture_path + '/color_texture.png')
-      print("\tImage saved")
+      print("\t-Texture baked")
+      color_image.save_render(filepath= self.saved_texture_path + 'color_texture.png')
+      print("\t-Image saved")
       color_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Color texture done{Color.ENDC.value}\n")
 
@@ -532,9 +534,9 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'NORMAL'
       bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
-      print("\tTexture baked")
-      normal_image.save_render(filepath= self.saved_texture_path +'/normal_texture.png')
-      print("\tImage saved")
+      print("\t-Texture baked")
+      normal_image.save_render(filepath= self.saved_texture_path + 'normal_texture.png')
+      print("\t-Image saved")
       normal_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Normal texture done{Color.ENDC.value}\n")
 
@@ -546,9 +548,9 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'ROUGHNESS'
       bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
-      print("\tTexture baked")
-      roughness_image.save_render(filepath= self.saved_texture_path +'/roughness_texture.png')
-      print("\tImage saved")
+      print("\t-Texture baked")
+      roughness_image.save_render(filepath= self.saved_texture_path + 'roughness_texture.png')
+      print("\t-Image saved")
       roughness_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Roughness texture done{Color.ENDC.value}\n")
 
@@ -565,12 +567,12 @@ class MeshGeneration:
       
 
       color_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      color_image = bpy.data.images.load(self.saved_texture_path + '/color_texture.png')
+      color_image = bpy.data.images.load(self.saved_texture_path + 'color_texture.png')
       color_image_node.image = color_image
 
 
       normal_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      normal_image = bpy.data.images.load(self.saved_texture_path +'/normal_texture.png')
+      normal_image = bpy.data.images.load(self.saved_texture_path +'normal_texture.png')
       normal_image_node.image = normal_image
       normal_image_node.image.colorspace_settings.name = 'Non-Color'
 
@@ -579,7 +581,7 @@ class MeshGeneration:
 
 
       roughness_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      roughness_image = bpy.data.images.load(self.saved_texture_path + '/roughness_texture.png')
+      roughness_image = bpy.data.images.load(self.saved_texture_path + 'roughness_texture.png')
       roughness_image_node.image = roughness_image
       roughness_image_node.image.colorspace_settings.name = 'Non-Color'
 
@@ -606,17 +608,17 @@ class MeshGeneration:
       obj = bpy.context.active_object
       estimated_tri_count = sum([(len(p.vertices) - 2) for p in obj.data.polygons])
       ratio = Config.MAX_MESH_TRIANGLES.value / estimated_tri_count
-      print("\tInitial number of triangles: ",estimated_tri_count)
-      print("\tDesired number of triangles: ", Config.MAX_MESH_TRIANGLES.value)
-      print("\tRatio: ",ratio)
+      print("\t-Initial number of triangles: ",estimated_tri_count)
+      print("\t-Desired number of triangles: ", Config.MAX_MESH_TRIANGLES.value)
+      print("\t-Ratio: ",ratio)
 
       if estimated_tri_count > Config.MAX_MESH_TRIANGLES.value:
          decimate_modifier = bpy.ops.object.modifier_add(type='DECIMATE')
          bpy.context.object.modifiers["Decimate"].ratio = ratio
          apply_mod = bpy.ops.object.modifier_apply(modifier='Decimate')
-         
+
       else:
-         print("\tMesh not decimated: Number of triangles is less than the max desired number")
+         print(f"\t{Color.WARNING.value}Mesh not decimated: Number of triangles is less than the max desired number{Color.ENDC.value}")
       print(f"{Color.BOLD.value}Mesh decimation process completed{Color.ENDC.value}")
 
 
@@ -647,10 +649,10 @@ class MeshGeneration:
          bpy.ops.export_mesh.ply(filepath=self.saved_mesh_path)
       
       else:
-         print("Problem with the export, wrong format")
+         print(f"\t{Color.FAIL.value}-Problem with the export, wrong format{Color.ENDC.value}")
          return -1
       
-      print("\tExport done")      
+      print("\t-Export done")      
       print(f"{Color.BOLD.value}Mesh successfully exported{Color.ENDC.value}")
 
 

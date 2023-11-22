@@ -21,7 +21,7 @@ class Graph:
         self.index_resizer = 0
         self.generation_name = generation_name_p
         self.nb_graphs = f"/{str(nb_graphs_p)}"
-        self.save_graph_path = Config.PLUME_DIR.value+"/data/raw_data/"+self.generation_name+self.nb_graphs+"/data.json"
+        self.save_graph_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/data.json"
         self.adj_matrix = None
         self.max_created_node_on_circle = max_created_node_on_circle_p
     
