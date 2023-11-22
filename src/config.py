@@ -14,7 +14,7 @@ class Config(Enum):
     # ==== General settings ====
     NB_GENERATION = 1
     IMAGE_FORMAT = ".png"
-    MESH_FORMAT = 'obj'        # Available: obj, ply
+    MESH_FORMAT = 'obj'        # Available: obj, ply, usd
     OPEN_VISUALIZATION = True
     GENERATE_MESH = True
     SAVE_GRAPH_IMAGE = False
@@ -27,7 +27,7 @@ class Config(Enum):
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
-    TEXTURE_SIZE = 4096      # 16384, 8192, 4096, 1024 pixels
+    TEXTURE_SIZE = 8192      # 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000 # 1Million triangles: 1000000
     GPU_ACCELERATION = True 
 
