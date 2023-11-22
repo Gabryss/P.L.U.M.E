@@ -610,11 +610,14 @@ class MeshGeneration:
       print("\tDesired number of triangles: ", Config.MAX_MESH_TRIANGLES.value)
       print("\tRatio: ",ratio)
 
-      decimate_modifier = bpy.ops.object.modifier_add(type='DECIMATE')
-      bpy.context.object.modifiers["Decimate"].ratio = ratio
-
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Decimate')
-      print(f"{Color.BOLD.value}Mesh decimated{Color.ENDC.value}")
+      if estimated_tri_count > Config.MAX_MESH_TRIANGLES.value:
+         decimate_modifier = bpy.ops.object.modifier_add(type='DECIMATE')
+         bpy.context.object.modifiers["Decimate"].ratio = ratio
+         apply_mod = bpy.ops.object.modifier_apply(modifier='Decimate')
+         
+      else:
+         print("\tMesh not decimated: Number of triangles is less than the max desired number")
+      print(f"{Color.BOLD.value}Mesh decimation process completed{Color.ENDC.value}")
 
 
    def export_mesh(self):
