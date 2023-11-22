@@ -58,17 +58,31 @@ class Generator:
         # Graph generation
         index = index_p
         graph = Graph(self.name, index, Config.MAX_CREATED_NODE_ON_CIRCLE.value)
+        print("\tGraph created")
 
         # Starting point
         graph.add_node(node_id_p=0, coordinates_p=[0.0,0.0], radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+        print("\tFirst node added")
 
         # Main logic
         algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
         algorithm.algorithm(Config.SELECTED_ALGORITHM.value)
-        
+        print("\tAlgorithm applied to the graph")
+
         processed_graph = self.post_processing_graph(graph_p=graph)
+        print("\tPost processing algorithm applied to the graph")
+
+        graph.create_adjency_matrix(graph.nb_nodes)
+        print("\tAdjency matrix created")
+
         # Save the graph
         processed_graph.save_graph()
+        print("\tGraph saved")
+
+        # Display the adjency matrix
+        print(f"{Color.BOLD.value}Adjency matrix:{Color.ENDC.value}")
+        print(graph.adj_matrix,"\n")
+
         print(f"\n{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
         return processed_graph
 
@@ -92,14 +106,16 @@ class Generator:
         """
         graph = graph_p
         index = index_p
-        print(f"\n{Color.OKBLUE.value} == Exporting the graph == {Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Graph picture generation == {Color.ENDC.value}")
         display = Display(nb_graphs_p=index, generation_name_p=self.name)
+        print("\tDisplay object created")
         display.process_graph(graph)
+        print("\tGraph important features imported")
         display.create_figure()
+        print("\tImage created")
         display.create_image_from_graph()
-        graph.create_adjency_matrix(graph.nb_nodes)
-        print(graph.adj_matrix)
-        print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
+        print("\tImage saved")        
+        print(f"\n{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
 
 
     def create_mesh(self, index_p):
@@ -107,7 +123,7 @@ class Generator:
         Create the mesh using Blender
         """
         index = index_p
-        print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Mesh generation start == {Color.ENDC.value}")
         result = None
         blender_path = Tools.find_file("blender")
         try:
@@ -131,7 +147,7 @@ class Generator:
                 error = result.stderr
                 if error:
                     print("Error: ", error)
-            print(f"\n{Color.OKBLUE.value}Mesh generation finished{Color.ENDC.value}")
+            print(f"\n{Color.OKBLUE.value} == Mesh generation finished == {Color.ENDC.value}")
 
 
 

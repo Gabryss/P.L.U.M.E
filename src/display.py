@@ -4,7 +4,7 @@ Display a graph using Plotly library
 
 import plotly.graph_objs as go
 import os
-from config import Config
+from config import Config, Color
 
 
 
