@@ -22,7 +22,7 @@ class MeshGeneration:
       self.index = str(index_p)
       self.path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/data.json"
       self.saved_mesh_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
-      self.saved_texture_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/textures/"
+      self.saved_texture_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/"
       self.json_file = open(self.path)
       self.data = json.load(self.json_file)
       self.obj = None
@@ -44,9 +44,13 @@ class MeshGeneration:
          exit()
       print(f"{Color.BOLD.value}Graph loading process completed{Color.ENDC.value}")
       self.blender_modifiers()
-      self.final_decimate_mesh_polys()
+
+      if Config.HIGH_POLY.value:
+         self.final_decimate_mesh_polys()
+      
       if Config.SAVE_MESH.value:
          self.export_mesh()
+      
       self.json_file.close()
 
 
@@ -137,7 +141,8 @@ class MeshGeneration:
       apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
       print(f"{Color.BOLD.value}Modifiers applied{Color.ENDC.value}")
 
-      self.decimate_mesh_polys()
+      if Config.HIGH_POLY.value:
+         self.decimate_mesh_polys()
       
       if Config.SAVE_MESH.value:
          self.bake_texture(self.material)
@@ -234,15 +239,15 @@ class MeshGeneration:
       volume_to_mesh_node_2.location = (900, 200)
       print("\t\t-Volume to mesh 2 node done")
 
+      if Config.HIGH_POLY.value:
+         subdivide_mesh = node_tree.nodes.new(type='GeometryNodeSubdivideMesh')
+         subdivide_mesh.location = (1100, 200)
+         print("\t\t-Mesh subdivision node done")
 
-      subdivide_mesh = node_tree.nodes.new(type='GeometryNodeSubdivideMesh')
-      subdivide_mesh.location = (1100, 200)
-      print("\t\t-Mesh subdivision node done")
-
-      subdivide_surface = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
-      subdivide_surface.location = (1300, 200)
-      subdivide_surface.uv_smooth = 'SMOOTH_ALL'
-      print("\t\t-Subdivision surface node done")
+         subdivide_surface = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
+         subdivide_surface.location = (1300, 200)
+         subdivide_surface.uv_smooth = 'SMOOTH_ALL'
+         print("\t\t-Subdivision surface node done")
 
       # Noise
       texture_noise = node_tree.nodes.new(type='ShaderNodeTexNoise')
@@ -311,9 +316,16 @@ class MeshGeneration:
       node_tree.links.new(mesh_to_volume_node.outputs["Volume"], volume_to_mesh_node.inputs["Volume"])
       node_tree.links.new(volume_to_mesh_node.outputs["Mesh"], mesh_to_volume_node_2.inputs["Mesh"])
       node_tree.links.new(mesh_to_volume_node_2.outputs["Volume"], volume_to_mesh_node_2.inputs["Volume"])
-      node_tree.links.new(volume_to_mesh_node_2.outputs["Mesh"], subdivide_mesh.inputs["Mesh"])
-      node_tree.links.new(subdivide_mesh.outputs["Mesh"], subdivide_surface.inputs["Mesh"])
-      node_tree.links.new(subdivide_surface.outputs["Mesh"], set_position.inputs["Geometry"])
+      
+      if Config.HIGH_POLY.value:
+         node_tree.links.new(volume_to_mesh_node_2.outputs["Mesh"], subdivide_mesh.inputs["Mesh"])
+         node_tree.links.new(subdivide_mesh.outputs["Mesh"], subdivide_surface.inputs["Mesh"])
+         node_tree.links.new(subdivide_surface.outputs["Mesh"], set_position.inputs["Geometry"])
+      
+      else:
+         node_tree.links.new(volume_to_mesh_node_2.outputs["Mesh"], set_position.inputs["Geometry"])
+
+      
       node_tree.links.new(set_position.outputs["Geometry"], subdivide_surface_2.inputs["Mesh"])
       node_tree.links.new(subdivide_surface_2.outputs["Mesh"], set_shade_smooth.inputs["Geometry"])
       node_tree.links.new(set_shade_smooth.outputs["Geometry"], flip_faces.inputs["Mesh"])
@@ -686,6 +698,9 @@ class MeshGeneration:
       
       elif Config.MESH_FORMAT.value == 'ply':
          bpy.ops.export_mesh.ply(filepath=self.saved_mesh_path)
+      
+      elif Config.MESH_FORMAT.value == 'fbx':
+         bpy.ops.export_scene.fbx(filepath=self.saved_mesh_path, use_selection=True)
       
       else:
          print(f"\t{Color.FAIL.value}-Problem with the export, wrong format{Color.ENDC.value}")
