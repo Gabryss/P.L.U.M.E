@@ -44,6 +44,7 @@ class MeshGeneration:
          exit()
       print(f"{Color.BOLD.value}Graph loading process completed{Color.ENDC.value}")
       self.blender_modifiers()
+      self.final_decimate_mesh_polys()
       if Config.SAVE_MESH.value:
          self.export_mesh()
       self.json_file.close()
@@ -188,6 +189,7 @@ class MeshGeneration:
 
       # Link the tree to the modifier
       geom_modifier.node_group = node_tree
+      print("\t\t-Node tree created")
 
       # Clear default nodes
       for node in node_tree.nodes:
@@ -202,6 +204,7 @@ class MeshGeneration:
       mesh_to_volume_node.inputs[5].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node.inputs[6].default_value = True  # Fill volume
       mesh_to_volume_node.location = (100, 200)
+      print("\t\t-Mesh to volume node done")
 
       # Add a Volume to Mesh node
       volume_to_mesh_node = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
@@ -209,8 +212,7 @@ class MeshGeneration:
       volume_to_mesh_node.inputs[3].default_value = 0.1   # Threshold
       volume_to_mesh_node.inputs[4].default_value = 0.8   # Adaptivity
       volume_to_mesh_node.location = (400, 200)
-
-
+      print("\t\t-Volume to mesh node done")
 
       # Add a Mesh to Volume node
       mesh_to_volume_node_2 = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
@@ -221,6 +223,7 @@ class MeshGeneration:
       mesh_to_volume_node_2.inputs[5].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node_2.inputs[6].default_value = True  # Fill volume
       mesh_to_volume_node_2.location = (600, 200)
+      print("\t\t-Mesh to volume 2 node done")
 
       # Add a Volume to Mesh node
       volume_to_mesh_node_2 = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
@@ -229,14 +232,17 @@ class MeshGeneration:
       volume_to_mesh_node_2.inputs[3].default_value = 0.1   # Threshold
       volume_to_mesh_node_2.inputs[4].default_value = 0     # Adaptivity
       volume_to_mesh_node_2.location = (900, 200)
+      print("\t\t-Volume to mesh 2 node done")
 
 
       subdivide_mesh = node_tree.nodes.new(type='GeometryNodeSubdivideMesh')
       subdivide_mesh.location = (1100, 200)
+      print("\t\t-Mesh subdivision node done")
 
       subdivide_surface = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
       subdivide_surface.location = (1300, 200)
       subdivide_surface.uv_smooth = 'SMOOTH_ALL'
+      print("\t\t-Subdivision surface node done")
 
       # Noise
       texture_noise = node_tree.nodes.new(type='ShaderNodeTexNoise')
@@ -247,50 +253,59 @@ class MeshGeneration:
       texture_noise.inputs[4].default_value = 1    # Roughness
       texture_noise.inputs[5].default_value = 0.0    # Distortion
       texture_noise.location = (500, -400)
+      print("\t\t-Texture noise done")
 
       value = node_tree.nodes.new(type="ShaderNodeValue")
       value.outputs[0].default_value = 0.1
       value.location = (700, -450)
+      print("\t\t-Value node done")
 
       add = node_tree.nodes.new(type="ShaderNodeMath")
       add.operation = 'ADD'
       add.inputs[1].default_value = 0.5
       add.location = (900, -500)
-
+      print("\t\t-Math 1 node done")
 
       multiply = node_tree.nodes.new(type="ShaderNodeMath")
       multiply.operation = 'MULTIPLY'
       multiply.use_clamp = True
       multiply.inputs[1].default_value = 1
       multiply.location = (1100, -450)
+      print("\t\t-Math 2 node done")
 
       multiply_add = node_tree.nodes.new(type="ShaderNodeVectorMath")
       multiply_add.operation = 'MULTIPLY_ADD'
       multiply_add.location = (1300, -400)
-
+      print("\t\t-Vector math node done")
       # End noise
 
       set_position = node_tree.nodes.new(type='GeometryNodeSetPosition')
       set_position.location = (1500, 200)
+      print("\t\t-Set position node done")
 
       subdivide_surface_2 = node_tree.nodes.new(type='GeometryNodeSubdivisionSurface')
       subdivide_surface_2.location = (1700, 200)
+      print("\t\t-Subdivision surface 2 node done")
 
 
       set_shade_smooth = node_tree.nodes.new(type='GeometryNodeSetShadeSmooth')
       set_shade_smooth.location = (1900, 200)
+      print("\t\t-Set shade smooth node done")
 
       flip_faces = node_tree.nodes.new(type='GeometryNodeFlipFaces')
       flip_faces.location = (2100, 200)
+      print("\t\t-Flip faces node done")
 
       # Material
       material_node = node_tree.nodes.new(type="GeometryNodeInputMaterial")
       material_node.material = self.shader_material()
       material_node.location = (2000, -200)
+      print("\t\t-Input material node done")
       # End Material
 
       set_material = node_tree.nodes.new(type='GeometryNodeSetMaterial')
       set_material.location = (2300, 200)
+      print("\t\t-Set material node done")
 
       # Connect nodes
       node_tree.links.new(mesh_to_volume_node.outputs["Volume"], volume_to_mesh_node.inputs["Volume"])
@@ -312,9 +327,7 @@ class MeshGeneration:
       node_tree.links.new(value.outputs["Value"], add.inputs["Value"])
       node_tree.links.new(add.outputs["Value"], multiply.inputs["Value"])
       node_tree.links.new(multiply.outputs["Value"], multiply_add.inputs[2])
-
-
-
+      print("\t\t-Node links done")
 
       # Add Group Input and Output nodes for completeness
       group_input = node_tree.nodes.new(type="NodeGroupInput")
@@ -327,6 +340,7 @@ class MeshGeneration:
       # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
       node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
       node_tree.links.new(set_material.outputs["Geometry"], group_output.inputs["Geometry"])
+      print("\t\t-Input and output node links done")
       print(f"{Color.OKGREEN.value}\t-Geometry node process completed{Color.ENDC.value}")
 
 
@@ -334,6 +348,7 @@ class MeshGeneration:
       """
       Proceduraly create rocky texture for the cave
       """
+      print(f"{Color.CVIOLET.value}\t\t\t--Create material--{Color.ENDC.value}")
       material = bpy.data.materials.new(name="rock")
       material.use_nodes = True
 
@@ -448,6 +463,7 @@ class MeshGeneration:
 
       self.material = material
       self.principled_bsdf_node = principled_bsdf_node
+      print(f"{Color.CVIOLET.value}\t\t\t--Material successfully created--{Color.ENDC.value}")
 
       return self.material
 
@@ -461,7 +477,7 @@ class MeshGeneration:
       - Bake each image
       """
       print(f"\n{Color.BOLD.value}Creation of the UV map{Color.ENDC.value}")
-      print("Can take some time")
+      print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
       bpy.ops.object.editmode_toggle()
       bpy.ops.mesh.select_all(action='SELECT')
       uv_map = bpy.ops.uv.smart_project()
@@ -471,7 +487,7 @@ class MeshGeneration:
 
 
       print(f"\n{Color.BOLD.value}Start texture baking process{Color.ENDC.value}")
-      print("Can take some time")
+      print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
       material = material_tree_p
       color_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
       color_image = bpy.data.images.new('color_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
@@ -604,11 +620,11 @@ class MeshGeneration:
       Decimate some polys in the mesh to fit with the max number of polys constraint in the config file
       """
       print(f"\n{Color.BOLD.value}Start mesh decimation process{Color.ENDC.value}")
-      print("Can take some time")
+      print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
       obj = bpy.context.active_object
       estimated_tri_count = sum([(len(p.vertices) - 2) for p in obj.data.polygons])
       ratio = Config.MAX_MESH_TRIANGLES.value / estimated_tri_count
-      print("\t-Initial number of triangles: ",estimated_tri_count)
+      print("\t-Generated number of triangles: ", estimated_tri_count)
       print("\t-Desired number of triangles: ", Config.MAX_MESH_TRIANGLES.value)
       print("\t-Ratio: ",ratio)
 
@@ -619,7 +635,30 @@ class MeshGeneration:
 
       else:
          print(f"\t{Color.WARNING.value}Mesh not decimated: Number of triangles is less than the max desired number{Color.ENDC.value}")
+         exit()
       print(f"{Color.BOLD.value}Mesh decimation process completed{Color.ENDC.value}")
+
+   
+   def final_decimate_mesh_polys(self):
+      """
+      Decimate some polys in the mesh to fit with the max number of polys constraint in the config file
+      """
+      print(f"\n{Color.BOLD.value}Start final mesh decimation process{Color.ENDC.value}")
+      print("This process is used to create even lighter meshes")
+      print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
+      obj = bpy.context.active_object
+      estimated_tri_count = sum([(len(p.vertices) - 2) for p in obj.data.polygons])
+      desired_tri_count = estimated_tri_count / 2
+      ratio = 0.5
+      print("\t-Generated number of triangles: ", estimated_tri_count)
+      print("\t-Desired number of triangles: ", desired_tri_count)
+      print("\t-Ratio: ",ratio)
+
+      decimate_modifier = bpy.ops.object.modifier_add(type='DECIMATE')
+      bpy.context.object.modifiers["Decimate"].ratio = ratio
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Decimate')
+
+      print(f"{Color.BOLD.value}Mesh final decimation process completed{Color.ENDC.value}")
 
 
    def export_mesh(self):
