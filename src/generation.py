@@ -80,7 +80,7 @@ class Generator:
         print("\t-Graph saved")
 
         # Display the adjency matrix
-        print(f"\n{Color.BOLD.value}Adjency matrix:{Color.ENDC.value}")
+        print(f"{Color.BOLD.value}Adjency matrix:{Color.ENDC.value}")
         print(graph.adj_matrix)
 
         print(f"{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
