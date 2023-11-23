@@ -4,7 +4,7 @@ Display a graph using Plotly library
 
 import plotly.graph_objs as go
 import os
-from config import Config
+from config import Config, Color
 
 
 
@@ -38,7 +38,7 @@ class Display():
         self.edges_color = edge_color_p
         self.nodes_size = node_width_p
         self.edges_width = edge_width_p
-        self.save_image_path = Config.PLUME_DIR.value+"/data/images/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
+        self.save_image_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
     
 
     def create_image_from_graph(self):
@@ -64,7 +64,7 @@ class Display():
         rendering inside the display class.
         """
         self.nodes = graph_p.nodes
-        self.edges = self.remove_dupliacte_tuples(graph_p.get_edges())
+        self.edges = graph_p.get_edges()
 
 
     def create_figure(self):
@@ -93,17 +93,3 @@ class Display():
             )
         
         self.figure.update_traces(textposition='top center')
-
-
-    def remove_dupliacte_tuples(self,tuple_list_p):
-        """
-        Takes a list of tuple in parameter and return a list of unique tuples irrespective of 
-        their order.
-        """
-        unique_tuples = []
-
-        for t in tuple_list_p:
-            if sorted(t) not in [sorted(x) for x in unique_tuples]:
-                unique_tuples.append(t)
-
-        return unique_tuples

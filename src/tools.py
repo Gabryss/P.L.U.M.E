@@ -48,6 +48,39 @@ class Tools:
         json_object = json.dumps(data, indent=4)
         with open(path,"w") as outfile:
             outfile.write(json_object)
+    
+
+    @staticmethod
+    def remove_dupliacte_tuples(tuple_list_p):
+        """
+        Takes a list of tuple in parameter and return a list of unique tuples irrespective of 
+        their order.
+        """
+        if tuple_list_p:
+            unique_tuples = []
+
+            for t in tuple_list_p:
+                if t==None:
+                    continue
+                if not all(t):
+                    continue
+                if sorted(t) not in [sorted(x) for x in unique_tuples]:
+                    unique_tuples.append(t)
+            return unique_tuples
+        
+        else:
+            return None
+    
+
+    @staticmethod
+    def remove_duplicate_none_list(list_p):
+        """
+        Take a list as input and return the same list without duplicates or none elements
+        """
+        list_pre = list(dict.fromkeys(list_p))
+        while None in list_pre:
+            list_pre.remove(None)
+        return list_pre
 
 
     @staticmethod

@@ -7,22 +7,14 @@ import argparse
 import datetime
 import multiprocessing
 from tools import Tools
+import random as rd
 
 class Generator:
 
-    def __init__(self, grid_size_p, nb_graphs_p, name_p) -> None:
-        # Get the grid size
-        if grid_size_p == None or '':
-            self.grid_size = Config.INITIAL_GRID_SIZE.value
-        else:
-            self.grid_size = grid_size_p
-        
+    def __init__(self, name_p) -> None:       
         # Get the number of graphs
-        if nb_graphs_p == None or '':
-            self.nb_graphs = Config.DEFAULT_NB_GRAPHS.value
-        else:
-            self.nb_graphs = nb_graphs_p
-        
+        self.nb_graphs = Config.NB_GENERATION.value
+
         # Get the name of the current graph generation
         if name_p == None or '':
             self.name = Config.DEFAULT_NAME.value
@@ -32,9 +24,12 @@ class Generator:
 
         self.graphs=[]
         # Make n graphs in different CPU cores
-        list_process = [i for i in range(self.nb_graphs)]
-        with multiprocessing.Pool(processes=self.nb_graphs) as pool:
-            result = pool.map(self.generator, list_process)
+        if self.nb_graphs==1:
+            self.generator(0)
+        else:
+            list_process = [i for i in range(self.nb_graphs)]
+            with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+                result = pool.map(self.generator, list_process)
 
 
     def generator(self, index_p):
@@ -49,7 +44,7 @@ class Generator:
                 self.create_graph_picture(current_graph, index)
 
         # Create the mesh
-        if Config.DEFAULT_MESH_GENERATION.value:
+        if Config.GENERATE_MESH.value:
                 self.create_mesh(index)
 
 
@@ -58,26 +53,52 @@ class Generator:
         Main logic of the graph generation
         """
         
-        print(f"{Color.OKBLUE.value} == Graph generation begins == {Color.ENDC.value}\n")
+        print(f"{Color.OKBLUE.value} == Graph generation begins == {Color.ENDC.value}")
         
         # Graph generation
         index = index_p
-        graph = Graph(self.grid_size, self.name, index)
+        graph = Graph(self.name, index, Config.MAX_CREATED_NODE_ON_CIRCLE.value)
+        print("\t-Graph created")
 
         # Starting point
-        starting_point = graph.grid_size // 2
-        graph.add_node(1, coordinates_p=[0.0,0.0], grid_coordinates_p=[starting_point, starting_point], active_p=True)
+        graph.add_node(node_id_p=0, coordinates_p=[0.0,0.0], radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+        print("\t-First node added")
 
         # Main logic
-        algorithm = Algorithm(Config.DEFAULT_MIN_NODES.value, Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
-        algorithm.probabilistic(graph, Config.DEFAULT_NB_ITERATION.value)
+        algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
+        algorithm.algorithm(Config.SELECTED_ALGORITHM.value)
+        print("\t-Algorithm applied to the graph")
+
+        processed_graph = self.post_processing_graph(graph_p=graph)
+        print("\t-Post processing algorithm applied to the graph")
+
+        graph.create_adjency_matrix(graph.nb_nodes)
+        print("\t-Adjency matrix created")
 
         # Save the graph
-        graph.save_grid()
-        graph.save_graph()
-        print(f"\n{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
-        return graph
+        processed_graph.save_graph()
+        print("\t-Graph saved")
 
+        # Display the adjency matrix
+        print(f"{Color.BOLD.value}Adjency matrix:{Color.ENDC.value}")
+        print(graph.adj_matrix)
+
+        print(f"{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
+        return processed_graph
+
+
+    def post_processing_graph(self, graph_p):
+        """
+        Various post process solition applied to the graph. Currently:
+        - Remove edge duplicates
+        """
+        # Remove duplicates
+        graph = graph_p
+        for node in graph.nodes:
+            graph.nodes[node].set_edges(Tools.remove_duplicate_none_list(graph.nodes[node].get_edges()))
+        
+        return graph
+    
 
     def create_graph_picture(self, graph_p, index_p):
         """
@@ -85,12 +106,16 @@ class Generator:
         """
         graph = graph_p
         index = index_p
-        print(f"\n{Color.OKBLUE.value} == Exporting the graph == {Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Graph picture generation == {Color.ENDC.value}")
         display = Display(nb_graphs_p=index, generation_name_p=self.name)
+        print("\t-Display object created")
         display.process_graph(graph)
+        print("\t-Graph important features imported")
         display.create_figure()
+        print("\t-Image created")
         display.create_image_from_graph()
-        print(f"\n{Color.OKBLUE.value} == End of exportation == {Color.ENDC.value}")
+        print("\t-Image saved")        
+        print(f"{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
 
 
     def create_mesh(self, index_p):
@@ -98,30 +123,31 @@ class Generator:
         Create the mesh using Blender
         """
         index = index_p
-        print(f"\n{Color.OKBLUE.value}Mesh generation start{Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Mesh generation start == {Color.ENDC.value}")
         result = None
         blender_path = Tools.find_file("blender")
         try:
-            if Config.DEFAULT_GUI_DISPLAY.value:
-                result = subprocess.run(f"{blender_path} --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+            if Config.OPEN_VISUALIZATION.value:
+                result = subprocess.run(f"{blender_path} --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
             else:
-                result = subprocess.run(f"{blender_path} --background --python src/blender.py -index {index} -name {self.name}", shell=True, check=True)
+                result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
         
         except Exception as e:
             print(f"\n{Color.FAIL.value}An issue occured: ",e)
-            print(f"The blender path might be wrong: ", Config.DEFAULT_BLENDER_PATH.value)
+            print(f"The blender path might be wrong, please check the path.json file")
             print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+            exit()
 
         finally:
             if result:
                 success = result.stdout
                 if success:
-                    print("Success: ", success)
+                    print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
                 
                 error = result.stderr
                 if error:
-                    print("Error: ", error)
-            print(f"\n{Color.OKBLUE.value}Mesh generation finished{Color.ENDC.value}")
+                    print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
+            print(f"\n{Color.OKBLUE.value} == Mesh generation finished == {Color.ENDC.value}")
 
 
 
@@ -131,12 +157,8 @@ if __name__ == '__main__':
                                 description="PLUME project. Procedural Lava-Tube Underground Modeling Engine: A generator that uses procedural generation techniques and graph algorithms to create detailed and visually appealing lava tube structures. ",
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument("-s", help="Initial grid size", type=int)
-    parser.add_argument("-nb_g", help="Number of graphs to generate", type=int)
     parser.add_argument("-name", help="Name of the current graph generation", type=str)
 
     args = parser.parse_args()
     arguments = vars(args)
-    generator = Generator(grid_size_p=arguments['s'],
-                          nb_graphs_p=arguments['nb_g'],
-                          name_p=arguments['name'])
+    generator = Generator(name_p=arguments['name'])
