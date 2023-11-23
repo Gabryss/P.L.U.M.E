@@ -14,20 +14,20 @@ class Config(Enum):
     # ==== General settings ====
     NB_GENERATION = 1
     IMAGE_FORMAT = ".png"
-    MESH_FORMAT = 'obj'        # Available: obj, ply, usd
+    MESH_FORMAT = 'obj'        # Available: obj, ply(no textures), usd
     OPEN_VISUALIZATION = True
     GENERATE_MESH = True
     SAVE_GRAPH_IMAGE = True
     SAVE_MESH = True
-    TYPE_OF_UNDERGROUND = "MINE" # Available: MINE, CAVE #Not available yet
+    TYPE_OF_UNDERGROUND = "CAVE" # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 10
+    DEFAULT_MIN_NODES = 100
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin" # Available: gaussian_perlin
-    TEXTURE_SIZE = 1024      # 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    TEXTURE_SIZE = 8192      # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000 # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     GPU_ACCELERATION = True 
 
@@ -47,8 +47,10 @@ class Color(Enum):
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
     OKGREEN = '\033[92m'
+    CVIOLET = '\33[35m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    CBLINK    = '\33[5m'
