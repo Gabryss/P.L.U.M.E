@@ -14,22 +14,47 @@ class Generator:
     def __init__(self, name_p) -> None:       
         # Get the number of graphs
         self.nb_graphs = Config.NB_GENERATION.value
+        self.visualization = Config.OPEN_VISUALIZATION.value
+        self.graphs=[]
 
         # Get the name of the current graph generation
         if name_p == None or '':
             self.name = Config.DEFAULT_NAME.value
         else:
             self.name = name_p +"_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        
 
-        self.graphs=[]
-        # Make n graphs in different CPU cores
+        # Start generation
         if self.nb_graphs==1:
             self.generator(0)
+            # Create the mesh
+            if Config.GENERATE_MESH.value:
+                self.create_mesh(0)
+        
+        elif Config.PARALLELIZATION.value:
+            # Make n graphs in different CPU cores (Only for the graph generation)  
+            if self.nb_graphs>1:
+                list_process = [i for i in range(self.nb_graphs)]
+                with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+                    result = pool.map(self.generator, list_process)
+                # Create the mesh
+                if Config.GENERATE_MESH.value:
+                    for index in list_process:
+                        self.create_mesh(index)
+
+            else:
+                print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
+                exit()
+        
         else:
-            list_process = [i for i in range(self.nb_graphs)]
-            with multiprocessing.Pool(processes=self.nb_graphs) as pool:
-                result = pool.map(self.generator, list_process)
+            if self.nb_graphs>1:
+                for index in range(self.nb_graphs):
+                    self.generator(index)
+                    if Config.GENERATE_MESH.value:
+                        self.create_mesh(index)
+            else:
+                print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
+                exit()
+
 
 
     def generator(self, index_p):
@@ -43,17 +68,13 @@ class Generator:
         if Config.SAVE_GRAPH_IMAGE.value:
                 self.create_graph_picture(current_graph, index)
 
-        # Create the mesh
-        if Config.GENERATE_MESH.value:
-                self.create_mesh(index)
-
 
     def generate_graph(self, index_p):
         """
         Main logic of the graph generation
         """
-        
-        print(f"{Color.OKBLUE.value} == Graph generation begins == {Color.ENDC.value}")
+        index = index_p
+        print(f"{Color.OKBLUE.value} == Graph {index} generation begins == {Color.ENDC.value}")
         
         # Graph generation
         index = index_p
@@ -83,7 +104,7 @@ class Generator:
         print(f"{Color.BOLD.value}Adjency matrix:{Color.ENDC.value}")
         print(graph.adj_matrix)
 
-        print(f"{Color.OKBLUE.value} == End of graph generation == {Color.ENDC.value}")
+        print(f"{Color.OKBLUE.value} == End of graph {index} generation == {Color.ENDC.value}")
         return processed_graph
 
 
@@ -106,7 +127,7 @@ class Generator:
         """
         graph = graph_p
         index = index_p
-        print(f"\n{Color.OKBLUE.value} == Graph picture generation == {Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Graph {index} picture generation == {Color.ENDC.value}")
         display = Display(nb_graphs_p=index, generation_name_p=self.name)
         print("\t-Display object created")
         display.process_graph(graph)
@@ -115,7 +136,7 @@ class Generator:
         print("\t-Image created")
         display.create_image_from_graph()
         print("\t-Image saved")        
-        print(f"{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
+        print(f"{Color.OKBLUE.value} == End of graph {index} picture generation == {Color.ENDC.value}")
 
 
     def create_mesh(self, index_p):
@@ -123,11 +144,11 @@ class Generator:
         Create the mesh using Blender
         """
         index = index_p
-        print(f"\n{Color.OKBLUE.value} == Mesh generation start == {Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Mesh {index} generation start == {Color.ENDC.value}")
         result = None
         blender_path = Tools.find_file("blender")
         try:
-            if Config.OPEN_VISUALIZATION.value:
+            if Config.OPEN_VISUALIZATION.value and index == self.nb_graphs-1:
                 result = subprocess.run(f"{blender_path} --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
             else:
                 result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
@@ -147,7 +168,7 @@ class Generator:
                 error = result.stderr
                 if error:
                     print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
-            print(f"\n{Color.OKBLUE.value} == Mesh generation finished == {Color.ENDC.value}")
+            print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
 
 
 
