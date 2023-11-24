@@ -45,7 +45,7 @@ class MeshGeneration:
       print(f"{Color.BOLD.value}Graph loading process completed{Color.ENDC.value}")
       self.blender_modifiers()
 
-      if Config.HIGH_POLY.value:
+      if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
          self.final_decimate_mesh_polys()
       
       if Config.SAVE_MESH.value:
@@ -78,7 +78,7 @@ class MeshGeneration:
          verts.append([
             self.data[i]["coordinates"]['x'],
             self.data[i]["coordinates"]['y'],
-            0.0
+            self.data[i]["coordinates"]['z'],
          ])
          for edge in self.data[i]['edges']:
             edges.append([
@@ -144,7 +144,7 @@ class MeshGeneration:
       if Config.HIGH_POLY.value:
          self.decimate_mesh_polys()
       
-      if Config.SAVE_MESH.value:
+      if Config.BAKE_TEXTURE.value:
          self.bake_texture(self.material)
 
 
@@ -202,9 +202,9 @@ class MeshGeneration:
 
       # Add a Mesh to Volume node
       mesh_to_volume_node = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
-      mesh_to_volume_node.resolution_mode = 'VOXEL_AMOUNT'
-      mesh_to_volume_node.inputs[1].default_value = 1     # Density
-      mesh_to_volume_node.inputs[3].default_value = 128   # Voxel Amount
+      mesh_to_volume_node.resolution_mode = 'VOXEL_SIZE'
+      mesh_to_volume_node.inputs[1].default_value = 1.0   # Density
+      mesh_to_volume_node.inputs[2].default_value = 0.3   # Voxel Size
       mesh_to_volume_node.inputs[4].default_value = 0.1   # Exterior Band Width
       mesh_to_volume_node.inputs[5].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node.inputs[6].default_value = True  # Fill volume
@@ -213,7 +213,8 @@ class MeshGeneration:
 
       # Add a Volume to Mesh node
       volume_to_mesh_node = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
-      volume_to_mesh_node.resolution_mode = 'GRID'
+      volume_to_mesh_node.resolution_mode = 'VOXEL_SIZE'
+      volume_to_mesh_node.inputs[1].default_value = 0.3   # Voxel Size
       volume_to_mesh_node.inputs[3].default_value = 0.1   # Threshold
       volume_to_mesh_node.inputs[4].default_value = 0.8   # Adaptivity
       volume_to_mesh_node.location = (400, 200)
@@ -221,9 +222,9 @@ class MeshGeneration:
 
       # Add a Mesh to Volume node
       mesh_to_volume_node_2 = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
-      mesh_to_volume_node_2.resolution_mode = 'VOXEL_AMOUNT'
-      mesh_to_volume_node_2.inputs[1].default_value = 0.5   # Density
-      mesh_to_volume_node_2.inputs[3].default_value = 120   # Voxel Amount
+      mesh_to_volume_node_2.resolution_mode = 'VOXEL_SIZE'
+      mesh_to_volume_node_2.inputs[1].default_value = 1.0   # Density
+      mesh_to_volume_node_2.inputs[2].default_value = 0.3   # Voxel Size
       mesh_to_volume_node_2.inputs[4].default_value = 0.1   # Exterior Band Width
       mesh_to_volume_node_2.inputs[5].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node_2.inputs[6].default_value = True  # Fill volume
@@ -232,10 +233,10 @@ class MeshGeneration:
 
       # Add a Volume to Mesh node
       volume_to_mesh_node_2 = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
-      volume_to_mesh_node_2.resolution_mode = 'VOXEL_AMOUNT'
-      volume_to_mesh_node_2.inputs[2].default_value = 120   # Voxel Amount
+      volume_to_mesh_node_2.resolution_mode = 'VOXEL_SIZE'
+      volume_to_mesh_node_2.inputs[1].default_value = 0.3   # Voxel Size
       volume_to_mesh_node_2.inputs[3].default_value = 0.1   # Threshold
-      volume_to_mesh_node_2.inputs[4].default_value = 0     # Adaptivity
+      volume_to_mesh_node_2.inputs[4].default_value = 0.0     # Adaptivity
       volume_to_mesh_node_2.location = (900, 200)
       print("\t\t-Volume to mesh 2 node done")
 
@@ -660,8 +661,8 @@ class MeshGeneration:
       print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
       obj = bpy.context.active_object
       estimated_tri_count = sum([(len(p.vertices) - 2) for p in obj.data.polygons])
-      desired_tri_count = estimated_tri_count / 2
-      ratio = 0.5
+      desired_tri_count = estimated_tri_count * Config.FINAL_DECIMATION_FACTOR.value
+      ratio = desired_tri_count / estimated_tri_count
       print("\t-Generated number of triangles: ", estimated_tri_count)
       print("\t-Desired number of triangles: ", desired_tri_count)
       print("\t-Ratio: ",ratio)
