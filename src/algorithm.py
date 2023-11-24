@@ -144,7 +144,16 @@ class Algorithm():
         node = self.graph.nodes[index]
         x = node.coordinates['x'] + radius * math.cos(theta)
         y = node.coordinates['y'] + radius * math.sin(theta)
-        return list((x,y))
+        if Config.THREE_DIMENSION_GENERATION.value:
+            z_layer_probability = Config.Z_AXIS_LAYER_PROB.value/100
+            layer_choice = rd.choices(population=[True,False], weights=[z_layer_probability,1-z_layer_probability])
+            if layer_choice[0]:
+                z = node.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value
+            else:
+                z = node.coordinates['z'] + radius * rd.gauss(Config.Z_AXIS_GAUSSIAN_MEAN.value, Config.Z_AXIS_GAUSSIAN_STANDARD_DEVIATION.value)
+        else:
+            z = 0.0
+        return list((x,y,z))
 
 
     def calculate_angle(self, parent_node_p, current_node_p):
@@ -181,7 +190,7 @@ class Algorithm():
         Calculate and return the Manhattan distance between two nodes.
         |x1-x2|+|y1-y2|
         """
-        manhattan_distance = abs(node1.coordinates['x'] - node2.coordinates['x']) + abs(node1.coordinates['y'] - node2.coordinates['y'])
+        manhattan_distance = abs(node1.coordinates['x'] - node2.coordinates['x']) + abs(node1.coordinates['y'] - node2.coordinates['y']) + abs(node1.coordinates['z'] - node2.coordinates['z'])
         return manhattan_distance
 
 
@@ -190,7 +199,7 @@ class Algorithm():
         Calculate and return the Manhattan distance between two nodes.
         |x1-x2|+|y1-y2|
         """
-        manhattan_distance = abs(coord1[0] - coord2[0]) + abs(coord1[1] - coord2[1])
+        manhattan_distance = abs(coord1[0] - coord2[0]) + abs(coord1[1] - coord2[1]) + abs(coord1[2] - coord2[2])
         return manhattan_distance
 
     
