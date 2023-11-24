@@ -105,7 +105,7 @@ class Graph:
         origin = self.nodes[node_id_p]
         neighbours = []
         for node in self.nodes.values():
-            distance = math.sqrt((origin.coordinates['x'] - node.coordinates['x']) ** 2 + (origin.coordinates['y'] - node.coordinates['y']) ** 2)
+            distance = math.sqrt((origin.coordinates['x'] - node.coordinates['x']) ** 2 + (origin.coordinates['y'] - node.coordinates['y']) ** 2 + (origin.coordinates['z'] - node.coordinates['z']) ** 2 )
             if distance > radius_p:
                 neighbours.append(node)
         return neighbours
