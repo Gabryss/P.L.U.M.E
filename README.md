@@ -133,6 +133,8 @@ The `config.py` script is a configuration module providing essential settings an
     - In order to have nice texture result, 8K or more is strongly recommended.
 - `MAX_MESH_TRIANGLES`: Upper threshold of triangles in the generated mesh.
 - `GPU_ACCELERATION`: Boolean flag for GPU acceleration.
+- `PARALLELIZATION`: Boolean flag to speed up the generation of the graph using all the cores of the computer
+- `HIGH_POLY`: Boolean flag to specify if the generation has to be low or high poly. High poly generation has a lot of details and therefore might need higher texture that can slow down the generation. On top of that higher poly generation takes longer to generate obviously.
 
 <br>
 For more in depth configuration, please check the documentation under `doc/Config_file.md`.
