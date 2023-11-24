@@ -82,7 +82,7 @@ class Generator:
         print("\t-Graph created")
 
         # Starting point
-        graph.add_node(node_id_p=0, coordinates_p=[0.0,0.0], radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+        graph.add_node(node_id_p=0, coordinates_p=[0.0,0.0,0.0], radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
         print("\t-First node added")
 
         # Main logic
