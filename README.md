@@ -118,6 +118,7 @@ The `config.py` script is a configuration module providing essential settings an
 - `GENERATE_MESH`: Boolean flag to generate 3D meshes (and texture).
 - `SAVE_GRAPH_IMAGE`: Boolean flag to save generated graph images.
 - `SAVE_MESH`: Boolean flag to save generated 3D meshes.
+- `BAKE_TEXTURE`: Boolean flag to bake, save and export the textures
 - `TYPE_OF_UNDERGROUND`: Type of underground structure ('CAVE' or 'MINE' - MINE not available yet).
 
 #### Advanced Settings
@@ -132,9 +133,12 @@ The `config.py` script is a configuration module providing essential settings an
     - 16K texture require 64GB of RAM or more (could use swap).
     - In order to have nice texture result, 8K or more is strongly recommended.
 - `MAX_MESH_TRIANGLES`: Upper threshold of triangles in the generated mesh.
+- `FINAL_DECIMATION`: Boolean flag to choose whether or not to reduce the number of polys after the textures are baked and applied.
+- `FINAL_DECIMATION_FACTOR`: Float that represent the ratio between the current number of polys of the mesh and the final number of polys ]0,1[.
 - `GPU_ACCELERATION`: Boolean flag for GPU acceleration.
-- `PARALLELIZATION`: Boolean flag to speed up the generation of the graph using all the cores of the computer
+- `PARALLELIZATION`: Boolean flag to speed up the generation of the graph using all the cores of the computer.
 - `HIGH_POLY`: Boolean flag to specify if the generation has to be low or high poly. High poly generation has a lot of details and therefore might need higher texture that can slow down the generation. On top of that higher poly generation takes longer to generate obviously.
+- `THREE_DIMENSION_GENERATION`: Boolean flag to choose if the generation will use the z axis or not.
 
 <br>
 For more in depth configuration, please check the documentation under `doc/Config_file.md`.
