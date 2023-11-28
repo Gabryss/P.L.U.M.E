@@ -203,31 +203,27 @@ class MeshGeneration:
       # Add a Mesh to Volume node
       mesh_to_volume_node = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
       mesh_to_volume_node.resolution_mode = 'VOXEL_SIZE'
-      mesh_to_volume_node.inputs[1].default_value = 1.0   # Density
-      mesh_to_volume_node.inputs[2].default_value = 0.3   # Voxel Size
-      mesh_to_volume_node.inputs[4].default_value = 0.1   # Exterior Band Width
-      mesh_to_volume_node.inputs[5].default_value = 0.1   # Interior Band Width
-      mesh_to_volume_node.inputs[6].default_value = True  # Fill volume
+      mesh_to_volume_node.inputs[1].default_value = 10.0   # Density
+      mesh_to_volume_node.inputs[2].default_value = 0.2   # Voxel Size
+      mesh_to_volume_node.inputs[4].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node.location = (100, 200)
       print("\t\t-Mesh to volume node done")
 
       # Add a Volume to Mesh node
       volume_to_mesh_node = node_tree.nodes.new(type="GeometryNodeVolumeToMesh")
       volume_to_mesh_node.resolution_mode = 'VOXEL_SIZE'
-      volume_to_mesh_node.inputs[1].default_value = 0.3   # Voxel Size
+      volume_to_mesh_node.inputs[1].default_value = 0.2   # Voxel Size
       volume_to_mesh_node.inputs[3].default_value = 0.1   # Threshold
-      volume_to_mesh_node.inputs[4].default_value = 0.8   # Adaptivity
+      volume_to_mesh_node.inputs[4].default_value = 0.0   # Adaptivity
       volume_to_mesh_node.location = (400, 200)
       print("\t\t-Volume to mesh node done")
 
       # Add a Mesh to Volume node
       mesh_to_volume_node_2 = node_tree.nodes.new(type="GeometryNodeMeshToVolume")
       mesh_to_volume_node_2.resolution_mode = 'VOXEL_SIZE'
-      mesh_to_volume_node_2.inputs[1].default_value = 1.0   # Density
-      mesh_to_volume_node_2.inputs[2].default_value = 0.3   # Voxel Size
-      mesh_to_volume_node_2.inputs[4].default_value = 0.1   # Exterior Band Width
-      mesh_to_volume_node_2.inputs[5].default_value = 0.1   # Interior Band Width
-      mesh_to_volume_node_2.inputs[6].default_value = True  # Fill volume
+      mesh_to_volume_node_2.inputs[1].default_value = 5.0   # Density
+      mesh_to_volume_node_2.inputs[2].default_value = 0.2   # Voxel Size
+      mesh_to_volume_node_2.inputs[4].default_value = 0.1   # Interior Band Width
       mesh_to_volume_node_2.location = (600, 200)
       print("\t\t-Mesh to volume 2 node done")
 
@@ -343,16 +339,22 @@ class MeshGeneration:
       print("\t\t-Node links done")
 
       # Add Group Input and Output nodes for completeness
+      node_tree.interface.new_socket(name="Input", in_out='INPUT', socket_type="NodeSocketGeometry")
+      node_tree.interface.new_socket(name="Output", in_out='OUTPUT', socket_type="NodeSocketGeometry")
+
+
+
       group_input = node_tree.nodes.new(type="NodeGroupInput")
-      node_tree.outputs.new("NodeSocketGeometry","Geometry")
+      # node_tree.outputs.new("NodeSocketGeometry","Geometry")
       group_input.location = (-100, 200)
+
       group_output = node_tree.nodes.new(type="NodeGroupOutput")
-      node_tree.inputs.new("NodeSocketGeometry","Geometry")
+      # node_tree.inputs.new("NodeSocketGeometry","Geometry")
       group_output.location = (2500, 200)
 
       # Connect the Group Input to Mesh to Volume and Volume to Mesh to Group Output
-      node_tree.links.new(group_input.outputs["Geometry"], mesh_to_volume_node.inputs["Mesh"])
-      node_tree.links.new(set_material.outputs["Geometry"], group_output.inputs["Geometry"])
+      node_tree.links.new(group_input.outputs[0], mesh_to_volume_node.inputs["Mesh"])
+      node_tree.links.new(set_material.outputs["Geometry"], group_output.inputs[0])
       print("\t\t-Input and output node links done")
       print(f"{Color.OKGREEN.value}\t-Geometry node process completed{Color.ENDC.value}")
 
