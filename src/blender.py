@@ -59,11 +59,13 @@ class MeshGeneration:
 
       bpy.ops.object.select_all(action='DESELECT')
       if Config.BAKE_TEXTURE.value:
-         for mesh in self.chunks:
-            mesh[1].select_set(True)
-            bpy.context.view_layer.objects.active = mesh[1]
+         for i in range(len(self.chunks)):
+            self.chunks[i][1].select_set(True)
+            chunck_number = i + 1
+            bpy.context.view_layer.objects.active = self.chunks[i][1]
+            print(f"{Color.OKBLUE.value}\n ==== Chuck {chunck_number}/{len(self.chunks)} ==== {Color.ENDC.value}")
             self.bake_texture(self.material)
-            mesh[1].select_set(False)
+            self.chunks[i][1].select_set(False)
 
       if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
          self.final_decimate_mesh_polys()
@@ -701,6 +703,7 @@ class MeshGeneration:
 
       print(f"{Color.BOLD.value}Mesh final decimation process completed{Color.ENDC.value}")
 
+
    def slice_mesh(self):
       """
       Mesh slicing test
@@ -709,8 +712,8 @@ class MeshGeneration:
       def bbox(ob):
          return (Vector(b) for b in ob.bound_box)
 
-      def bbox_center(ob):
-         return sum(bbox(ob), Vector()) / 8
+      # def bbox_center(ob):
+      #    return sum(bbox(ob), Vector()) / 8
 
       def bbox_axes(ob):
          bb = list(bbox(ob))
