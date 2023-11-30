@@ -31,6 +31,7 @@ class MeshGeneration:
       self.data = json.load(self.json_file)
       self.obj = None
       self.mesh = None
+      self.chunks = []
       self.material = None
       self.generate_mesh()
 
@@ -49,15 +50,30 @@ class MeshGeneration:
       print(f"{Color.BOLD.value}Graph loading process completed{Color.ENDC.value}")
       self.blender_modifiers()
 
-      if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
-         self.final_decimate_mesh_polys()
-      
-      if Config.SAVE_MESH.value:
-         self.export_mesh()
+      if Config.HIGH_POLY.value:
+         self.decimate_mesh_polys()
       
       print("Slice")
       self.slice_mesh()
       print("Slice finished")
+
+      bpy.ops.object.select_all(action='DESELECT')
+      if Config.BAKE_TEXTURE.value:
+         for mesh in self.chunks:
+            mesh[1].select_set(True)
+            bpy.context.view_layer.objects.active = mesh[1]
+            self.bake_texture(self.material)
+            mesh[1].select_set(False)
+
+      if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
+         self.final_decimate_mesh_polys()
+      
+      bpy.ops.object.select_all(action='SELECT')
+
+      if Config.SAVE_MESH.value:
+         self.export_mesh()
+      
+     
 
       self.json_file.close()
 
@@ -148,13 +164,6 @@ class MeshGeneration:
       apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
       apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
       print(f"{Color.BOLD.value}Modifiers applied{Color.ENDC.value}")
-
-      if Config.HIGH_POLY.value:
-         self.decimate_mesh_polys()
-      
-      if Config.BAKE_TEXTURE.value:
-         self.bake_texture(self.material)
-
 
 
    def create_voronoi_texture(self):
@@ -499,8 +508,13 @@ class MeshGeneration:
       - Use Cycle render and if needed use the GPU acceleration
       - Bake each image
       """
+      obj = bpy.context.active_object
       print(f"\n{Color.BOLD.value}Creation of the UV map{Color.ENDC.value}")
       print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
+      obj.select_set(True)
+      bpy.context.view_layer.objects.active = obj
+      uv_layer = obj.data.uv_layers.new(name="UndergroundUVMap") #new UV layer for underground mapping
+      uv_layer.active
       bpy.ops.object.editmode_toggle()
       bpy.ops.mesh.select_all(action='SELECT')
       uv_map = bpy.ops.uv.smart_project()
@@ -508,25 +522,24 @@ class MeshGeneration:
       bpy.ops.object.editmode_toggle()
       print(f"{Color.BOLD.value}UV map completed{Color.ENDC.value}")
 
+      print(obj.name)
 
       print(f"\n{Color.BOLD.value}Start texture baking process{Color.ENDC.value}")
       print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
       material = material_tree_p
       color_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
-      color_image = bpy.data.images.new('color_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      color_image = bpy.data.images.new(f'color_rock_{obj.name}', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
       color_image_node.image = color_image
 
       normal_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
-      normal_image = bpy.data.images.new('normal_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      normal_image = bpy.data.images.new(f'normal_rock_{obj.name}', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
       normal_image_node.image = normal_image
       normal_image_node.image.colorspace_settings.name = 'Non-Color'
 
       roughness_image_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
-      roughness_image = bpy.data.images.new('roughness_rock', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
+      roughness_image = bpy.data.images.new(f'roughness_rock_{obj.name}', Config.TEXTURE_SIZE.value, Config.TEXTURE_SIZE.value)
       roughness_image_node.image = roughness_image
       roughness_image_node.image.colorspace_settings.name = 'Non-Color'
-
-      obj = bpy.context.active_object
 
       # Set the device_type
       bpy.context.preferences.addons[
@@ -557,11 +570,12 @@ class MeshGeneration:
       print(f"\t{Color.OKCYAN.value}Color texture{Color.ENDC.value}")
       color_image_node.select = True
       material.node_tree.nodes.active = color_image_node
+      # bpy.ops.object.select_all(action='SELECT')
+      obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
-      bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
       print("\t-Texture baked")
-      color_image.save_render(filepath= self.saved_texture_path + 'color_texture.png')
+      color_image.save_render(filepath= self.saved_texture_path + f'color_texture_{obj.name}.png')
       print("\t-Image saved")
       color_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Color texture done{Color.ENDC.value}\n")
@@ -571,10 +585,12 @@ class MeshGeneration:
       normal_image_node.select = True
       material.node_tree.nodes.active = normal_image_node
       bpy.context.scene.cycles.bake_type = 'NORMAL'
-      bpy.ops.object.select_all(action='SELECT')
+      obj.select_set(True)
+      bpy.context.view_layer.objects.active = obj
+      # bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
       print("\t-Texture baked")
-      normal_image.save_render(filepath= self.saved_texture_path + 'normal_texture.png')
+      normal_image.save_render(filepath= self.saved_texture_path + f'normal_texture_{obj.name}.png')
       print("\t-Image saved")
       normal_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Normal texture done{Color.ENDC.value}\n")
@@ -585,10 +601,12 @@ class MeshGeneration:
       roughness_image_node.select = True
       material.node_tree.nodes.active = roughness_image_node
       bpy.context.scene.cycles.bake_type = 'ROUGHNESS'
-      bpy.ops.object.select_all(action='SELECT')
+      obj.select_set(True)
+      bpy.context.view_layer.objects.active = obj
+      # bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
       print("\t-Texture baked")
-      roughness_image.save_render(filepath= self.saved_texture_path + 'roughness_texture.png')
+      roughness_image.save_render(filepath= self.saved_texture_path + f'roughness_texture_{obj.name}.png')
       print("\t-Image saved")
       roughness_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Roughness texture done{Color.ENDC.value}\n")
@@ -597,7 +615,7 @@ class MeshGeneration:
       # Create new material for the export
       bpy.ops.object.material_slot_remove()
       bpy.ops.object.material_slot_remove()
-      material_export = bpy.data.materials.new(name="Rock")
+      material_export = bpy.data.materials.new(name=f"Rock_{obj.name}")
       material_export.use_nodes = True
 
 
@@ -606,12 +624,12 @@ class MeshGeneration:
       
 
       color_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      color_image = bpy.data.images.load(self.saved_texture_path + 'color_texture.png')
+      color_image = bpy.data.images.load(self.saved_texture_path + f'color_texture_{obj.name}.png')
       color_image_node.image = color_image
 
 
       normal_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      normal_image = bpy.data.images.load(self.saved_texture_path +'normal_texture.png')
+      normal_image = bpy.data.images.load(self.saved_texture_path + f'normal_texture_{obj.name}.png')
       normal_image_node.image = normal_image
       normal_image_node.image.colorspace_settings.name = 'Non-Color'
 
@@ -620,7 +638,7 @@ class MeshGeneration:
 
 
       roughness_image_node = material_export.node_tree.nodes.new(type='ShaderNodeTexImage')
-      roughness_image = bpy.data.images.load(self.saved_texture_path + 'roughness_texture.png')
+      roughness_image = bpy.data.images.load(self.saved_texture_path + f'roughness_texture_{obj.name}.png')
       roughness_image_node.image = roughness_image
       roughness_image_node.image.colorspace_settings.name = 'Non-Color'
 
@@ -632,7 +650,7 @@ class MeshGeneration:
       material_export.node_tree.links.new(normal_map_node.outputs["Normal"], principled_bsdf_node.inputs["Normal"])
       material_export.node_tree.links.new(roughness_image_node.outputs["Color"], principled_bsdf_node.inputs["Roughness"])
 
-      obj.active_material = bpy.data.materials.get("Rock")
+      obj.active_material = bpy.data.materials.get(f"Rock_{obj.name}")
 
       bpy.ops.file.pack_all()
       print(f"{Color.BOLD.value}Texture baking process completed{Color.ENDC.value}")
@@ -736,6 +754,8 @@ class MeshGeneration:
       bpy.ops.object.mode_set(mode='EDIT')
       bpy.ops.mesh.separate(type='LOOSE')
       bpy.ops.object.mode_set() 
+      
+      self.chunks = bpy.context.scene.objects.items()
 
 
    def export_mesh(self):
