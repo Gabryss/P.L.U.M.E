@@ -14,36 +14,36 @@ class Config(Enum):
     # ==== General settings ====
     NB_GENERATION = 1
     IMAGE_FORMAT = ".png"
-    MESH_FORMAT = 'obj'                     # Available: obj, ply(no textures), usd, fbx
+    MESH_FORMAT = 'fbx'                     # Available: obj, ply(no textures), usd, fbx
     OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
     GENERATE_MESH = True
     SAVE_GRAPH_IMAGE = False
     SAVE_MESH = True
-    BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
+    BAKE_TEXTURE = True                    # Create, bake and save the textures (Color, Normal and Roughness maps)
     TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 1000
+    DEFAULT_MIN_NODES = 100
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin
-    TEXTURE_SIZE = 512                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    TEXTURE_SIZE = 1024                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
-    FINAL_DECIMATION = True
+    FINAL_DECIMATION = False
     FINAL_DECIMATION_FACTOR = 0.8           # Percentage of final mesh decimation (after texture baking). 0.8 means keep 80% of the polys number of the model
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
-    HIGH_POLY = False                       # If false, the generation is significantly faster
+    HIGH_POLY = True                       # If false, the generation is significantly faster
     THREE_DIMENSION_GENERATION = True
-
+    NUMBER_OF_CHUNKS = 10
 
     #Gaussian
     MEAN = 0.0
     STANDARD_DEVIATION = 0.5
 
     Z_AXIS_GAUSSIAN_MEAN = 0.0                      #Shift the Z axis by this value
-    Z_AXIS_GAUSSIAN_STANDARD_DEVIATION = 0.5        #Higher value here leads to more extremums
+    Z_AXIS_GAUSSIAN_STANDARD_DEVIATION = 0.1        #Higher value here leads to more extremums
     Z_AXIS_LAYER_PROB = 10                          #Percentage of one node to "step down". 10 means 10%
     Z_AXIS_LAYER_STEP = 4                           #Distance of one step between layers
 
