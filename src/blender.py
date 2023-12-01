@@ -56,7 +56,6 @@ class MeshGeneration:
       print("Slice")
       self.slice_mesh()
       print("Slice finished")
-
       bpy.ops.object.select_all(action='DESELECT')
       if Config.BAKE_TEXTURE.value:
          for i in range(len(self.chunks)):
@@ -66,6 +65,18 @@ class MeshGeneration:
             print(f"{Color.OKBLUE.value}\n ==== Chuck {chunck_number}/{len(self.chunks)} ==== {Color.ENDC.value}")
             self.bake_texture(self.material)
             self.chunks[i][1].select_set(False)
+         
+         print("\nAll chunks are baked, proceeding to apply the textures\n")
+         
+         for i in range(len(self.chunks)):
+            self.chunks[i][1].select_set(True)
+            chunck_number = i + 1
+            bpy.context.view_layer.objects.active = self.chunks[i][1]
+            self.load_images()
+            self.chunks[i][1].select_set(False)
+
+         print("\nAll textures applied for each chunks\n")
+
 
       if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
          self.final_decimate_mesh_polys()
@@ -572,7 +583,6 @@ class MeshGeneration:
       print(f"\t{Color.OKCYAN.value}Color texture{Color.ENDC.value}")
       color_image_node.select = True
       material.node_tree.nodes.active = color_image_node
-      # bpy.ops.object.select_all(action='SELECT')
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
       bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
@@ -589,7 +599,6 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'NORMAL'
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
-      # bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
       print("\t-Texture baked")
       normal_image.save_render(filepath= self.saved_texture_path + f'normal_texture_{obj.name}.png')
@@ -605,7 +614,6 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'ROUGHNESS'
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
-      # bpy.ops.object.select_all(action='SELECT')
       bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
       print("\t-Texture baked")
       roughness_image.save_render(filepath= self.saved_texture_path + f'roughness_texture_{obj.name}.png')
@@ -613,6 +621,22 @@ class MeshGeneration:
       roughness_image_node.select = False
       print(f"\t{Color.OKCYAN.value}Roughness texture done{Color.ENDC.value}\n")
 
+      # Remove the images to save VRAM
+      bpy.data.images.remove(color_image)
+      bpy.data.images.remove(normal_image)
+      bpy.data.images.remove(roughness_image)
+
+      print(f"{Color.BOLD.value}Texture baking process completed{Color.ENDC.value}")
+
+
+   def load_images(self):
+      """
+      Load the saved images on the model before export
+      """
+      # Make sure the right chunk is selected
+      obj = bpy.context.active_object
+      obj.select_set(True)
+      bpy.context.view_layer.objects.active = obj
 
       # Create new material for the export
       bpy.ops.object.material_slot_remove()
@@ -654,8 +678,8 @@ class MeshGeneration:
 
       obj.active_material = bpy.data.materials.get(f"Rock_{obj.name}")
 
-      bpy.ops.file.pack_all()
-      print(f"{Color.BOLD.value}Texture baking process completed{Color.ENDC.value}")
+      obj.select_set(False)
+      # bpy.ops.file.pack_all()
 
 
    def decimate_mesh_polys(self):
@@ -678,7 +702,7 @@ class MeshGeneration:
 
       else:
          print(f"\t{Color.WARNING.value}Mesh not decimated: Number of triangles is less than the max desired number{Color.ENDC.value}")
-         exit()
+         return 1
       print(f"{Color.BOLD.value}Mesh decimation process completed{Color.ENDC.value}")
 
    
@@ -708,15 +732,19 @@ class MeshGeneration:
       """
       Mesh slicing test
       """
+      import math
       # bounding box helper methods
       def bbox(ob):
          return (Vector(b) for b in ob.bound_box)
 
       # def bbox_center(ob):
       #    return sum(bbox(ob), Vector()) / 8
+      def vect_distance(v1,v2):
+         return math.sqrt((v1[0]-v2[0])**2+(v1[1]-v2[1])**2+(v1[2]-v2[2])**2)
 
       def bbox_axes(ob):
          bb = list(bbox(ob))
+         print("bb: ",bb)
          return tuple(bb[i] for i in (0, 4, 3, 1))
 
       def slice(bm, start, end, segments):
@@ -725,6 +753,7 @@ class MeshGeneration:
          def geom(bm):
             return bm.verts[:] + bm.edges[:] + bm.faces[:]
          planes = [start.lerp(end, f / segments) for f in range(1, segments)]
+         
          #p0 = start
          plane_no = (end - start).normalized() 
          while(planes): 
@@ -743,11 +772,26 @@ class MeshGeneration:
       me = ob.data
       bm.from_mesh(me)
 
-      o, x, y, z = bbox_axes(ob)        
+      o, x, y, z = bbox_axes(ob)
+      origin_x = math.dist(o,x)
+      origin_y = math.dist(o,y)
+      
+      if origin_x >= origin_y:
+         added_x = int(origin_x // origin_y)
+         added_y = 1
 
-      x_segments = 2
-      y_segments = 2
-      z_segments = 1
+
+      if origin_x < origin_y:
+         added_y = int(origin_y // origin_y)
+         added_x = 1
+      
+      x_segments = added_x * Config.NUMBER_OF_CHUNKS.value
+      y_segments = added_y * Config.NUMBER_OF_CHUNKS.value
+      
+      if Config.THREE_DIMENSION_GENERATION.value:
+         z_segments = Config.NUMBER_OF_CHUNKS.value
+      else:
+         z_segments = 1
 
       slice(bm, o, x, x_segments)
       slice(bm, o, y, y_segments)
