@@ -8,6 +8,7 @@ import datetime
 import multiprocessing
 from tools import Tools
 import random as rd
+import time
 
 class Generator:
 
@@ -16,6 +17,8 @@ class Generator:
         self.nb_graphs = Config.NB_GENERATION.value
         self.visualization = Config.OPEN_VISUALIZATION.value
         self.graphs=[]
+
+        self.starting_time = time.time()
 
         # Get the name of the current graph generation
         if name_p == None or '':
@@ -75,6 +78,7 @@ class Generator:
         """
         index = index_p
         print(f"{Color.OKBLUE.value} == Graph {index} generation begins == {Color.ENDC.value}")
+        
         
         # Graph generation
         index = index_p
@@ -168,6 +172,8 @@ class Generator:
                 error = result.stderr
                 if error:
                     print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
+            duration = (time.time() - self.starting_time) / 60
+            print("Duration of the generation: ", duration," minutes")
             print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
 
 
