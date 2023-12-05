@@ -15,6 +15,7 @@ class Graph:
         generation_name_p should be a string.
         nb_graphs_p should be an integer.
         """
+        self.data = {}
         self.nodes = {}
         self.nb_nodes = 0
         self.nb_deactivated_nodes = 0
@@ -128,5 +129,14 @@ class Graph:
         # Create the target directory if it does not exist
         if not os.path.exists(os.path.dirname(self.save_graph_path)):
             os.makedirs(os.path.dirname(self.save_graph_path))
+        
+        if Config.THREE_DIMENSION_GENERATION.value:
+            self.data["generation_dimension"] = '3D'
+        else:
+            self.data["generation_dimension"] = '2D'
+
+        self.data['generation_type'] = Config.TYPE_OF_UNDERGROUND.value
+        self.data['nodes'] = self.nodes
+        
         with open(self.save_graph_path, "w") as outfile:
-                json.dump(self.nodes, outfile, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+                json.dump(self.data, outfile, default=lambda o: o.__dict__, sort_keys=True, indent=4)
