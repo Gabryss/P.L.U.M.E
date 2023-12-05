@@ -150,7 +150,8 @@ class Algorithm():
             if layer_choice[0]:
                 z = node.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value
             else:
-                z = node.coordinates['z'] + radius * rd.gauss(Config.Z_AXIS_GAUSSIAN_MEAN.value, Config.Z_AXIS_GAUSSIAN_STANDARD_DEVIATION.value)
+                z = node.coordinates['z']
+                # z = node.coordinates['z'] + radius * rd.gauss(Config.Z_AXIS_GAUSSIAN_MEAN.value, Config.Z_AXIS_GAUSSIAN_STANDARD_DEVIATION.value)
         else:
             z = 0.0
         return list((x,y,z))
