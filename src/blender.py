@@ -21,14 +21,19 @@ from config import Config, Color
 
 
 class MeshGeneration:
-   def __init__(self, generation_name_p, index_p) -> None:
+   def __init__(self, generation_name_p, index_p, graph_path_p) -> None:
       self.generation_name = str(generation_name_p)
       self.index = str(index_p)
-      self.path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/data.json"
+      if graph_path_p == "-g":
+         self.path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/data.json"
+      else:
+         self.path = graph_path_p
       self.saved_mesh_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
       self.saved_texture_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/"
       self.json_file = open(self.path)
       self.data = json.load(self.json_file)
+      self.generation_dimension = self.data['generation_dimension']
+
       self.obj = None
       self.mesh = None
       self.chunks = []
@@ -111,15 +116,15 @@ class MeshGeneration:
       """
       print("\t-Begin extraction of points")
       verts, edges = [], []
-      for i in self.data:
+      for i in self.data['nodes']:
          verts.append([
-            self.data[i]["coordinates"]['x'],
-            self.data[i]["coordinates"]['y'],
-            self.data[i]["coordinates"]['z'],
+            self.data['nodes'][i]["coordinates"]['x'],
+            self.data['nodes'][i]["coordinates"]['y'],
+            self.data['nodes'][i]["coordinates"]['z'],
          ])
-         for edge in self.data[i]['edges']:
+         for edge in self.data['nodes'][i]['edges']:
             edges.append([
-               self.data[i]['id'],
+               self.data['nodes'][i]['id'],
                edge
             ])
       print("\t-Extraction done")
@@ -788,7 +793,7 @@ class MeshGeneration:
       x_segments = added_x * Config.NUMBER_OF_CHUNKS.value
       y_segments = added_y * Config.NUMBER_OF_CHUNKS.value
       
-      if Config.THREE_DIMENSION_GENERATION.value:
+      if self.generation_dimension == "3D":
          z_segments = Config.NUMBER_OF_CHUNKS.value
       else:
          z_segments = 1
@@ -845,4 +850,5 @@ class MeshGeneration:
 
 if __name__ == '__main__':
    generator = MeshGeneration(index_p=sys.argv[-3],
-                              generation_name_p= sys.argv[-1])
+                              generation_name_p= sys.argv[-1],
+                              graph_path_p=sys.argv[-5])
