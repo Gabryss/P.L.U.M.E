@@ -12,7 +12,7 @@ import time
 
 class Generator:
 
-    def __init__(self, name_p) -> None:       
+    def __init__(self, name_p, graph_path_p) -> None:       
         # Get the number of graphs
         self.nb_graphs = Config.NB_GENERATION.value
         self.visualization = Config.OPEN_VISUALIZATION.value
@@ -26,37 +26,41 @@ class Generator:
         else:
             self.name = name_p +"_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
-        # Start generation
-        if self.nb_graphs==1:
-            self.generator(0)
-            # Create the mesh
-            if Config.GENERATE_MESH.value:
-                self.create_mesh(0)
-        
-        elif Config.PARALLELIZATION.value:
-            # Make n graphs in different CPU cores (Only for the graph generation)  
-            if self.nb_graphs>1:
-                list_process = [i for i in range(self.nb_graphs)]
-                with multiprocessing.Pool(processes=self.nb_graphs) as pool:
-                    result = pool.map(self.generator, list_process)
+        if graph_path_p:
+            self.graph_path = graph_path_p
+            self.create_mesh(0, graph_path_p=self.graph_path)
+        else:
+            # Start generation
+            if self.nb_graphs==1:
+                self.generator(0)
                 # Create the mesh
                 if Config.GENERATE_MESH.value:
-                    for index in list_process:
-                        self.create_mesh(index)
-
-            else:
-                print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
-                exit()
-        
-        else:
-            if self.nb_graphs>1:
-                for index in range(self.nb_graphs):
-                    self.generator(index)
+                    self.create_mesh(0)
+            
+            elif Config.PARALLELIZATION.value:
+                # Make n graphs in different CPU cores (Only for the graph generation)  
+                if self.nb_graphs>1:
+                    list_process = [i for i in range(self.nb_graphs)]
+                    with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+                        result = pool.map(self.generator, list_process)
+                    # Create the mesh
                     if Config.GENERATE_MESH.value:
-                        self.create_mesh(index)
+                        for index in list_process:
+                            self.create_mesh(index)
+
+                else:
+                    print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
+                    exit()
+            
             else:
-                print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
-                exit()
+                if self.nb_graphs>1:
+                    for index in range(self.nb_graphs):
+                        self.generator(index)
+                        if Config.GENERATE_MESH.value:
+                            self.create_mesh(index)
+                else:
+                    print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
+                    exit()
 
 
 
@@ -143,38 +147,67 @@ class Generator:
         print(f"{Color.OKBLUE.value} == End of graph {index} picture generation == {Color.ENDC.value}")
 
 
-    def create_mesh(self, index_p):
+    def create_mesh(self, index_p, graph_path_p=None):
         """
         Create the mesh using Blender
         """
-        index = index_p
-        print(f"\n{Color.OKBLUE.value} == Mesh {index} generation start == {Color.ENDC.value}")
-        result = None
         blender_path = Tools.find_file("blender")
-        try:
-            if Config.OPEN_VISUALIZATION.value and index == self.nb_graphs-1:
-                result = subprocess.run(f"{blender_path} --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
-            else:
-                result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -index {index} -name {self.name}", shell=True, check=True)
-        
-        except Exception as e:
-            print(f"\n{Color.FAIL.value}An issue occured: ",e)
-            print(f"The blender path might be wrong, please check the path.json file")
-            print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
-            exit()
+        if graph_path_p:
+            print(f"\n{Color.OKBLUE.value} == Mesh re-generation start == {Color.ENDC.value}")
+            result = None
+            try:
+                if Config.OPEN_VISUALIZATION.value:
+                    result = subprocess.run(f"{blender_path} --python src/blender.py -- -g {graph_path_p} -index 0 -name {self.name}", shell=True, check=True)
+                else:
+                    result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g {graph_path_p} -index 0 -name {self.name}", shell=True, check=True)
+            
+            except Exception as e:
+                print(f"\n{Color.FAIL.value}An issue occured: ",e)
+                print(f"The blender path might be wrong, please check the path.json file")
+                print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+                exit()
 
-        finally:
-            if result:
-                success = result.stdout
-                if success:
-                    print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
-                
-                error = result.stderr
-                if error:
-                    print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
-            duration = (time.time() - self.starting_time) / 60
-            print("Duration of the generation: ", duration," minutes")
-            print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
+            finally:
+                if result:
+                    success = result.stdout
+                    if success:
+                        print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
+                    
+                    error = result.stderr
+                    if error:
+                        print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
+                duration = (time.time() - self.starting_time) / 60
+                print("Duration of the generation: ", duration," minutes")
+                print(f"\n{Color.OKBLUE.value} == Mesh re-generation finished == {Color.ENDC.value}")
+
+        else:
+            index = index_p
+            print(f"\n{Color.OKBLUE.value} == Mesh {index} generation start == {Color.ENDC.value}")
+            result = None
+            try:
+                if Config.OPEN_VISUALIZATION.value and index == self.nb_graphs-1:
+                    result = subprocess.run(f"{blender_path} --python src/blender.py -- -g -index {index} -name {self.name}", shell=True, check=True)
+                else:
+                    result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g -index {index} -name {self.name}", shell=True, check=True)
+            
+            except Exception as e:
+                print(f"\n{Color.FAIL.value}An issue occured: ",e)
+                print(f"The blender path might be wrong, please check the path.json file")
+                print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+                exit()
+
+            finally:
+                if result:
+                    success = result.stdout
+                    if success:
+                        print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
+                    
+                    error = result.stderr
+                    if error:
+                        print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
+                duration = (time.time() - self.starting_time) / 60
+                print("Duration of the generation: ", duration," minutes")
+                print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
 
 
 
@@ -184,8 +217,9 @@ if __name__ == '__main__':
                                 description="PLUME project. Procedural Lava-Tube Underground Modeling Engine: A generator that uses procedural generation techniques and graph algorithms to create detailed and visually appealing lava tube structures. ",
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument("-name", help="Name of the current graph generation", type=str)
+    parser.add_argument("-n", help="Name of the current graph generation", type=str)
+    parser.add_argument("-g", help="Take an already generated graph as input", type=str)
 
     args = parser.parse_args()
     arguments = vars(args)
-    generator = Generator(name_p=arguments['name'])
+    generator = Generator(name_p=arguments['n'], graph_path_p=arguments['g'])
