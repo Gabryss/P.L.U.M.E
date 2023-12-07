@@ -47,20 +47,26 @@ class MeshGeneration:
       """
       self.initial_cleanup()
       print(f"{Color.BOLD.value}Start graph loading process{Color.ENDC.value}")
+
+      # Extract and load data
       verts, edges = self.extract_mesh_data()
       result_loading = self.load_mesh_in_blender(verts_p=verts, edges_p=edges)
       if result_loading == -1:
          print(f"{Color.FAIL.value}There was a problem while creating the mesh{Color.ENDC.value}")
          exit()
       print(f"{Color.BOLD.value}Graph loading process completed{Color.ENDC.value}")
+      
+      # Generate geometry and apply modifiers
       self.blender_modifiers()
 
+      # First decimation process (lower the number of polys for better performance)
       if Config.HIGH_POLY.value:
          self.decimate_mesh_polys()
       
-      print("Slice")
+      # Slice mesh
       self.slice_mesh()
-      print("Slice finished")
+
+      # Bake and save and apply the texture
       bpy.ops.object.select_all(action='DESELECT')
       if Config.BAKE_TEXTURE.value:
          for i in range(len(self.chunks)):
@@ -82,12 +88,13 @@ class MeshGeneration:
 
          print("\nAll textures applied for each chunks\n")
 
-
+      # Final decimation process
       if Config.HIGH_POLY.value and Config.FINAL_DECIMATION.value:
          self.final_decimate_mesh_polys()
       
       bpy.ops.object.select_all(action='SELECT')
 
+      # Export the mesh
       if Config.SAVE_MESH.value:
          self.export_mesh()
       
@@ -737,6 +744,8 @@ class MeshGeneration:
       """
       Mesh slicing test
       """
+      print(f"\n{Color.BOLD.value}Start slice process{Color.ENDC.value}")
+
       import math
       # bounding box helper methods
       def bbox(ob):
@@ -749,7 +758,6 @@ class MeshGeneration:
 
       def bbox_axes(ob):
          bb = list(bbox(ob))
-         print("bb: ",bb)
          return tuple(bb[i] for i in (0, 4, 3, 1))
 
       def slice(bm, start, end, segments):
@@ -800,14 +808,18 @@ class MeshGeneration:
 
       slice(bm, o, x, x_segments)
       slice(bm, o, y, y_segments)
-      slice(bm, o, z, z_segments)    
+      slice(bm, o, z, z_segments)
       bm.to_mesh(me)
 
       bpy.ops.object.mode_set(mode='EDIT')
       bpy.ops.mesh.separate(type='LOOSE')
-      bpy.ops.object.mode_set() 
-      
+      bpy.ops.object.mode_set()
       self.chunks = bpy.context.scene.objects.items()
+
+
+      print(f"\t-Slicing done, {len(self.chunks)} chunks created")     
+      print(f"{Color.BOLD.value}Slice process completed{Color.ENDC.value}")
+
 
 
    def export_mesh(self):
