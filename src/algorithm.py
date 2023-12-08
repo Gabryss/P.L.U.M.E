@@ -13,6 +13,7 @@ class Algorithm():
         self.loop_closure_probability = loop_closure_probability_p
         self.angles = np.arange(360)
         self.current_node_index=1
+        self.stop_algorithm = False
 
 
     def algorithm(self, selected_algorithm="gaussian_perlin"):
@@ -30,6 +31,15 @@ class Algorithm():
                 self.graph.nodes[0].add_edge(i+1)
             # The graph
             self.gaussian_perlin()
+        
+        if selected_algorithm == "mine":
+            # Nodes around the starting node
+            first_node_probability = self.perlin_distribution_circle()
+            chosen_angle = np.random.choice(self.angles, p=first_node_probability)
+            self.graph.add_node(node_id_p=1, parent_p=0, coordinates_p=self.get_coordinates_on_circle(radius_p=self.graph.nodes[0].radius, theta_p=chosen_angle, index_p=0), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+            self.graph.nodes[0].add_edge(1)
+            # The graph
+            self.mine()
 
 
     def gaussian_perlin(self):
@@ -127,6 +137,97 @@ class Algorithm():
         return noise_values
 
 
+    def mine(self):
+        """
+        MINE CONTEXT
+        Create a graph that looks like a mine structure
+        """
+        print("In mine algo")
+        origin = list(self.graph.nodes.values())[-1]
+        self.current_node_index = self.graph.nb_nodes-1
+        number_nodes = self.graph.nb_nodes
+        print(number_nodes)
+        origin = self.graph.nodes[self.current_node_index]
+
+        while number_nodes < Config.DEFAULT_MIN_NODES.value:
+            nb_branch = rd.randint(1,3)
+            for i in range(nb_branch):
+                # Create a main branch
+                branch = self.mine_add_main_branch(origin)
+                if branch:
+                    # Add sub branches (harvesting sites) to main branch
+                    break_point_sub = self.mine_add_sub_branches(branch)
+                    if break_point_sub:
+                        continue
+                    else:
+                        return 1
+                else:
+                    return 1
+                
+            if not Config.THREE_DIMENSION_GENERATION.value:
+                print("yes")
+                return 1
+            
+            else:
+                print("no")
+                origin = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p= origin.id, coordinates_p=(origin.coordinates['x'], origin.coordinates['y'], origin.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value ), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value))
+            print("New wave", number_nodes)
+
+
+    def mine_add_main_branch(self, origin_p):
+        """
+        MINE CONTEXT
+        Create a main branch based on the position of the origin
+        """
+        print("In main branch")
+        size_branch = rd.randint(2,10)
+        branch = []
+        last_node = None
+        shift = None
+        for i in range(size_branch):
+            if i == 0:
+                chosen_angle = np.random.choice(self.angles)
+                shift = (rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]), rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]))
+                last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=origin_p.id, coordinates_p=(origin_p.coordinates['x']+shift[0],origin_p.coordinates['y']+shift[1],origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                branch.append(last_node)
+            else:
+                last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(origin_p.coordinates['x']+shift[0]*i,origin_p.coordinates['y']+shift[1]*i,origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                branch.append(last_node)
+            # Check if number of desired nodes reached
+            if self.graph.nb_nodes >= Config.DEFAULT_MIN_NODES.value:
+                return 0
+        return branch
+
+    def mine_add_sub_branches(self, branch_p):
+        """
+        MINE CONTEXT
+        Add small branches along an given main branch (list of nodes)
+        """
+        print("In sub branch")
+        for main_branch_node in branch_p:
+            # Add sub branches of random size
+            size_branch = rd.randint(0,5)
+            last_node = None
+
+            for i in range(size_branch):
+                # 2D Rotation matrix
+                coord_x = main_branch_node.coordinates['x'] + 1
+                coord_y = main_branch_node.coordinates['y'] + 1
+                # coord_x = main_branch_node.coordinates['x'] * math.cos(math.pi/2) - main_branch_node.coordinates['y'] * math.sin(math.pi/2)
+                # coord_y = main_branch_node.coordinates['x'] * math.sin(math.pi/2) + main_branch_node.coordinates['y'] * math.cos(math.pi/2)
+                if i == 0:
+                    # Create a node from the main branch node
+                    # self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=self.get_coordinates_on_circle(radius_p=self.main_branch_node.radius, theta_p=45, index_p=self.main_branch_node.id), radius_p=0.5, active_p=True)
+                    last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=(coord_x,coord_y,main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
+                else:
+                    # Extend the sub branch
+                    last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(coord_x+i, coord_y+i, main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
+
+                if self.graph.nb_nodes >= Config.DEFAULT_MIN_NODES.value:
+                    return 0
+        return 1
+
+
     def loop_closure(self):
         """
         Post processing loop closure creation
@@ -144,14 +245,18 @@ class Algorithm():
         node = self.graph.nodes[index]
         x = node.coordinates['x'] + radius * math.cos(theta)
         y = node.coordinates['y'] + radius * math.sin(theta)
+
+        # 3D generation
         if Config.THREE_DIMENSION_GENERATION.value:
             z_layer_probability = Config.Z_AXIS_LAYER_PROB.value/100
             layer_choice = rd.choices(population=[True,False], weights=[z_layer_probability,1-z_layer_probability])
             if layer_choice[0]:
                 z = node.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value
+                x *= Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+                y *= Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
             else:
-                z = node.coordinates['z']
-                # z = node.coordinates['z'] + radius * rd.gauss(Config.Z_AXIS_GAUSSIAN_MEAN.value, Config.Z_AXIS_GAUSSIAN_STANDARD_DEVIATION.value)
+                # z = node.coordinates['z']
+                z = node.coordinates['z'] + rd.gauss(Config.Z_AXIS_GAUSSIAN_MEAN.value, 0.1)
         else:
             z = 0.0
         return list((x,y,z))
