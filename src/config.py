@@ -18,25 +18,26 @@ class Config(Enum):
     OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
     GENERATE_MESH = True
     SAVE_GRAPH_IMAGE = False
-    SAVE_MESH = True
-    BAKE_TEXTURE = True                    # Create, bake and save the textures (Color, Normal and Roughness maps)
-    TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
+    SAVE_MESH = False
+    BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
+    TYPE_OF_UNDERGROUND = "MINE"            # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 100
+    DEFAULT_MIN_NODES = 250
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
-    SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin
-    TEXTURE_SIZE = 1024                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    SELECTED_ALGORITHM = "mine"  # Available: gaussian_perlin, mine
+    TEXTURE_SIZE = 512                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     FINAL_DECIMATION = False
     FINAL_DECIMATION_FACTOR = 0.8           # Percentage of final mesh decimation (after texture baking). 0.8 means keep 80% of the polys number of the model
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
-    HIGH_POLY = True                       # If false, the generation is significantly faster
+    HIGH_POLY = False                       # If false, the generation is significantly faster
     THREE_DIMENSION_GENERATION = True
-    NUMBER_OF_CHUNKS = 10
+    SLICE_MESH = False
+    NUMBER_OF_CHUNKS = 1
 
     #Gaussian
     MEAN = 0.0
@@ -46,7 +47,7 @@ class Config(Enum):
     Z_AXIS_GAUSSIAN_STANDARD_DEVIATION = 0.1        #Higher value here leads to more extremums
     Z_AXIS_LAYER_PROB = 10                          #Percentage of one node to "step down". 10 means 10%
     Z_AXIS_LAYER_STEP = 4                           #Distance of one step between layers
-
+    Z_AXIS_STEP_DOWN_XY_SHIFT = 1.2
 
     # Perlin
     MAX_SCALE = 10.0
