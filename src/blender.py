@@ -5,6 +5,7 @@ import json
 
 from bpy import context
 from  mathutils import Vector
+import random as rd
 
 
 # Get the path of the PLUME directory
@@ -64,7 +65,8 @@ class MeshGeneration:
          self.decimate_mesh_polys()
       
       # Slice mesh
-      self.slice_mesh()
+      if Config.SLICE_MESH.value:
+         self.slice_mesh()
 
       # Bake and save and apply the texture
       bpy.ops.object.select_all(action='DESELECT')
@@ -152,6 +154,13 @@ class MeshGeneration:
       bpy.context.view_layer.objects.active = self.obj
 
       self.mesh.from_pydata(verts, edges, [])
+      
+      #Merge points by distance = better graph and improved geometry
+      bpy.ops.object.editmode_toggle()
+      bpy.ops.mesh.select_all(action='SELECT')
+      bpy.ops.mesh.remove_doubles()
+      bpy.ops.object.editmode_toggle()
+
       if not self.mesh:
          return -1
       print("\t-Graph loaded")
@@ -166,12 +175,14 @@ class MeshGeneration:
       - Geometry nodes (Including texture creation)
       - Displacement
       """
-      print(f"\n{Color.BOLD.value}Start modifiers{Color.ENDC.value}")
-      mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
-      print("\t-Skin done")
-
       mod_sub = bpy.ops.object.modifier_add(type='SUBSURF')
       print("\t-Subdivision surface done")
+
+      print(f"\n{Color.BOLD.value}Start modifiers{Color.ENDC.value}")
+      mod_skin = self.obj.modifiers.new('Skin', 'SKIN')
+      print("Test skin resize")
+      self.skin_resize()
+      print("\t-Skin done")
       
       self.geometry_nodes()
 
@@ -183,13 +194,35 @@ class MeshGeneration:
       print("\t-Displacement done")
 
       # Apply modifiers
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
-      apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      # apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
       print(f"{Color.BOLD.value}Modifiers applied{Color.ENDC.value}")
 
+
+   def skin_resize(self):
+      """
+      Resize the skin of the mesh
+      """
+      print(self.obj.data.skin_vertices[''])
+      obj = bpy.context.active_object
+      size = 0.2
+      sign = 0.001
+      for vert_index in range(len(obj.data.vertices)):
+         invert_prob = rd.randint(1,3)
+         if invert_prob == 1:
+            print("Sign inverted !")
+            sign *= -1
+         obj.data.skin_vertices[''].data[vert_index].radius = (size*2, size)
+         size += sign
+      
+      #Merge points by distance = better graph and improved geometry
+      bpy.ops.object.editmode_toggle()
+      bpy.ops.mesh.select_all(action='SELECT')
+      bpy.ops.mesh.remove_doubles()
+      bpy.ops.object.editmode_toggle()
 
    def create_voronoi_texture(self):
       """
