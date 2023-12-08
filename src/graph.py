@@ -62,6 +62,7 @@ class Graph:
             for edge in edges_p:
                 self.add_edge(node_id_p, edge)
         self.nb_nodes += 1
+        return self.nodes[node_id_p]
 
 
     def add_edge(self, node_1_id, node_2_id):
