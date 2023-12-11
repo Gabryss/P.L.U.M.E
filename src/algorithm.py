@@ -142,11 +142,9 @@ class Algorithm():
         MINE CONTEXT
         Create a graph that looks like a mine structure
         """
-        print("In mine algo")
         origin = list(self.graph.nodes.values())[-1]
         self.current_node_index = self.graph.nb_nodes-1
         number_nodes = self.graph.nb_nodes
-        print(number_nodes)
         origin = self.graph.nodes[self.current_node_index]
 
         while number_nodes < Config.DEFAULT_MIN_NODES.value:
@@ -165,13 +163,10 @@ class Algorithm():
                     return 1
                 
             if not Config.THREE_DIMENSION_GENERATION.value:
-                print("yes")
                 return 1
             
             else:
-                print("no")
                 origin = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p= origin.id, coordinates_p=(origin.coordinates['x'], origin.coordinates['y'], origin.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value ), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value))
-            print("New wave", number_nodes)
 
 
     def mine_add_main_branch(self, origin_p):
@@ -179,7 +174,6 @@ class Algorithm():
         MINE CONTEXT
         Create a main branch based on the position of the origin
         """
-        print("In main branch")
         size_branch = rd.randint(2,10)
         branch = []
         last_node = None
@@ -203,7 +197,6 @@ class Algorithm():
         MINE CONTEXT
         Add small branches along an given main branch (list of nodes)
         """
-        print("In sub branch")
         for main_branch_node in branch_p:
             # Add sub branches of random size
             size_branch = rd.randint(0,5)
@@ -211,10 +204,10 @@ class Algorithm():
 
             for i in range(size_branch):
                 # 2D Rotation matrix
-                coord_x = main_branch_node.coordinates['x'] + 1
-                coord_y = main_branch_node.coordinates['y'] + 1
-                # coord_x = main_branch_node.coordinates['x'] * math.cos(math.pi/2) - main_branch_node.coordinates['y'] * math.sin(math.pi/2)
-                # coord_y = main_branch_node.coordinates['x'] * math.sin(math.pi/2) + main_branch_node.coordinates['y'] * math.cos(math.pi/2)
+                # coord_x = main_branch_node.coordinates['x'] + 1
+                # coord_y = main_branch_node.coordinates['y'] + 1
+                coord_x = main_branch_node.coordinates['x'] * math.cos(math.pi/2) - main_branch_node.coordinates['y'] * math.sin(math.pi/2)
+                coord_y = main_branch_node.coordinates['x'] * math.sin(math.pi/2) + main_branch_node.coordinates['y'] * math.cos(math.pi/2)
                 if i == 0:
                     # Create a node from the main branch node
                     # self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=self.get_coordinates_on_circle(radius_p=self.main_branch_node.radius, theta_p=45, index_p=self.main_branch_node.id), radius_p=0.5, active_p=True)
