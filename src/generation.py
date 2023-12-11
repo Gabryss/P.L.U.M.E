@@ -72,7 +72,7 @@ class Generator:
         current_graph = self.generate_graph(index)
         
         # Create picture for n graphs
-        if Config.SAVE_GRAPH_IMAGE.value:
+        if Config.GENERATE_GRAPH_IMAGE.value:
                 self.create_graph_picture(current_graph, index)
 
 
@@ -142,8 +142,9 @@ class Generator:
         print("\t-Graph important features imported")
         display.create_figure()
         print("\t-Image created")
-        display.create_image_from_graph()
-        print("\t-Image saved")        
+        if Config.SAVE_GRAPH_IMAGE.value:
+            display.save_image()
+            print("\t-Image saved")        
         print(f"{Color.OKBLUE.value} == End of graph {index} picture generation == {Color.ENDC.value}")
 
 
