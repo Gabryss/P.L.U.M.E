@@ -12,22 +12,28 @@ class Config(Enum):
         sys.path.append(PLUME_DIR)  
 
     # ==== General settings ====
+    # ==========================
     NB_GENERATION = 1
+    #Graph image
     IMAGE_FORMAT = ".png"
-    MESH_FORMAT = 'fbx'                     # Available: obj, ply(no textures), usd, fbx
-    OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
-    GENERATE_MESH = True
+    GENERATE_GRAPH_IMAGE = True
     SAVE_GRAPH_IMAGE = False
+
+    #Mesh
+    OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
+    MESH_FORMAT = 'fbx'                     # Available: obj, ply(no textures), usd, fbx    
+    GENERATE_MESH = True
     SAVE_MESH = False
     BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
-    TYPE_OF_UNDERGROUND = "MINE"            # Available: MINE (#Not available yet), CAVE
+    TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
-    DEFAULT_MIN_NODES = 250
+    # ===========================
+    DEFAULT_MIN_NODES = 50
     MAX_CREATED_NODE_ON_CIRCLE = 2
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
-    SELECTED_ALGORITHM = "mine"  # Available: gaussian_perlin, mine
+    SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin, mine
     TEXTURE_SIZE = 512                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     FINAL_DECIMATION = False
