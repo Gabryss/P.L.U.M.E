@@ -3,9 +3,10 @@ Display a graph using Plotly library
 """
 
 import plotly.graph_objs as go
+import plotly.express as px
 import os
 from config import Config, Color
-
+import pandas as pd
 
 
 class Display():
@@ -13,8 +14,9 @@ class Display():
     def __init__(self, nb_graphs_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
         self.nb_graphs = f"/{str(nb_graphs_p)}"
         self.figure = go.Figure()
-        self.figure.update_layout(paper_bgcolor = 'darkgrey')
+        self.figure.update_layout(paper_bgcolor = 'white')
         self.generation_name = generation_name_p
+        self._3dimension = Config.THREE_DIMENSION_GENERATION.value
         
         self.figure.update_xaxes(
             mirror=True,
@@ -41,7 +43,7 @@ class Display():
         self.save_image_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
     
 
-    def create_image_from_graph(self):
+    def save_image(self):
         """
         Path is without the format.
         Save the graph in the desired format
@@ -71,25 +73,58 @@ class Display():
         """
         Render the graph in the figure object
         """
-        # Create a scatter plot for each node
-        for node in self.nodes:
-            self.figure.add_trace(go.Scatter(
-                x=[self.nodes[node].coordinates['x']],
-                y=[self.nodes[node].coordinates['y']],
-                text=[self.nodes[node].id],
-                mode='markers+text',
-                textposition="bottom center"
-            ))
+        if self._3dimension :
+            df = pd.DataFrame()
+            for node in self.nodes:
+                print(self.nodes[node])
+                data = {'id':self.nodes[node].id, 'x':self.nodes[node].coordinates['x'], 'y':self.nodes[node].coordinates['y'], 'z':self.nodes[node].coordinates['z']}
+                df2 = pd.DataFrame([data])
+                df = pd.concat([df,df2], ignore_index = True)
+               
 
-        # Create a line plot for each edge
-        for edge in self.edges:
-            self.figure.add_shape(
-                type='line',
-                x0=self.nodes[edge[0]].coordinates['x'],
-                y0=self.nodes[edge[0]].coordinates['y'],
-                x1=self.nodes[edge[1]].coordinates['x'],
-                y1=self.nodes[edge[1]].coordinates['y'],
-                line=dict(width=self.edges_width, color=self.edges_color)
-            )
-        
-        self.figure.update_traces(textposition='top center')
+            df.set_index('id')
+            print(df)
+
+            for edge in self.edges:
+                self.figure.add_shape(
+                    type='line',
+                    x0=self.nodes[edge[0]].coordinates['x'],
+                    y0=self.nodes[edge[0]].coordinates['y'],
+                    x1=self.nodes[edge[1]].coordinates['x'],
+                    y1=self.nodes[edge[1]].coordinates['y'],
+                    line=dict(width=self.edges_width, color=self.edges_color)
+                )
+
+            # df = px.data.iris()
+            self.figure = px.scatter_3d(df, x='x', y='y', z='z',
+                        size_max=18,
+                        opacity=0.7)
+            
+
+            # tight layout
+            self.figure.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+            self.figure.show()
+
+        else:
+            # Create a scatter plot for each node
+            for node in self.nodes:
+                self.figure.add_trace(go.Scatter(
+                    x=[self.nodes[node].coordinates['x']],
+                    y=[self.nodes[node].coordinates['y']],
+                    text=[self.nodes[node].id],
+                    mode='markers+text',
+                    textposition="bottom center"
+                ))
+
+            # Create a line plot for each edge
+            for edge in self.edges:
+                self.figure.add_shape(
+                    type='line',
+                    x0=self.nodes[edge[0]].coordinates['x'],
+                    y0=self.nodes[edge[0]].coordinates['y'],
+                    x1=self.nodes[edge[1]].coordinates['x'],
+                    y1=self.nodes[edge[1]].coordinates['y'],
+                    line=dict(width=self.edges_width, color=self.edges_color)
+                )
+            
+            self.figure.update_traces(textposition='top center')
