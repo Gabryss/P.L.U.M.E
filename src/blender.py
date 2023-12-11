@@ -206,14 +206,12 @@ class MeshGeneration:
       """
       Resize the skin of the mesh
       """
-      print(self.obj.data.skin_vertices[''])
       obj = bpy.context.active_object
       size = 0.2
       sign = 0.001
       for vert_index in range(len(obj.data.vertices)):
          invert_prob = rd.randint(1,3)
          if invert_prob == 1:
-            print("Sign inverted !")
             sign *= -1
          obj.data.skin_vertices[''].data[vert_index].radius = (size*2, size)
          size += sign
@@ -871,6 +869,7 @@ class MeshGeneration:
             os.makedirs(os.path.dirname(self.saved_mesh_path))
 
       # Export the mesh
+      # Need to remove -> Lead to unbaked texture in the final result
       if Config.MESH_FORMAT.value == 'obj':
          bpy.ops.wm.obj_export(filepath=self.saved_mesh_path,
                                export_selected_objects=True)
