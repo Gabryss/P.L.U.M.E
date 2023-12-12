@@ -2,38 +2,21 @@
 Display a graph using Plotly library
 """
 
-import plotly.graph_objs as go
+# import plotly.graph_objs as go
+import plotly.graph_objects as go
 import plotly.express as px
 import os
 from config import Config, Color
 import pandas as pd
-
+import numpy as np
 
 class Display():
 
     def __init__(self, nb_graphs_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
         self.nb_graphs = f"/{str(nb_graphs_p)}"
         self.figure = go.Figure()
-        self.figure.update_layout(paper_bgcolor = 'white')
         self.generation_name = generation_name_p
         self._3dimension = Config.THREE_DIMENSION_GENERATION.value
-        
-        self.figure.update_xaxes(
-            mirror=True,
-            ticks='outside',
-            showline=True,
-            linecolor='black',
-            gridcolor='lightgrey',
-            tickfont=dict(family='Rockwell', color='black', size=14)
-        )
-        self.figure.update_yaxes(
-            mirror=True,
-            ticks='outside',
-            showline=True,
-            linecolor='black',
-            gridcolor='lightgrey',
-            tickfont=dict(family='Rockwell', color='black', size=14)
-        )
         self.nodes = []
         self.edges = []
         self.nodes_color = node_color_p
@@ -75,34 +58,71 @@ class Display():
         """
         if self._3dimension :
             df = pd.DataFrame()
+            df_edge = pd.DataFrame()
+            size = len(self.nodes)
+            array = np.zeros((size,size,size))
+            print(array.shape)
             for node in self.nodes:
-                print(self.nodes[node])
                 data = {'id':self.nodes[node].id, 'x':self.nodes[node].coordinates['x'], 'y':self.nodes[node].coordinates['y'], 'z':self.nodes[node].coordinates['z']}
                 df2 = pd.DataFrame([data])
                 df = pd.concat([df,df2], ignore_index = True)
-               
-
-            df.set_index('id')
-            print(df)
-
-            for edge in self.edges:
-                self.figure.add_shape(
-                    type='line',
-                    x0=self.nodes[edge[0]].coordinates['x'],
-                    y0=self.nodes[edge[0]].coordinates['y'],
-                    x1=self.nodes[edge[1]].coordinates['x'],
-                    y1=self.nodes[edge[1]].coordinates['y'],
-                    line=dict(width=self.edges_width, color=self.edges_color)
-                )
-
-            # df = px.data.iris()
-            self.figure = px.scatter_3d(df, x='x', y='y', z='z',
-                        size_max=18,
-                        opacity=0.7)
+                # array = np.r_[array,[[self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']]]]
             
 
-            # tight layout
-            self.figure.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+            df.set_index('id')
+
+
+            X, Y, Z = np.mgrid[-8:8:3j, -8:8:3j, -8:8:3j]            # values = np.sin(X*Y*Z) / (X*Y*Z)
+            print(X.flatten())
+            values = np.sin(X*Y*Z) / (X*Y*Z)
+            # values_raw /= array.max()
+
+
+            
+            print(values)
+            print("val:\n",values.flatten())
+            self.figure = go.Figure(data=go.Volume(
+                x=X.flatten(),
+                y=Y.flatten(),
+                z=Z.flatten(),
+                value=values.flatten(),
+                isomin=0.01,
+                isomax=0.8,
+                opacity=0.1, # needs to be small to see through all surfaces
+                surface_count=17, # needs to be a large number for good volume rendering
+                ))
+            self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
+            # self.figure.update_layout(scene_xaxis_showticklabels=False,
+            #                 scene_yaxis_showticklabels=False,
+            #                 scene_zaxis_showticklabels=False)
+
+            # for edge in self.edges:
+            #     # df = px.data.gapminder().query("continent=='Europe'")
+            #     data = {'x':self.nodes[edge[0]].coordinates['x'], 'y':self.nodes[edge[0]].coordinates['y'],  'z':self.nodes[edge[0]].coordinates['z']}
+            #     df1 = pd.DataFrame([data])
+            #     df = pd.concat([df, df1], ignore_index=True)
+
+            #     data = {'x':self.nodes[edge[1]].coordinates['x'], 'y':self.nodes[edge[1]].coordinates['y'],  'z':self.nodes[edge[1]].coordinates['z']}
+            #     df1 = pd.DataFrame([data])
+            #     df = pd.concat([df, df1], ignore_index=True)
+            # print(df)
+
+
+                
+            # self.figure = px.line_3d(df, x="x", y="y", z="z")
+            # self.figure.show()
+
+            # df = px.data.iris()
+            
+            
+            #Scatter
+            # self.figure = px.scatter_3d(df, x='x', y='y', z='z',
+            #             size_max=18,
+            #             opacity=0.7)
+            
+
+            # # tight layout
+            # self.figure.update_layout(margin=dict(l=0, r=0, b=0, t=0))
             self.figure.show()
 
         else:
@@ -128,3 +148,6 @@ class Display():
                 )
             
             self.figure.update_traces(textposition='top center')
+            self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
+            self.figure.show()
+
