@@ -72,26 +72,39 @@ class Display():
             df.set_index('id')
 
 
-            X, Y, Z = np.mgrid[-8:8:3j, -8:8:3j, -8:8:3j]            # values = np.sin(X*Y*Z) / (X*Y*Z)
-            print(X.flatten())
-            values = np.sin(X*Y*Z) / (X*Y*Z)
-            # values_raw /= array.max()
-
-
-            
-            print(values)
-            print("val:\n",values.flatten())
+            X, Y, Z = np.mgrid[-1:1:30j, -1:1:30j, -1:1:30j]            # values = np.sin(X*Y*Z) / (X*Y*Z)
+            values = np.sin(np.pi*X) * np.cos(np.pi*Z) * np.sin(np.pi*Y)
+            print(values.shape)
+            print(X.shape)
             self.figure = go.Figure(data=go.Volume(
                 x=X.flatten(),
                 y=Y.flatten(),
                 z=Z.flatten(),
                 value=values.flatten(),
-                isomin=0.01,
+                isomin=-0.1,
                 isomax=0.8,
                 opacity=0.1, # needs to be small to see through all surfaces
-                surface_count=17, # needs to be a large number for good volume rendering
+                surface_count=25, # needs to be a large number for good volume rendering
                 ))
+            
+            
+            # import plotly.graph_objects as go
+
+            self.figure = go.Figure(data=go.Isosurface(
+                x=[0,0,0,0,1,1,1,1],
+                y=[1,0,1,0,1,0,1,0],
+                z=[1,1,0,0,1,1,0,0],
+                value=[1,2,3,4,5,6,7,8],
+                isomin=2,
+                isomax=6,
+            ))
+
+            
             self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
+
+
+
+
             # self.figure.update_layout(scene_xaxis_showticklabels=False,
             #                 scene_yaxis_showticklabels=False,
             #                 scene_zaxis_showticklabels=False)
