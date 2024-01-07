@@ -9,7 +9,7 @@ from config import Config
 
 
 class Graph:
-    def __init__(self, generation_name_p, nb_graphs_p, max_created_node_on_circle_p):
+    def __init__(self, generation_name_p, nb_graphs_p, max_created_node_on_circle_p=3):
         """
         Create an instace of everything needed to create a graph.
         generation_name_p should be a string.
