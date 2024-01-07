@@ -3,6 +3,7 @@ Display a graph using Plotly library
 """
 
 # import plotly.graph_objs as go
+import plotly
 import plotly.graph_objects as go
 import plotly.express as px
 import os
@@ -56,48 +57,134 @@ class Display():
         """
         Render the graph in the figure object
         """
+        import matplotlib.pyplot as plt
         if self._3dimension :
-            df = pd.DataFrame()
-            df_edge = pd.DataFrame()
-            size = len(self.nodes)
-            array = np.zeros((size,size,size))
-            print(array.shape)
+            # x = np.array(range(-20, 20, 0.1))
+            # y = np.array(range(-20, 20, 0.1))
+            # z = np.array(range(-20, 20, 0.1))
+            # Xgrid, Ygrid, Zgrid = np.meshgrid(x,y,z)
+            Xgrid, Ygrid, Zgrid = np.mgrid[-10:10:50j, -10:10:50j, -10:10:50j]
+
+            # fig = plt.figure()
+            # ax = fig.add_subplot(projection='3d')
+            # for node in self.nodes:
+            #     cX, cY, cZ = self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']
+            #     radius = self.nodes[node].radius
+                
+            #     check = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
+            #     # print(check, check.shape)
+            #     # print(Xgrid[check], Xgrid[check].shape)
+                
+            #     # array = np.r_[array,[[self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']]]]
+            #     ax.scatter(Xgrid[check], Ygrid[check], Zgrid[check], color='green')
+
+            # ax.set_title('сетка из точек 100х100',
+            #             fontfamily = 'monospace',
+            #             fontstyle = 'normal',
+            #             fontweight = 'bold',
+            #             fontsize = 10)
+            # ax.set_xlabel("Value", fontsize=14)
+            # ax.set_ylabel("Square of Value", fontsize=14)
+
+            # ax.set_xlim3d(-50, 50)
+            # ax.set_ylim3d(-50, 50)
+            # ax.set_zlim3d(-50, 50)
+
+            # plt.show()
+            count = 0
             for node in self.nodes:
-                data = {'id':self.nodes[node].id, 'x':self.nodes[node].coordinates['x'], 'y':self.nodes[node].coordinates['y'], 'z':self.nodes[node].coordinates['z']}
-                df2 = pd.DataFrame([data])
-                df = pd.concat([df,df2], ignore_index = True)
-                # array = np.r_[array,[[self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']]]]
+                count +=1
+                if self.nodes[node].id == 0:
+                    cX, cY, cZ = self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']
+                    radius = 0.5
+                    values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
+                    # values=values.flatten()
+
+
+
+
+                # test = plotly.graph_objects.Volume(
+                #     x=Xgrid.flatten(),
+                #     y=Ygrid.flatten(),
+                #     z=Zgrid.flatten(),
+                #     value=values.flatten(),
+                #     isomin=-0.1,
+                #     isomax=0.8,
+                #     opacity=0.1, # needs to be small to see through all surfaces
+                #     surface_count=25, # needs to be a large number for good volume rendering
+                # )
+                # data_3d.append(plotly.graph_objects.Volume(
+                #     x=Xgrid.flatten(),
+                #     y=Ygrid.flatten(),
+                #     z=Zgrid.flatten(),
+                #     value=values.flatten(),
+                #     isomin=-0.1,
+                #     isomax=0.8,
+                #     opacity=0.1, # needs to be small to see through all surfaces
+                #     surface_count=17, # needs to be a large number for good volume rendering
+                # ))
+                
+                else:
+                    cX, cY, cZ = self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']
+                    radius = 0.5
+                    new_values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
+                    # new_values.flatten()
+
+                    values = np.logical_or(values, new_values)
+                    # for i in range(len(values)):
+                    #     for j in range(len(values)):
+                    #         for k in range(len(values)):
+                    #             if new_values[i][j][k] == True:
+                    #                 values[i][j][k] == True
+                    
+                    # print(values, values.shape)
+                    # print(Xgrid[values], Xgrid[values].shape)
+                
             
+            self.figure.add_trace(go.Streamtube(x=[0, 0, 1], y=[0, 1, 2], z=[0, 0, 0], 
+                                       u=[0, 0, 0], v=[1, 1, 1], w=[0, 0, 0]))
 
-            df.set_index('id')
-
-
-            X, Y, Z = np.mgrid[-1:1:30j, -1:1:30j, -1:1:30j]            # values = np.sin(X*Y*Z) / (X*Y*Z)
-            values = np.sin(np.pi*X) * np.cos(np.pi*Z) * np.sin(np.pi*Y)
-            print(values.shape)
-            print(X.shape)
+            # X, Y, Z = np.mgrid[-1:1:30j, -1:1:30j, -1:1:30j]            # values = np.sin(X*Y*Z) / (X*Y*Z)
+            # values = np.sin(np.pi*X) * np.cos(np.pi*Z) * np.sin(np.pi*Y)
+            # self.figure = go.Figure(data=data_3d)
             self.figure = go.Figure(data=go.Volume(
-                x=X.flatten(),
-                y=Y.flatten(),
-                z=Z.flatten(),
+                x=Xgrid.flatten(),
+                y=Ygrid.flatten(),
+                z=Zgrid.flatten(),
                 value=values.flatten(),
-                isomin=-0.1,
-                isomax=0.8,
+                isomin=-1,
+                isomax=1,
                 opacity=0.1, # needs to be small to see through all surfaces
-                surface_count=25, # needs to be a large number for good volume rendering
+                surface_count=20, # needs to be a large number for good volume rendering
                 ))
             
-            
-            # import plotly.graph_objects as go
+            df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/streamtube-wind.csv').drop(['Unnamed: 0'],axis=1)
+            print(df)
+            print(df['x'])
+            x, y, z = np.mgrid[0:10, 0:10, 0:10]
+            x = x.flatten()
+            y = y.flatten()
+            z = z.flatten()
 
-            self.figure = go.Figure(data=go.Isosurface(
-                x=[0,0,0,0,1,1,1,1],
-                y=[1,0,1,0,1,0,1,0],
-                z=[1,1,0,0,1,1,0,0],
-                value=[1,2,3,4,5,6,7,8],
-                isomin=2,
-                isomax=6,
-            ))
+            u = np.zeros_like(x)
+            v = np.zeros_like(y)
+            w = z**2
+            self.figure.add_trace(go.Streamtube(x=x,
+                                                y=y,
+                                                z=z,
+                                                u=u,
+                                                v=v,
+                                                w=w))
+
+            # self.figure = go.Figure(data=go.Isosurface(
+            #     x=[0,0,0,0,2,2,2,2],
+            #     y=[3,0,3,0,3,0,3,0],
+            #     z=[2,2,5,5,2,2,5,5],
+            #     value=[2,2,3,4,5,6,7,8],
+            #     isomin=2,
+            #     isomax=6,
+            #     colorscale='magma',
+            # ))
 
             
             self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
