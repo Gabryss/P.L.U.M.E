@@ -1,4 +1,5 @@
 from graph import Graph
+from node import Node
 from display import Display
 from algorithm import Algorithm
 from config import Color, Config
@@ -9,6 +10,8 @@ import multiprocessing
 from tools import Tools
 import random as rd
 import time
+import json
+import math
 
 class Generator:
 
@@ -28,6 +31,19 @@ class Generator:
 
         if graph_path_p:
             self.graph_path = graph_path_p
+            # Create picture for n graphs
+            if Config.GENERATE_GRAPH_IMAGE.value:
+                    data_file = open(self.graph_path)
+                    data = json.load(data_file)
+                    re_generated_graph = Graph(self.name,0)
+                    for i in range(len(data['nodes'])):
+                        re_generated_graph.nodes[i] = Node(
+                            i, 
+                            data['nodes'][f'{i}']['parent'], 
+                            data['nodes'][f'{i}']['edges'], 
+                            coordinates_p=[data['nodes'][f'{i}']['coordinates']['x'], data['nodes'][f'{i}']['coordinates']['y'], data['nodes'][f'{i}']['coordinates']['z']], 
+                            radius_p=data['nodes'][f'{i}']['radius'])
+                    self.create_graph_picture(re_generated_graph, 0)
             self.create_mesh(0, graph_path_p=self.graph_path)
         else:
             # Start generation
@@ -207,6 +223,7 @@ class Generator:
                     if error:
                         print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
                 duration = (time.time() - self.starting_time) / 60
+                # seconds = math.round((duration % 1)*)
                 print("Duration of the generation: ", duration," minutes")
                 print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
 
