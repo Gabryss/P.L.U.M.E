@@ -68,6 +68,9 @@ class MeshGeneration:
       # Slice mesh
       if Config.SLICE_MESH.value:
          self.slice_mesh()
+         
+      else:
+         self.chunks = bpy.context.scene.objects.items()
 
       # Bake and save and apply the texture
       bpy.ops.object.select_all(action='DESELECT')
