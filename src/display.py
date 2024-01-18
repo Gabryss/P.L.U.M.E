@@ -62,7 +62,7 @@ class Display():
    
             Xgrid, Ygrid, Zgrid = np.mgrid[-10:10:50j, -10:10:50j, -10:10:50j]
             count = 0
-            for node in self.nodes:
+            for node in tqdm(self.nodes, desc="                Progress"):
                 count +=1
                 if self.nodes[node].id == 0:
                     cX, cY, cZ = self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']
@@ -118,7 +118,7 @@ class Display():
 
         else:
             # Create a scatter plot for each node
-            for node in self.nodes:
+            for node in tqdm(self.nodes, desc="                Progress"):
                 self.figure.add_trace(go.Scatter(
                     x=[self.nodes[node].coordinates['x']],
                     y=[self.nodes[node].coordinates['y']],
