@@ -6,6 +6,7 @@ import json
 from bpy import context
 from  mathutils import Vector
 import random as rd
+import time
 
 
 # Get the path of the PLUME directory
@@ -194,11 +195,11 @@ class MeshGeneration:
       print("\t-Displacement done")
 
       # Apply modifiers
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
-      # apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Skin') # Create a mesh skin arount the graph
+      apply_mod = bpy.ops.object.modifier_apply(modifier='GeometryNodes')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Subdivision.001')
+      apply_mod = bpy.ops.object.modifier_apply(modifier='Displace')
       print(f"{Color.BOLD.value}Modifiers applied{Color.ENDC.value}")
 
 
@@ -554,7 +555,7 @@ class MeshGeneration:
       print(f"{Color.CVIOLET.value}\t\t\t--Material successfully created--{Color.ENDC.value}")
 
       return self.material
-
+   
 
    def bake_texture(self, material_tree_p):
       """
@@ -573,12 +574,14 @@ class MeshGeneration:
       uv_layer.active
       bpy.ops.object.editmode_toggle()
       bpy.ops.mesh.select_all(action='SELECT')
+      t1 = time.time()
       uv_map = bpy.ops.uv.smart_project()
-      print("\t-UV map Done")
+      t2 = time.time()
+      end_time = (t2-t1)/60
+      print(f"\t-UV map Done, process took {int(end_time)} minutes and {round(end_time%1*60, 3)} seconds")
       bpy.ops.object.editmode_toggle()
       print(f"{Color.BOLD.value}UV map completed{Color.ENDC.value}")
 
-      print(obj.name)
 
       print(f"\n{Color.BOLD.value}Start texture baking process{Color.ENDC.value}")
       print(f"{Color.CBLINK.value}Can take some time{Color.ENDC.value}")
@@ -628,8 +631,11 @@ class MeshGeneration:
       material.node_tree.nodes.active = color_image_node
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
+      t1 = time.time()
       bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
-      print("\t-Texture baked")
+      t2 = time.time()
+      end_time = (t2-t1)/60
+      print(f"\t-Texture baked, process took {int(end_time)} minutes and {round(end_time%1*60, 3)} seconds")
       color_image.save_render(filepath= self.saved_texture_path + f'color_texture_{obj.name}.png')
       print("\t-Image saved")
       color_image_node.select = False
@@ -642,8 +648,11 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'NORMAL'
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
+      t1 = time.time()
       bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
-      print("\t-Texture baked")
+      t2 = time.time()
+      end_time = (t2-t1)/60
+      print(f"\t-Texture baked, process took {int(end_time)} minutes and {round(end_time%1*60, 3)} seconds")
       normal_image.save_render(filepath= self.saved_texture_path + f'normal_texture_{obj.name}.png')
       print("\t-Image saved")
       normal_image_node.select = False
@@ -657,8 +666,11 @@ class MeshGeneration:
       bpy.context.scene.cycles.bake_type = 'ROUGHNESS'
       obj.select_set(True)
       bpy.context.view_layer.objects.active = obj
+      t1 = time.time()
       bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
-      print("\t-Texture baked")
+      t2 = time.time()
+      end_time = (t2-t1)/60
+      print(f"\t-Texture baked, process took {int(end_time)} minutes and {round(end_time%1*60, 3)} seconds")
       roughness_image.save_render(filepath= self.saved_texture_path + f'roughness_texture_{obj.name}.png')
       print("\t-Image saved")
       roughness_image_node.select = False
