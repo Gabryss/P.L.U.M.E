@@ -2,13 +2,11 @@
 Display a graph using Plotly library
 """
 
-# import plotly.graph_objs as go
-import plotly
 import plotly.graph_objects as go
 import plotly.express as px
 import os
-from config import Config, Color
-import pandas as pd
+from config import Config
+from tqdm import tqdm
 import numpy as np
 
 class Display():
@@ -83,15 +81,15 @@ class Display():
                         c_next = np.array([cX_next, cY_next, cZ_next])
                         dist = np.linalg.norm(c - c_next)
 
-                        if dist < 1.0:
-                            x_f = np.linspace(c[0],c_next[0],int(dist))
-                            y_f = np.linspace(c[1],c_next[1],int(dist))
-                            z_f = np.linspace(c[2],c_next[2],int(dist))
+                        if dist <= 0.5:
+                            x_f = np.linspace(c[0],c_next[0],1)
+                            y_f = np.linspace(c[1],c_next[1],1)
+                            z_f = np.linspace(c[2],c_next[2],1)
                         
                         else:
-                            x_f = np.linspace(c[0],c_next[0],int(dist*2))
-                            y_f = np.linspace(c[1],c_next[1],int(dist*2))
-                            z_f = np.linspace(c[2],c_next[2],int(dist*2))
+                            x_f = np.linspace(c[0],c_next[0],int(dist*1.5))
+                            y_f = np.linspace(c[1],c_next[1],int(dist*1.5))
+                            z_f = np.linspace(c[2],c_next[2],int(dist*1.5))
                         
                         for i in range(len(x_f)):
                             new_values+= (Xgrid - x_f[i])**2 + (Ygrid - y_f[i])**2 + (Zgrid - z_f[i])**2 <= radius**2
