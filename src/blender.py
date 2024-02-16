@@ -26,10 +26,7 @@ class MeshGeneration:
    def __init__(self, generation_name_p, index_p, graph_path_p) -> None:
       self.generation_name = str(generation_name_p)
       self.index = str(index_p)
-      if graph_path_p == "-g":
-         self.path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/data.json"
-      else:
-         self.path = graph_path_p
+      self.path = graph_path_p+"/data.json"
       self.saved_mesh_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/mesh."+Config.MESH_FORMAT.value
       self.saved_texture_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+"/"+self.index+"/"
       self.json_file = open(self.path)
