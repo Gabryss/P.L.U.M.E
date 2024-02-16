@@ -11,7 +11,7 @@ from tools import Tools
 import random as rd
 import time
 import json
-import math
+import os
 
 class Generator:
 
@@ -22,74 +22,77 @@ class Generator:
         self.graphs=[]
 
         self.starting_time = time.time()
+        self.graph_path = []
 
         # Get the name of the current graph generation
         if name_p == None or '':
             self.name = Config.DEFAULT_NAME.value
         else:
             self.name = name_p +"_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        
+        if graph_path_p == None or '':
+            self.graph_path = None
+        else:
+            # Check if mutli-node generation
+            self.name = f'{graph_path_p}_regen_{datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")}'
+            graph_path_p = f'{os.getcwd()}/data/{graph_path_p}'
+            dir_ = os.listdir(graph_path_p)
+            if os.path.isdir(f'{graph_path_p}/{dir_[0]}'):
+                # Multi-node generation
+                for path in dir_:
+                    self.graph_path.append(str(f'{graph_path_p}/{path}'))
+            else:
+                self.graph_path = graph_path_p
 
-        if graph_path_p:
-            self.graph_path = graph_path_p
-            # Create picture for n graphs
-            if Config.GENERATE_GRAPH_IMAGE.value:
-                    data_file = open(self.graph_path)
-                    data = json.load(data_file)
-                    re_generated_graph = Graph(self.name,0)
-                    for i in range(len(data['nodes'])):
-                        re_generated_graph.nodes[i] = Node(
-                            i, 
-                            data['nodes'][f'{i}']['parent'], 
-                            data['nodes'][f'{i}']['edges'], 
-                            coordinates_p=[data['nodes'][f'{i}']['coordinates']['x'], data['nodes'][f'{i}']['coordinates']['y'], data['nodes'][f'{i}']['coordinates']['z']], 
-                            radius_p=data['nodes'][f'{i}']['radius'])
-                    self.create_graph_picture(re_generated_graph, 0)
-            self.create_mesh(0, graph_path_p=self.graph_path)
+
+        if self.graph_path:
+            # Regenerate graph
+            if type(self.graph_path) == list:
+                index = 0
+                for path in self.graph_path:
+                    if Config.GENERATE_GRAPH_IMAGE.value:
+                        saving_path = os.getcwd()+'/data/'+self.name+'/'+ str(index)
+                        self.create_graph_picture(path_p=path, saving_path_p=saving_path)
+                    self.create_mesh(index, graph_path_p=path)
+                    index+=1
+                                
+            else:
+                if Config.GENERATE_GRAPH_IMAGE.value:
+                        saving_path = os.getcwd()+'/data/'+self.name
+                        self.create_graph_picture(path_p=path, saving_path_p=saving_path)
+                self.create_mesh(0, graph_path_p=self.graph_path)
+
         else:
             # Start generation
-            if self.nb_graphs==1:
-                self.generator(0)
+            if Config.PARALLELIZATION.value:
+                # Make n graphs in different CPU cores (Only for the graph generation)  
+                list_process = [i for i in range(self.nb_graphs)]
+                with multiprocessing.Pool(processes=self.nb_graphs) as pool:
+                    result = pool.map(self.generator, list_process)
                 # Create the mesh
                 if Config.GENERATE_MESH.value:
-                    self.create_mesh(0)
-            
-            elif Config.PARALLELIZATION.value:
-                # Make n graphs in different CPU cores (Only for the graph generation)  
-                if self.nb_graphs>1:
-                    list_process = [i for i in range(self.nb_graphs)]
-                    with multiprocessing.Pool(processes=self.nb_graphs) as pool:
-                        result = pool.map(self.generator, list_process)
-                    # Create the mesh
-                    if Config.GENERATE_MESH.value:
-                        for index in list_process:
-                            self.create_mesh(index)
-
-                else:
-                    print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
-                    exit()
+                    for index in list_process:
+                        path = f'{os.getcwd()}/data/{self.name}/{index}'
+                        self.create_mesh(index, graph_path_p=path)
             
             else:
-                if self.nb_graphs>1:
-                    for index in range(self.nb_graphs):
-                        self.generator(index)
-                        if Config.GENERATE_MESH.value:
-                            self.create_mesh(index)
-                else:
-                    print(f"{Color.FAIL.value}Number of graphs not valid{Color.ENDC.value}")
-                    exit()
+                for index in range(self.nb_graphs):
+                    path = os.getcwd()+'/data/'+self.name+'/'+str(index)
+                    self.generator(index, path)
+                    if Config.GENERATE_MESH.value:
+                        self.create_mesh(index, graph_path_p=path)
 
 
-
-    def generator(self, index_p):
+    def generator(self, index_p, path_p):
         """
         Main generation frame. Used for multiprocessing
         """
         index = index_p
-        current_graph = self.generate_graph(index)
+        self.generate_graph(index)
         
         # Create picture for n graphs
         if Config.GENERATE_GRAPH_IMAGE.value:
-                self.create_graph_picture(current_graph, index)
+                self.create_graph_picture(path_p = path_p, saving_path_p=path_p)
 
 
     def generate_graph(self, index_p):
@@ -145,23 +148,21 @@ class Generator:
         return graph
     
 
-    def create_graph_picture(self, graph_p, index_p):
+    def create_graph_picture(self, path_p, saving_path_p):
         """
         Display the created graph
         """
-        graph = graph_p
-        index = index_p
-        print(f"\n{Color.OKBLUE.value} == Graph {index} picture generation == {Color.ENDC.value}")
-        display = Display(nb_graphs_p=index, generation_name_p=self.name)
+        print(f"\n{Color.OKBLUE.value} == Graph picture generation == {Color.ENDC.value}")
+        display = Display(path_p=path_p, saving_path_p=saving_path_p, generation_name_p=self.name)
         print("\t-Display object created")
-        display.process_graph(graph)
+        display.process_graph()
         print("\t-Graph important features imported")
         display.create_figure()
         print("\t-Image created")
         if Config.SAVE_GRAPH_IMAGE.value:
             display.save_image()
             print("\t-Image saved")        
-        print(f"{Color.OKBLUE.value} == End of graph {index} picture generation == {Color.ENDC.value}")
+        print(f"{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
 
 
     def create_mesh(self, index_p, graph_path_p=None):
@@ -169,63 +170,34 @@ class Generator:
         Create the mesh using Blender
         """
         blender_path = Tools.find_file("blender")
-        if graph_path_p:
-            print(f"\n{Color.OKBLUE.value} == Mesh re-generation start == {Color.ENDC.value}")
-            result = None
-            try:
-                if Config.OPEN_VISUALIZATION.value:
-                    result = subprocess.run(f"{blender_path} --python src/blender.py -- -g {graph_path_p} -index 0 -name {self.name}", shell=True, check=True)
-                else:
-                    result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g {graph_path_p} -index 0 -name {self.name}", shell=True, check=True)
-            
-            except Exception as e:
-                print(f"\n{Color.FAIL.value}An issue occured: ",e)
-                print(f"The blender path might be wrong, please check the path.json file")
-                print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
-                exit()
+        index = index_p
 
-            finally:
-                if result:
-                    success = result.stdout
-                    if success:
-                        print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
-                    
-                    error = result.stderr
-                    if error:
-                        print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
-                duration = (time.time() - self.starting_time) / 60
-                print("Duration of the generation: ", duration," minutes")
-                print(f"\n{Color.OKBLUE.value} == Mesh re-generation finished == {Color.ENDC.value}")
+        print(f"\n{Color.OKBLUE.value} == Mesh generation start == {Color.ENDC.value}")
+        result = None
+        try:
+            if Config.OPEN_VISUALIZATION.value:
+                result = subprocess.run(f"{blender_path} --python src/blender.py -- -g {graph_path_p} -index {index} -name {self.name}", shell=True, check=True)
+            else:
+                result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g {graph_path_p} -index {index} -name {self.name}", shell=True, check=True)
+        
+        except Exception as e:
+            print(f"\n{Color.FAIL.value}An issue occured: ",e)
+            print(f"The blender path might be wrong, please check the path.json file")
+            print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
+            exit()
 
-        else:
-            index = index_p
-            print(f"\n{Color.OKBLUE.value} == Mesh {index} generation start == {Color.ENDC.value}")
-            result = None
-            try:
-                if Config.OPEN_VISUALIZATION.value and index == self.nb_graphs-1:
-                    result = subprocess.run(f"{blender_path} --python src/blender.py -- -g -index {index} -name {self.name}", shell=True, check=True)
-                else:
-                    result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g -index {index} -name {self.name}", shell=True, check=True)
-            
-            except Exception as e:
-                print(f"\n{Color.FAIL.value}An issue occured: ",e)
-                print(f"The blender path might be wrong, please check the path.json file")
-                print(f"If it is the case, please remove the path.json file{Color.ENDC.value}")
-                exit()
-
-            finally:
-                if result:
-                    success = result.stdout
-                    if success:
-                        print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
-                    
-                    error = result.stderr
-                    if error:
-                        print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
-                duration = (time.time() - self.starting_time) / 60
-                # seconds = math.round((duration % 1)*)
-                print("Duration of the generation: ", duration," minutes")
-                print(f"\n{Color.OKBLUE.value} == Mesh {index} generation finished == {Color.ENDC.value}")
+        finally:
+            if result:
+                success = result.stdout
+                if success:
+                    print(f"{Color.OKGREEN.value}Success: ", success,f"{Color.ENDC.value}")
+                
+                error = result.stderr
+                if error:
+                    print(f"{Color.FAIL.value}Error: ", error,f"{Color.ENDC.value}")
+            duration = (time.time() - self.starting_time) / 60
+            print("Duration of the generation: ", duration," minutes")
+            print(f"\n{Color.OKBLUE.value} == Mesh generation finished == {Color.ENDC.value}")
 
 
 
