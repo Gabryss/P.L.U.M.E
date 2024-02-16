@@ -8,22 +8,24 @@ import os
 from config import Config
 from tqdm import tqdm
 import numpy as np
+import json
 
 class Display():
 
-    def __init__(self, nb_graphs_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
-        self.nb_graphs = f"/{str(nb_graphs_p)}"
+    def __init__(self, path_p, saving_path_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
+        self.path = path_p
         self.figure = go.Figure()
         self.generation_name = generation_name_p
         self._3dimension = Config.THREE_DIMENSION_GENERATION.value
         self.nodes = []
-        self.edges = []
+        self.parents = []
+        self.coordinates = []
         self.nodes_color = node_color_p
         self.edges_color = edge_color_p
         self.nodes_size = node_width_p
         self.edges_width = edge_width_p
-        self.save_image_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/graph"+Config.IMAGE_FORMAT.value
-        self.save_html_image_path = Config.PLUME_DIR.value+"/data/"+self.generation_name+self.nb_graphs+"/graph.html"
+        self.save_image_path = saving_path_p + "/graph"+Config.IMAGE_FORMAT.value
+        self.save_html_image_path = saving_path_p + "/graph.html"
 
     def save_image(self):
         """
@@ -45,13 +47,21 @@ class Display():
             self.figure.write_html(self.save_html_image_path)
 
 
-    def process_graph(self, graph_p):
+    def process_graph(self):
         """
         Take in input the nodes and edges of the graph and store the important parameters for the
         rendering inside the display class.
         """
-        self.nodes = graph_p.nodes
-        self.edges = graph_p.get_edges()
+        data_file = open(self.path + '/data.json')
+        data = json.load(data_file)
+        for node in data['nodes']:
+            self.nodes.append(int(node))
+            parent = data['nodes'][node]['parent']
+            self.coordinates.append(data['nodes'][node]['coordinates'])
+            if parent:
+                self.parents.append([int(node), parent])
+            else:
+                self.parents.append([int(node), 0])
 
 
     def create_figure(self):
@@ -64,18 +74,18 @@ class Display():
             count = 0
             for node in tqdm(self.nodes, desc="                Progress"):
                 count +=1
-                if self.nodes[node].id == 0:
-                    cX, cY, cZ = self.nodes[node].coordinates['x'],self.nodes[node].coordinates['y'],self.nodes[node].coordinates['z']
+                if node == 0:
+                    cX, cY, cZ = self.coordinates[node]['x'], self.coordinates[node]['y'], self.coordinates[node]['z']
                     radius = 0.5
                     values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
                 
                 else:
-                    cX, cY, cZ = self.nodes[node].coordinates['x'], self.nodes[node].coordinates['y'], self.nodes[node].coordinates['z']
+                    cX, cY, cZ = self.coordinates[node]['x'], self.coordinates[node]['y'], self.coordinates[node]['z']
                     
                     radius = 0.5
                     new_values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
                     if count != len(self.nodes):
-                        cX_next, cY_next, cZ_next = self.nodes[count].coordinates['x'], self.nodes[count].coordinates['y'], self.nodes[count].coordinates['z']
+                        cX_next, cY_next, cZ_next = self.coordinates[count]['x'], self.coordinates[count]['y'], self.coordinates[count]['z']
                         
                         c = np.array([cX, cY, cZ])
                         c_next = np.array([cX_next, cY_next, cZ_next])
@@ -120,21 +130,20 @@ class Display():
             # Create a scatter plot for each node
             for node in tqdm(self.nodes, desc="                Progress"):
                 self.figure.add_trace(go.Scatter(
-                    x=[self.nodes[node].coordinates['x']],
-                    y=[self.nodes[node].coordinates['y']],
-                    text=[self.nodes[node].id],
+                    x=[self.coordinates[node]['x']],
+                    y=[self.coordinates[node]['y']],
+                    text=[node],
                     mode='markers+text',
                     textposition="bottom center"
                 ))
 
-            # Create a line plot for each edge
-            for edge in self.edges:
+                # Create a line plot for each edge
                 self.figure.add_shape(
                     type='line',
-                    x0=self.nodes[edge[0]].coordinates['x'],
-                    y0=self.nodes[edge[0]].coordinates['y'],
-                    x1=self.nodes[edge[1]].coordinates['x'],
-                    y1=self.nodes[edge[1]].coordinates['y'],
+                    x0=self.coordinates[self.parents[node][0]]['x'],
+                    y0=self.coordinates[self.parents[node][0]]['y'],
+                    x1=self.coordinates[self.parents[node][1]]['x'],
+                    y1=self.coordinates[self.parents[node][1]]['y'],
                     line=dict(width=self.edges_width, color=self.edges_color)
                 )
             
