@@ -14,14 +14,16 @@ class Config(Enum):
     # ==== General settings ====
     # ==========================
     NB_GENERATION = 1
+    GENERATION_SIZE = (10,10,10)            # Size of the generated environment
+    
     #Graph image
     IMAGE_FORMAT = ".png"
     GENERATE_GRAPH_IMAGE = True
-    SAVE_GRAPH_IMAGE = False
+    SAVE_GRAPH_IMAGE = True
 
     #Mesh
     OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
-    MESH_FORMAT = 'fbx'                     # Available: obj, ply(no textures), usd, fbx    
+    MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True
     SAVE_MESH = False
     BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
@@ -34,14 +36,14 @@ class Config(Enum):
     MAX_RADIUS_NODE = 5.0
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10
     SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin, mine
-    TEXTURE_SIZE = 512                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    TEXTURE_SIZE = 1024                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
     MAX_MESH_TRIANGLES = 1000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     FINAL_DECIMATION = False
     FINAL_DECIMATION_FACTOR = 0.8           # Percentage of final mesh decimation (after texture baking). 0.8 means keep 80% of the polys number of the model
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
     HIGH_POLY = False                       # If false, the generation is significantly faster
-    THREE_DIMENSION_GENERATION = True
+    THREE_DIMENSION_GENERATION = False
     SLICE_MESH = False
     NUMBER_OF_CHUNKS = 1
 

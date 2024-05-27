@@ -6,14 +6,14 @@ from config import Config
 
 class Algorithm():
     
-    def __init__(self, graph_p, min_nodes_p = 4, loop_closure_probability_p = 10):
+    def __init__(self, graph_p, loop_closure_probability_p = 10):
         self.graph = graph_p
         self.iterations = 0
-        self.min_nodes = min_nodes_p
         self.loop_closure_probability = loop_closure_probability_p
         self.angles = np.arange(360)
         self.current_node_index=1
         self.stop_algorithm = False
+        self.max_node_distance = 0
 
 
     def algorithm(self, selected_algorithm="gaussian_perlin"):
@@ -47,9 +47,15 @@ class Algorithm():
         Execute the Gaussian-Perlin algorithm
         """
         self.current_node_index = self.graph.nb_nodes-1
-        for i in range(self.min_nodes):           
+        while 1:
+        # for i in range(self.min_nodes):           
             current_node = self.graph.nodes[self.current_node_index]
+            self.max_node_distance = max(self.max_node_distance, current_node.coordinates['x'], current_node.coordinates['y'], current_node.coordinates['z'])
             
+            # Doesn't take into account each edge of the cube but only the max edge => need to redo the function to take every edge into account
+            if any(self.max_node_distance > dist / 2 for dist in Config.GENERATION_SIZE.value):
+                pass
+
             parent_node = self.graph.nodes[self.graph.nodes[current_node.id].parent]
             angle_parent = self.calculate_angle(parent_node, current_node)
 
