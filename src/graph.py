@@ -2,8 +2,10 @@ from node import Node
 import random as rd
 import numpy as np
 import json 
+import time
 import os
 import math
+import datetime
 
 from config import Config
 
@@ -15,6 +17,7 @@ class Graph:
         generation_name_p should be a string.
         nb_graphs_p should be an integer.
         """
+        self.starting_time = time.time()
         self.data = {}
         self.nodes = {}
         self.nb_nodes = 0
@@ -130,14 +133,64 @@ class Graph:
         # Create the target directory if it does not exist
         if not os.path.exists(os.path.dirname(self.save_graph_path)):
             os.makedirs(os.path.dirname(self.save_graph_path))
-        
+        duration_graph_generation = (time.time() - self.starting_time) / 60
+
+        # General metadata
+        self.data['generation_name'] = self.generation_name
+        self.data['date'] = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        self.data['graph_generation_duration_minutes'] = duration_graph_generation
+        self.data['generation_size'] = Config.GENERATION_SIZE.value
         if Config.THREE_DIMENSION_GENERATION.value:
             self.data["generation_dimension"] = '3D'
         else:
             self.data["generation_dimension"] = '2D'
 
         self.data['generation_type'] = Config.TYPE_OF_UNDERGROUND.value
+        self.data['selected_algorithm'] = Config.SELECTED_ALGORITHM.value
+        self.data['gpu_acceleration'] = Config.GPU_ACCELERATION.value
+        self.data['parallelization'] = Config.PARALLELIZATION.value
+        self.data['high_poly'] = Config.HIGH_POLY.value
+
+        # Visualization metadata
+        self.data['node_visualization'] = Config.GENERATE_GRAPH_IMAGE.value
+        self.data['node_visualization_format'] = Config.IMAGE_FORMAT.value
+        self.data['node_visualization_saved'] = Config.SAVE_GRAPH_IMAGE.value
+        self.data['mesh_visualization'] = Config.OPEN_VISUALIZATION.value
+
+        # Mesh metadata
+        self.data['mesh_format'] = Config.MESH_FORMAT.value
+        self.data['mesh_generated'] = Config.GENERATE_MESH.value
+        self.data['mesh_saved'] = Config.SAVE_MESH.value
+        self.data['mesh_max_triangles'] = Config.MAX_MESH_TRIANGLES.value
+        self.data['mesh_sliced'] = Config.SAVE_MESH.value
+        self.data['mesh_number_slices'] = Config.NUMBER_OF_CHUNKS.value
+        self.data['mesh_final_decimation'] = Config.FINAL_DECIMATION.value
+        self.data['mesh_final_decimation_factor'] = Config.FINAL_DECIMATION_FACTOR.value
+
+        # Texture metadata
+        self.data['texture_baked'] = Config.BAKE_TEXTURE.value
+        self.data['texture_size'] = Config.TEXTURE_SIZE.value
+
+        # Gaussian and Z axis metadata
+        self.data['gaussian_mean'] = Config.MEAN.value
+        self.data['gaussian_standard_deviation'] = Config.STANDARD_DEVIATION.value
+        self.data['z_axis_gaussian_mean'] = Config.Z_AXIS_GAUSSIAN_MEAN.value
+        self.data['z_axis_gaussian_standard_deviation'] = Config.Z_AXIS_GAUSSIAN_STANDARD_DEVIATION.value
+        self.data['z_axis_layer_probability'] = Config.Z_AXIS_LAYER_PROB.value
+        self.data['z_axis_layer_step_size'] = Config.Z_AXIS_LAYER_STEP.value
+        self.data['z_axis_step_xy_shift'] = Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+        # Perlin metadata
+        self.data['perlin_max_scale'] = Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+        self.data['perlin_max_octave'] = Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+        self.data['perlin_max_persistence'] = Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+        self.data['perlin_max_lacunarity'] = Config.Z_AXIS_STEP_DOWN_XY_SHIFT.value
+
+
+        # Nodes metadata
+        self.data['nodes_number'] = self.nb_nodes
+        self.data['nodes_max_new_nodes_created'] = Config.MAX_CREATED_NODE_ON_CIRCLE.value
+        self.data['nodes_radius'] = Config.MAX_RADIUS_NODE.value
         self.data['nodes'] = self.nodes
         
         with open(self.save_graph_path, "w") as outfile:
-                json.dump(self.data, outfile, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+                json.dump(self.data, outfile, default=lambda o: o.__dict__, sort_keys=False, indent=4)
