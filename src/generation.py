@@ -1,5 +1,4 @@
 from graph import Graph
-from node import Node
 from display import Display
 from algorithm import Algorithm
 from config import Color, Config
@@ -113,7 +112,7 @@ class Generator:
         print("\t-First node added")
 
         # Main logic
-        algorithm = Algorithm(graph_p=graph, min_nodes_p=Config.DEFAULT_MIN_NODES.value, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
+        algorithm = Algorithm(graph_p=graph, loop_closure_probability_p=Config.DEFAULT_LOOP_CLOSURE_PROBABILITY.value)
         algorithm.algorithm(Config.SELECTED_ALGORITHM.value)
         print("\t-Algorithm applied to the graph")
 
