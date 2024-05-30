@@ -47,14 +47,10 @@ class Algorithm():
         Execute the Gaussian-Perlin algorithm
         """
         self.current_node_index = self.graph.nb_nodes-1
-        while 1:
+        while self.graph.nb_nodes < Config.NB_NODES.value:
         # for i in range(self.min_nodes):           
             current_node = self.graph.nodes[self.current_node_index]
             self.max_node_distance = max(self.max_node_distance, current_node.coordinates['x'], current_node.coordinates['y'], current_node.coordinates['z'])
-            
-            # Doesn't take into account each edge of the cube but only the max edge => need to redo the function to take every edge into account
-            if any(self.max_node_distance > dist / 2 for dist in Config.GENERATION_SIZE.value):
-                pass
 
             parent_node = self.graph.nodes[self.graph.nodes[current_node.id].parent]
             angle_parent = self.calculate_angle(parent_node, current_node)
@@ -87,9 +83,14 @@ class Algorithm():
             # Choose an angle based on the distribution
             nb_nodes = rd.randint(0,self.graph.max_created_node_on_circle)
             for i in range(nb_nodes):
-                chosen_angle = np.random.choice(self.angles, p=probability_final[0])
-                self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=self.current_node_index, coordinates_p=self.get_coordinates_on_circle(radius_p=self.graph.nodes[self.current_node_index].radius, theta_p=chosen_angle, index_p=self.current_node_index), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
-                        
+                if self.graph.nb_nodes < Config.NB_NODES.value:    
+                    chosen_angle = np.random.choice(self.angles, p=probability_final[0])
+                    new_node_coordinates = self.get_coordinates_on_circle(radius_p=self.graph.nodes[self.current_node_index].radius, theta_p=chosen_angle, index_p=self.current_node_index)
+                    
+                    if abs(new_node_coordinates[0]) <= Config.GENERATION_SIZE.value[0]/2 and abs(new_node_coordinates[1]) <= Config.GENERATION_SIZE.value[1]/2 and abs(new_node_coordinates[2]) <= Config.GENERATION_SIZE.value[2]/2:
+                        print(new_node_coordinates)
+                        self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=self.current_node_index, coordinates_p=new_node_coordinates, radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                            
             self.current_node_index += 1
 
             if self.current_node_index >= len(self.graph.nodes):
@@ -153,7 +154,7 @@ class Algorithm():
         number_nodes = self.graph.nb_nodes
         origin = self.graph.nodes[self.current_node_index]
 
-        while number_nodes < Config.DEFAULT_MIN_NODES.value:
+        while number_nodes < Config.NB_NODES.value:
             nb_branch = rd.randint(1,3)
             for i in range(nb_branch):
                 # Create a main branch
@@ -194,7 +195,7 @@ class Algorithm():
                 last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(origin_p.coordinates['x']+shift[0]*i,origin_p.coordinates['y']+shift[1]*i,origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
                 branch.append(last_node)
             # Check if number of desired nodes reached
-            if self.graph.nb_nodes >= Config.DEFAULT_MIN_NODES.value:
+            if self.graph.nb_nodes >= Config.NB_NODES.value:
                 return 0
         return branch
 
@@ -222,7 +223,7 @@ class Algorithm():
                     # Extend the sub branch
                     last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(coord_x+i, coord_y+i, main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
 
-                if self.graph.nb_nodes >= Config.DEFAULT_MIN_NODES.value:
+                if self.graph.nb_nodes >= Config.NB_NODES.value:
                     return 0
         return 1
 
