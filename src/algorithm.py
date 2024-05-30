@@ -88,7 +88,6 @@ class Algorithm():
                     new_node_coordinates = self.get_coordinates_on_circle(radius_p=self.graph.nodes[self.current_node_index].radius, theta_p=chosen_angle, index_p=self.current_node_index)
                     
                     if abs(new_node_coordinates[0]) <= Config.GENERATION_SIZE.value[0]/2 and abs(new_node_coordinates[1]) <= Config.GENERATION_SIZE.value[1]/2 and abs(new_node_coordinates[2]) <= Config.GENERATION_SIZE.value[2]/2:
-                        print(new_node_coordinates)
                         self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=self.current_node_index, coordinates_p=new_node_coordinates, radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
                             
             self.current_node_index += 1
@@ -173,7 +172,8 @@ class Algorithm():
                 return 1
             
             else:
-                origin = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p= origin.id, coordinates_p=(origin.coordinates['x'], origin.coordinates['y'], origin.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value ), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value))
+                if abs(origin.coordinates['x']) <= Config.GENERATION_SIZE.value[0]/2 and abs(origin.coordinates['y']) <= Config.GENERATION_SIZE.value[1]/2 and abs(origin.coordinates['z']) <= Config.GENERATION_SIZE.value[2]/2:
+                    origin = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p= origin.id, coordinates_p=(origin.coordinates['x'], origin.coordinates['y'], origin.coordinates['z'] - Config.Z_AXIS_LAYER_STEP.value ), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value))
 
 
     def mine_add_main_branch(self, origin_p):
@@ -186,18 +186,24 @@ class Algorithm():
         last_node = None
         shift = None
         for i in range(size_branch):
-            if i == 0:
-                chosen_angle = np.random.choice(self.angles)
-                shift = (rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]), rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]))
-                last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=origin_p.id, coordinates_p=(origin_p.coordinates['x']+shift[0],origin_p.coordinates['y']+shift[1],origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
-                branch.append(last_node)
-            else:
-                last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(origin_p.coordinates['x']+shift[0]*i,origin_p.coordinates['y']+shift[1]*i,origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
-                branch.append(last_node)
             # Check if number of desired nodes reached
             if self.graph.nb_nodes >= Config.NB_NODES.value:
                 return 0
+            if i == 0:
+                chosen_angle = np.random.choice(self.angles)
+                shift = (rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]), rd.randint(1,5)*rd.random()*([-1,1][rd.randrange(2)]))
+                coord_x = origin_p.coordinates['x']+shift[0]
+                coord_y = origin_p.coordinates['y']+shift[1]
+                last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=origin_p.id, coordinates_p=(coord_x, coord_y, origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                branch.append(last_node)
+            else:
+                coord_x = origin_p.coordinates['x']+shift[0]*i
+                coord_y = origin_p.coordinates['y']+shift[1]*i
+                if abs(coord_x) <= Config.GENERATION_SIZE.value[0]/2 and abs(coord_y) <= Config.GENERATION_SIZE.value[1]/2 and abs(origin_p.coordinates['z']) <= Config.GENERATION_SIZE.value[2]/2:
+                    last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(coord_x,coord_y,origin_p.coordinates['z']), radius_p=rd.uniform(1.0, Config.MAX_RADIUS_NODE.value), active_p=True)
+                    branch.append(last_node)
         return branch
+
 
     def mine_add_sub_branches(self, branch_p):
         """
@@ -210,21 +216,21 @@ class Algorithm():
             last_node = None
 
             for i in range(size_branch):
-                # 2D Rotation matrix
-                # coord_x = main_branch_node.coordinates['x'] + 1
-                # coord_y = main_branch_node.coordinates['y'] + 1
-                coord_x = main_branch_node.coordinates['x'] * math.cos(math.pi/2) - main_branch_node.coordinates['y'] * math.sin(math.pi/2)
-                coord_y = main_branch_node.coordinates['x'] * math.sin(math.pi/2) + main_branch_node.coordinates['y'] * math.cos(math.pi/2)
-                if i == 0:
-                    # Create a node from the main branch node
-                    # self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=self.get_coordinates_on_circle(radius_p=self.main_branch_node.radius, theta_p=45, index_p=self.main_branch_node.id), radius_p=0.5, active_p=True)
-                    last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=(coord_x,coord_y,main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
-                else:
-                    # Extend the sub branch
-                    last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(coord_x+i, coord_y+i, main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
-
+                # Check if number of desired nodes reached
                 if self.graph.nb_nodes >= Config.NB_NODES.value:
                     return 0
+                # 2D Rotation matrix
+                coord_x = main_branch_node.coordinates['x'] * math.cos(math.pi/2) - main_branch_node.coordinates['y'] * math.sin(math.pi/2)
+                coord_y = main_branch_node.coordinates['x'] * math.sin(math.pi/2) + main_branch_node.coordinates['y'] * math.cos(math.pi/2)
+                
+                # Check if the new coordinates are outside the generation box
+                if abs(coord_x) <= Config.GENERATION_SIZE.value[0]/2 and abs(coord_y) <= Config.GENERATION_SIZE.value[1]/2:
+                    if i == 0:
+                        # Create a node from the main branch node
+                        last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=main_branch_node.id, coordinates_p=(coord_x,coord_y,main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
+                    else:
+                        # Extend the sub branch
+                        last_node = self.graph.add_node(node_id_p=self.graph.nb_nodes, parent_p=last_node.id, coordinates_p=(coord_x+i, coord_y+i, main_branch_node.coordinates['z']), radius_p=0.5, active_p=True)
         return 1
 
 
