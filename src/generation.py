@@ -27,7 +27,7 @@ class Generator:
         if name_p == None or '':
             self.name = Config.DEFAULT_NAME.value
         else:
-            self.name = name_p +"_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+            self.name = name_p
         
         if graph_path_p == None or '':
             self.graph_path = None
@@ -79,7 +79,8 @@ class Generator:
                     path = os.getcwd()+'/data/'+self.name+'/'+str(index)
                     self.generator(index, path)
                     if Config.GENERATE_MESH.value:
-                        self.create_mesh(index, graph_path_p=path)
+                        duration = self.create_mesh(index, graph_path_p=path)
+                        
 
 
     def generator(self, index_p, path_p):
@@ -119,7 +120,7 @@ class Generator:
         processed_graph = self.post_processing_graph(graph_p=graph)
         print("\t-Post processing algorithm applied to the graph")
 
-        graph.create_adjency_matrix(graph.nb_nodes)
+        processed_graph.create_adjency_matrix(graph.nb_nodes)
         print("\t-Adjency matrix created")
 
         # Save the graph
@@ -197,6 +198,8 @@ class Generator:
             duration = (time.time() - self.starting_time) / 60
             print("Duration of the generation: ", duration," minutes")
             print(f"\n{Color.OKBLUE.value} == Mesh generation finished == {Color.ENDC.value}")
+        
+        return duration
 
 
 
