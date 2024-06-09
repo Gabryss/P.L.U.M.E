@@ -20,9 +20,10 @@ class Config(Enum):
     IMAGE_FORMAT = ".png"
     GENERATE_GRAPH_IMAGE = True
     SAVE_GRAPH_IMAGE = True
+    THEME = "white"                         # Light or dark mode. Available: white, dark
 
     #Mesh
-    OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
+    OPEN_VISUALIZATION = False               # Only open the last generation on sequential generation
     MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True                    # Use blender to generate the mesh
     SAVE_MESH = False                       # Save the mesh in data folder
@@ -31,7 +32,7 @@ class Config(Enum):
 
     # ==== Advanced settings ====
     # ===========================
-    NB_NODES = 500                          # Number of nodes in the generation
+    NB_NODES = 50                          # Number of nodes in the generation
     MAX_CREATED_NODE_ON_CIRCLE = 2          # Maximal number of nodes created per nodes
     MAX_RADIUS_NODE = 7.0                   # Distance between the nodes
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10   # Probability of connecting two close nodes
@@ -43,9 +44,9 @@ class Config(Enum):
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
     HIGH_POLY = False                       # If false, the generation is significantly faster
-    THREE_DIMENSION_GENERATION = False
+    THREE_DIMENSION_GENERATION = True
     SLICE_MESH = False
-    NUMBER_OF_CHUNKS = 1
+    NUMBER_OF_CHUNKS = 3
 
     #Gaussian
     MEAN = 0.0
