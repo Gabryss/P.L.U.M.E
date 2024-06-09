@@ -26,6 +26,7 @@ class Display():
         self.edges_width = edge_width_p
         self.save_image_path = saving_path_p + "/graph"+Config.IMAGE_FORMAT.value
         self.save_html_image_path = saving_path_p + "/graph.html"
+        self.margin = 3
 
     def save_image(self):
         """
@@ -64,13 +65,54 @@ class Display():
                 self.parents.append([int(node), 0])
 
 
+    def get_bounding_box(self):
+        """
+        Get the bounderies of the mesh generation
+        """
+        x_max = 0
+        x_min = 0
+        y_max = 0
+        y_min = 0
+        z_max = 0
+        z_min = 0
+        for coord in self.coordinates:
+            if coord['x'] > x_max:
+                x_max = coord['x']
+            if coord['x'] < x_min:
+                x_min = coord['x']
+
+            if coord['y'] > y_max:
+                y_max = coord['y']
+            if coord['y'] < y_min:
+                y_min = coord['y']
+                
+            if coord['z'] > z_max:
+                z_max = coord['z']
+            if coord['z'] < z_min:
+                z_min = coord['z']
+        
+        # Add margin between graph and edge of visualization
+        x_max +=self.margin
+        y_max +=self.margin
+        z_max +=self.margin
+
+        x_min -=self.margin
+        y_min -=self.margin
+        z_min -=self.margin
+
+        return x_max,x_min,y_max,y_min,z_max,z_min
+
+
     def create_figure(self):
         """
         Render the graph in the figure object
         """
         if self._3dimension :
-   
-            Xgrid, Ygrid, Zgrid = np.mgrid[-10:10:50j, -10:10:50j, -10:10:50j]
+            x_max_boundery, x_min_boundery, y_max_boundery, y_min_boundery, z_max_boundery, z_min_boundery = self.get_bounding_box()
+            x_ = np.linspace(x_min_boundery, x_max_boundery, 60)
+            y_ = np.linspace(y_min_boundery, y_max_boundery, 60)
+            z_ = np.linspace(z_min_boundery, z_max_boundery, 60)
+            Xgrid, Ygrid, Zgrid = np.meshgrid(x_,y_,z_)
             count = 0
             for node in tqdm(self.nodes, desc="                Progress"):
                 count +=1
@@ -123,8 +165,7 @@ class Display():
                   scene_yaxis_showticklabels=False,
                   scene_zaxis_showticklabels=False)
             
-            
-            self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
+            self.figure.update_layout(template=f'plotly_{Config.THEME.value}', title=f"Generation {self.generation_name}")
 
         else:
             # Create a scatter plot for each node
@@ -148,5 +189,5 @@ class Display():
                 )
             
             self.figure.update_traces(textposition='top center')
-            self.figure.update_layout(template='plotly_dark', title=f"Generation {self.generation_name}")
+            self.figure.update_layout(template=f'plotly_{Config.THEME.value}', title=f"Generation {self.generation_name}")
 
