@@ -123,7 +123,7 @@ The `config.py` script is a configuration module providing essential settings an
 
 #### Advanced Settings
 
-- `DEFAULT_MIN_NODES`: Default minimum number of nodes (more nodes = larger environment).
+- `NB_NODES`: Default minimum number of nodes (more nodes = larger environment).
 - `MAX_CREATED_NODE_ON_CIRCLE`: Maximum number of nodes created on a circle (more node on circle = denser environment and more likely to fetch large rooms).
 - `MAX_RADIUS_NODE`: Maximum radius of a node (Density of the nodes).
 - `DEFAULT_LOOP_CLOSURE_PROBABILITY`: Default probability for loop closure.
