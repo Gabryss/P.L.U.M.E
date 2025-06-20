@@ -1,193 +1,288 @@
 """
-Display a graph using Plotly library
+Display a graph using Pyvista library
 """
-
-import plotly.graph_objects as go
-import plotly.express as px
 import os
-from config import Config
-from tqdm import tqdm
-import numpy as np
 import json
+from tqdm import tqdm
+from config import Config
+import numpy as np
+import pyvista as pv
+import math
 
 class Display():
+    def __init__(self, data_path, voxel_size=0.6, node_radius=1.0, edge_radius=1.0, smoothing=True, n_iter=50, relaxation_factor=0.1):
+        self.data_path = data_path + "/data.json"
+        self.voxel_size = voxel_size
+        self.node_radius = node_radius
+        self.edge_radius = edge_radius
+        self.smoothing = smoothing
+        self.n_iter = n_iter
+        self.relaxation_factor = relaxation_factor
 
-    def __init__(self, path_p, saving_path_p, generation_name_p, node_width_p = 15, edge_width_p = 2, node_color_p = "red", edge_color_p = "blue"):
-        self.path = path_p
-        self.figure = go.Figure()
-        self.generation_name = generation_name_p
-        self._3dimension = Config.THREE_DIMENSION_GENERATION.value
-        self.nodes = []
-        self.parents = []
-        self.coordinates = []
-        self.nodes_color = node_color_p
-        self.edges_color = edge_color_p
-        self.nodes_size = node_width_p
-        self.edges_width = edge_width_p
-        self.save_image_path = saving_path_p + "/graph"+Config.IMAGE_FORMAT.value
-        self.save_html_image_path = saving_path_p + "/graph.html"
-        self.margin = 3
+        self.positions = None
+        self.radii = None
+        self.edges = None
+        self.vol_shape = None
+        self.grid = None
+        self.contours = None
 
-    def save_image(self):
+    def load_graph(self):
+        with open(self.data_path) as f:
+            data = json.load(f)
+        nodes = data['nodes']
+
+        self.positions = np.array([[v['coordinates']['x'], v['coordinates']['y'], v['coordinates']['z']] for v in nodes.values()])
+        self.radii = np.array([self.node_radius for _ in nodes.values()])
+        edges = []
+        for nid, node in nodes.items():
+            nid = int(nid)
+            for nb in node['edges']:
+                if (nid, nb) not in edges and (nb, nid) not in edges:
+                    edges.append((nid, nb))
+        self.edges = edges
+
+    def voxelize(self):
+        margin = 2 * max(self.node_radius, self.edge_radius)
+        mins = self.positions.min(axis=0) - margin
+        maxs = self.positions.max(axis=0) + margin
+
+        xs = np.arange(mins[0], maxs[0], self.voxel_size)
+        ys = np.arange(mins[1], maxs[1], self.voxel_size)
+        zs = np.arange(mins[2], maxs[2], self.voxel_size)
+        X, Y, Z = np.meshgrid(xs, ys, zs, indexing='ij')
+        grid_points = np.stack([X, Y, Z], axis=-1).reshape(-1, 3)
+
+        voxels = np.zeros(len(grid_points), dtype=bool)
+        # Voxelize nodes as spheres
+        for pos in self.positions:
+            dists = np.linalg.norm(grid_points - pos, axis=1)
+            voxels |= dists <= self.node_radius
+
+        # Voxelize edges as cylinders/tubes
+        def point_to_segment_dist(p, a, b):
+            ap = p - a
+            ab = b - a
+            ab_dot = np.dot(ab, ab)
+            if ab_dot == 0:
+                return np.linalg.norm(ap)
+            t = np.clip(np.dot(ap, ab) / ab_dot, 0, 1)
+            closest = a + t * ab
+            return np.linalg.norm(p - closest)
+
+        for i1, i2 in self.edges:
+            a = self.positions[i1]
+            b = self.positions[i2]
+            rad = self.edge_radius
+            seg_min = np.minimum(a, b) - rad
+            seg_max = np.maximum(a, b) + rad
+            mask = np.all((grid_points >= seg_min) & (grid_points <= seg_max), axis=1)
+            points_in_box = grid_points[mask]
+            if len(points_in_box) == 0:
+                continue
+            dists = np.array([point_to_segment_dist(p, a, b) for p in points_in_box])
+            inside = dists <= rad
+            voxels[mask] |= inside
+
+        vol_shape = (len(xs), len(ys), len(zs))
+        self.vol_shape = vol_shape
+        vol = voxels.reshape(vol_shape)
+        # Pad for isosurface extraction
+        vol_points = np.pad(vol, ((0,1), (0,1), (0,1)), mode='constant', constant_values=0)
+        self.grid_origin = (xs[0], ys[0], zs[0])
+        self.grid_spacing = (self.voxel_size, self.voxel_size, self.voxel_size)
+        self.grid_dims = vol_points.shape
+
+        # Create ImageData for PyVista
+        grid = pv.ImageData()
+        grid.dimensions = vol_points.shape
+        grid.origin = self.grid_origin
+        grid.spacing = self.grid_spacing
+        grid.point_data['cave'] = vol_points.flatten(order='F')
+        self.grid = grid
+
+    def extract_surface(self):
+        contours = self.grid.contour(isosurfaces=[0.5], scalars="cave")
+        if self.smoothing:
+            contours = contours.smooth(n_iter=self.n_iter, relaxation_factor=self.relaxation_factor)
+        self.contours = contours
+
+    def plot(self):
+        pl = pv.Plotter(window_size=(1024, 768))
+        elev_contours = self.contours.elevation()
+        pl.add_mesh(elev_contours, scalars="Elevation", cmap="magma", smooth_shading=True)
+        # Optional: add skeleton as navy tubes
+        for i1, i2 in self.edges:
+            p1 = self.positions[i1]
+            p2 = self.positions[i2]
+            line = pv.Line(p1, p2)
+            tube = line.tube(radius=0.2*self.node_radius)
+            pl.add_mesh(tube, color="navy", opacity=0.4)
+        pl.set_background("darkgray")
+        pl.show()
+
+    def save_surface(self, filename):
+        if self.contours:
+            self.contours.save(filename)
+            print(f"Surface saved to {filename}")
+
+    def animate_bone_then_mesh_with_orbit(
+        self,
+        path="cave_bone_then_mesh_orbit.mp4",
+        tube_color="navy",
+        n_skip_bone=1,
+        n_skip_mesh=1,
+        mesh_opacity=0.4,
+        orbit_frames=36,
+        orbit_factor=2.0,
+        color_map="fire"  # Optional: color map for mesh,
+    ):
         """
-        Path is without the format.
-        Save the graph in the desired format
-        Available formats:
-            -png
-            -jpeg
-            -webp
-            -svg
-            -json
+        1. Animate only the skeleton ('bone') growing step by step.
+        2. Hide the skeleton and animate only the mesh growing step by step.
+        3. Optionally finish with a camera orbit of the final mesh.
         """
-        if not os.path.exists(os.path.dirname(self.save_image_path)):
-            os.makedirs(os.path.dirname(self.save_image_path))
-    
-        self.figure.write_image(self.save_image_path, engine="kaleido")
+        if self.positions is None or self.edges is None:
+            raise RuntimeError("You must call load_graph() first.")
 
-        if self._3dimension:
-            self.figure.write_html(self.save_html_image_path)
+        margin = 2 * max(self.node_radius, self.edge_radius)
+        mins = self.positions.min(axis=0) - margin
+        maxs = self.positions.max(axis=0) + margin
+        xs = np.arange(mins[0], maxs[0], self.voxel_size)
+        ys = np.arange(mins[1], maxs[1], self.voxel_size)
+        zs = np.arange(mins[2], maxs[2], self.voxel_size)
+        grid_points = np.stack(
+            np.meshgrid(xs, ys, zs, indexing="ij"), axis=-1
+        ).reshape(-1, 3)
+        vol_shape = (len(xs), len(ys), len(zs))
+
+        pl = pv.Plotter(off_screen=True, window_size=(1920, 1080))
+        pl.set_background("white")
+        pl.enable_eye_dome_lighting()
+        pl.show_axes()
+        pl.open_movie(path, framerate=15)
+
+        # --- Step 1: Animate skeleton (bone) only ---
+        print("Animating skeleton (bone) growth...")
+        skeleton_tubes = []
+        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="                Progress")):
+            if step % n_skip_bone != 0:
+                continue
+            a = self.positions[i1]
+            b = self.positions[i2]
+            line = pv.Line(a, b)
+            tube = line.tube(radius=0.2 * self.node_radius)
+            skeleton_tubes.append(tube)
+
+            pl.clear()
+            for tube in skeleton_tubes:
+                pl.add_mesh(tube, color=tube_color, smooth_shading=True, lighting=True, style="wireframe", opacity=0.4)
+            pl.camera_position = "iso"
+            pl.write_frame()
+
+        # --- Step 2: Animate mesh only (no bone visible) ---
+        print("\nAnimating mesh growth(nodes)...")
+        voxels = np.zeros(len(grid_points), dtype=bool)
+        for idx, pos in enumerate(tqdm(self.positions, desc="                Progress")):
+            if idx % n_skip_mesh != 0:
+                continue
+            dists = np.linalg.norm(grid_points - pos, axis=1)
+            voxels |= dists <= self.node_radius
+
+            vol = voxels.reshape(vol_shape)
+            vol_points = np.pad(vol, ((0,1), (0,1), (0,1)), mode="constant", constant_values=0)
+
+            grid = pv.ImageData()
+            grid.dimensions = vol_points.shape
+            grid.origin = (xs[0], ys[0], zs[0])
+            grid.spacing = (self.voxel_size, self.voxel_size, self.voxel_size)
+            grid.point_data["cave"] = vol_points.flatten(order="F")
+
+            contours = grid.contour(isosurfaces=[0.5], scalars="cave")
+            if self.smoothing:
+                contours = contours.smooth(n_iter=self.n_iter, relaxation_factor=self.relaxation_factor)
+
+            pl.clear()
+            if contours.n_points > 0:
+                contours = contours.elevation()  # Color by elevation
+                pl.add_mesh(contours, scalars="Elevation", cmap=color_map, smooth_shading=True, lighting=True, opacity=mesh_opacity)
+            for tube in skeleton_tubes:
+                pl.add_mesh(tube, color=tube_color, opacity=0.4)
+            pl.camera_position = "iso"
+            pl.write_frame()
+
+        # Edges (tubes) need to be added to the mesh as well:
+        def point_to_segment_dist(p, a, b):
+            ap = p - a
+            ab = b - a
+            ab_dot = np.dot(ab, ab)
+            if ab_dot == 0:
+                return np.linalg.norm(ap)
+            t = np.clip(np.dot(ap, ab) / ab_dot, 0, 1)
+            closest = a + t * ab
+            return np.linalg.norm(p - closest)
+
+        print("\nAnimating mesh growth(edges)...")
+        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="                Progress")):
+            if step % n_skip_mesh != 0:
+                continue
+            a = self.positions[i1]
+            b = self.positions[i2]
+            rad = self.edge_radius
+            seg_min = np.minimum(a, b) - rad
+            seg_max = np.maximum(a, b) + rad
+            mask = np.all((grid_points >= seg_min) & (grid_points <= seg_max), axis=1)
+            points_in_box = grid_points[mask]
+            if len(points_in_box) == 0:
+                continue
+
+            dists = np.array([point_to_segment_dist(p, a, b) for p in points_in_box])
+            inside = dists <= rad
+            voxels[mask] |= inside
+
+            vol = voxels.reshape(vol_shape)
+            vol_points = np.pad(vol, ((0,1), (0,1), (0,1)), mode="constant", constant_values=0)
+
+            grid = pv.ImageData()
+            grid.dimensions = vol_points.shape
+            grid.origin = (xs[0], ys[0], zs[0])
+            grid.spacing = (self.voxel_size, self.voxel_size, self.voxel_size)
+            grid.point_data["cave"] = vol_points.flatten(order="F")
+
+            contours = grid.contour(isosurfaces=[0.5], scalars="cave")
+            if self.smoothing:
+                contours = contours.smooth(n_iter=self.n_iter, relaxation_factor=self.relaxation_factor)
+
+            pl.clear()
+            if contours.n_points > 0:
+                contours = contours.elevation()  # Color by elevation
+                pl.add_mesh(contours, scalars="Elevation", cmap=color_map, smooth_shading=True, lighting=True, opacity=mesh_opacity)
+            for tube in skeleton_tubes:
+                pl.add_mesh(tube, color=tube_color, opacity=0.4)
+            pl.camera_position = "iso"
+            pl.write_frame()
+
+        # --- Optional: Camera orbit of final mesh ---
+        pl.clear()
+        if contours.n_points > 0:
+            contours = contours.elevation()  # Color by elevation
+            pl.add_mesh(contours, scalars="Elevation", cmap=color_map, smooth_shading=True, lighting=True, opacity=mesh_opacity)
 
 
-    def process_graph(self):
-        """
-        Take in input the nodes and edges of the graph and store the important parameters for the
-        rendering inside the display class.
-        """
-        data_file = open(self.path + '/data.json')
-        data = json.load(data_file)
-        for node in data['nodes']:
-            self.nodes.append(int(node))
-            parent = data['nodes'][node]['parent']
-            self.coordinates.append(data['nodes'][node]['coordinates'])
-            if parent:
-                self.parents.append([int(node), parent])
-            else:
-                self.parents.append([int(node), 0])
+        center = contours.center
+        radius = max(contours.length, 10) * orbit_factor
+        n_frames = orbit_frames
+        print("\nAnimating camera orbit around final mesh...")
+        for i in tqdm(range(n_frames), desc="                Progress"):
+            angle = 2 * math.pi * i / n_frames
+            cam_x = center[0] + radius * math.cos(angle)
+            cam_y = center[1] + radius * math.sin(angle)
+            cam_z = center[2] + radius * 0.3  # keep it slightly above the center
+            position = (cam_x, cam_y, cam_z)
+            focal_point = center
+            viewup = (0, 0, 1)
+            pl.camera_position = (position, focal_point, viewup)
+            pl.write_frame()
 
 
-    def get_bounding_box(self):
-        """
-        Get the bounderies of the mesh generation
-        """
-        x_max = 0
-        x_min = 0
-        y_max = 0
-        y_min = 0
-        z_max = 0
-        z_min = 0
-        for coord in self.coordinates:
-            if coord['x'] > x_max:
-                x_max = coord['x']
-            if coord['x'] < x_min:
-                x_min = coord['x']
-
-            if coord['y'] > y_max:
-                y_max = coord['y']
-            if coord['y'] < y_min:
-                y_min = coord['y']
-                
-            if coord['z'] > z_max:
-                z_max = coord['z']
-            if coord['z'] < z_min:
-                z_min = coord['z']
-        
-        # Add margin between graph and edge of visualization
-        x_max +=self.margin
-        y_max +=self.margin
-        z_max +=self.margin
-
-        x_min -=self.margin
-        y_min -=self.margin
-        z_min -=self.margin
-
-        return x_max,x_min,y_max,y_min,z_max,z_min
-
-
-    def create_figure(self):
-        """
-        Render the graph in the figure object
-        """
-        if self._3dimension :
-            x_max_boundery, x_min_boundery, y_max_boundery, y_min_boundery, z_max_boundery, z_min_boundery = self.get_bounding_box()
-            x_ = np.linspace(x_min_boundery, x_max_boundery, 60)
-            y_ = np.linspace(y_min_boundery, y_max_boundery, 60)
-            z_ = np.linspace(z_min_boundery, z_max_boundery, 60)
-            Xgrid, Ygrid, Zgrid = np.meshgrid(x_,y_,z_)
-            count = 0
-            for node in tqdm(self.nodes, desc="                Progress"):
-                count +=1
-                if node == 0:
-                    cX, cY, cZ = self.coordinates[node]['x'], self.coordinates[node]['y'], self.coordinates[node]['z']
-                    radius = 0.5
-                    values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
-                
-                else:
-                    cX, cY, cZ = self.coordinates[node]['x'], self.coordinates[node]['y'], self.coordinates[node]['z']
-                    
-                    radius = 0.5
-                    new_values = (Xgrid - cX)**2 + (Ygrid - cY)**2 + (Zgrid - cZ)**2 <= radius**2
-                    if count != len(self.nodes):
-                        cX_next, cY_next, cZ_next = self.coordinates[count]['x'], self.coordinates[count]['y'], self.coordinates[count]['z']
-                        
-                        c = np.array([cX, cY, cZ])
-                        c_next = np.array([cX_next, cY_next, cZ_next])
-                        dist = np.linalg.norm(c - c_next)
-
-                        if dist <= 0.5:
-                            x_f = np.linspace(c[0],c_next[0],1)
-                            y_f = np.linspace(c[1],c_next[1],1)
-                            z_f = np.linspace(c[2],c_next[2],1)
-                        
-                        else:
-                            x_f = np.linspace(c[0],c_next[0],int(dist*1.5))
-                            y_f = np.linspace(c[1],c_next[1],int(dist*1.5))
-                            z_f = np.linspace(c[2],c_next[2],int(dist*1.5))
-                        
-                        for i in range(len(x_f)):
-                            new_values+= (Xgrid - x_f[i])**2 + (Ygrid - y_f[i])**2 + (Zgrid - z_f[i])**2 <= radius**2
-
-                    values = np.logical_or(values, new_values)
-
-
-            self.figure = go.Figure(data=go.Volume(
-                x=Xgrid.flatten(),
-                y=Ygrid.flatten(),
-                z=Zgrid.flatten(),
-                value=values.flatten(),
-                isomin=-1,
-                isomax=1,
-                opacity=0.2, # needs to be small to see through all surfaces
-                surface_count=20, # needs to be a large number for good volume rendering
-                caps= dict(x_show=True, y_show=True, z_show=True, x_fill=1),
-                ))
-            
-            self.figure.update_layout(scene_xaxis_showticklabels=False,
-                  scene_yaxis_showticklabels=False,
-                  scene_zaxis_showticklabels=False)
-            
-            self.figure.update_layout(template=f'plotly_{Config.THEME.value}', title=f"Generation {self.generation_name}")
-
-        else:
-            # Create a scatter plot for each node
-            for node in tqdm(self.nodes, desc="                Progress"):
-                self.figure.add_trace(go.Scatter(
-                    x=[self.coordinates[node]['x']],
-                    y=[self.coordinates[node]['y']],
-                    text=[node],
-                    mode='markers+text',
-                    textposition="bottom center"
-                ))
-
-                # Create a line plot for each edge
-                self.figure.add_shape(
-                    type='line',
-                    x0=self.coordinates[self.parents[node][0]]['x'],
-                    y0=self.coordinates[self.parents[node][0]]['y'],
-                    x1=self.coordinates[self.parents[node][1]]['x'],
-                    y1=self.coordinates[self.parents[node][1]]['y'],
-                    line=dict(width=self.edges_width, color=self.edges_color)
-                )
-            
-            self.figure.update_traces(textposition='top center')
-            self.figure.update_layout(template=f'plotly_{Config.THEME.value}', title=f"Generation {self.generation_name}")
-
+        pl.close()
+        print(f"Bone-then-mesh animation (with orbit) saved to {path}")
