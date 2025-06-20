@@ -153,15 +153,35 @@ class Generator:
         Display the created graph
         """
         print(f"\n{Color.OKBLUE.value} == Graph picture generation == {Color.ENDC.value}")
-        display = Display(path_p=path_p, saving_path_p=saving_path_p, generation_name_p=self.name)
+        display = Display(data_path=path_p, voxel_size=0.6,
+            node_radius=1.0,      # You can set per-node radii if desired
+            edge_radius=1.0,      # You can set per-edge radii if desired
+            smoothing=True,
+            n_iter=50,
+            relaxation_factor=0.1)
         print("\t-Display object created")
-        display.process_graph()
+        display.load_graph()
         print("\t-Graph important features imported")
-        display.create_figure()
-        print("\t-Image created")
-        if Config.SAVE_GRAPH_IMAGE.value:
-            display.save_image()
-            print("\t-Image saved")        
+        display.voxelize()
+        print("\t-Graph voxelized")
+        display.extract_surface()
+        print("\t-Graph surface extracted")
+        display.animate_bone_then_mesh_with_orbit(
+            path=saving_path_p + "cave_bone_then_mesh_orbit.mp4",
+            tube_color="navy",
+            mesh_opacity=1,
+            n_skip_bone=1,    # Skip edges for faster bone growth animation
+            n_skip_mesh=1,    # Skip for faster mesh growth (adjust as you want)
+            orbit_frames=36,
+            orbit_factor=1.3,)
+        print("\t-Graph animated")
+        display.plot()
+        print("\t-Graph plotted")
+
+        # print("\t-Image created")
+        # if Config.SAVE_GRAPH_IMAGE.value:
+        #     display.save_image()
+        #     print("\t-Image saved")        
         print(f"{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
 
 
