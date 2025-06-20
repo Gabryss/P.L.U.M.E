@@ -26,13 +26,13 @@ class Config(Enum):
     OPEN_VISUALIZATION = False               # Only open the last generation on sequential generation
     MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True                    # Use blender to generate the mesh
-    SAVE_MESH = False                       # Save the mesh in data folder
+    SAVE_MESH = True                       # Save the mesh in data folder
     BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
     TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
     # ===========================
-    NB_NODES = 50                          # Number of nodes in the generation
+    NB_NODES = 250                          # Number of nodes in the generation
     MAX_CREATED_NODE_ON_CIRCLE = 2          # Maximal number of nodes created per nodes
     MAX_RADIUS_NODE = 7.0                   # Distance between the nodes
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10   # Probability of connecting two close nodes
