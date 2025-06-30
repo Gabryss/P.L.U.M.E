@@ -18,16 +18,16 @@ class Config(Enum):
     
     #Graph image
     IMAGE_FORMAT = ".png"
-    GENERATE_GRAPH_IMAGE = True
+    GENERATE_GRAPH_IMAGE = False
     SAVE_GRAPH_IMAGE = True
     THEME = "white"                         # Light or dark mode. Available: white, dark
 
     #Mesh
-    OPEN_VISUALIZATION = False               # Only open the last generation on sequential generation
+    OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
     MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True                    # Use blender to generate the mesh
     SAVE_MESH = True                       # Save the mesh in data folder
-    BAKE_TEXTURE = False                    # Create, bake and save the textures (Color, Normal and Roughness maps)
+    BAKE_TEXTURE = True                    # Create, bake and save the textures (Color, Normal and Roughness maps)
     TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
 
     # ==== Advanced settings ====
