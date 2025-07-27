@@ -1,7 +1,6 @@
 """
 Display a graph using Pyvista library
 """
-import os
 import json
 from tqdm import tqdm
 from config import Config
@@ -53,6 +52,7 @@ class Display():
         grid_points = np.stack([X, Y, Z], axis=-1).reshape(-1, 3)
 
         voxels = np.zeros(len(grid_points), dtype=bool)
+
         # Voxelize nodes as spheres
         for pos in self.positions:
             dists = np.linalg.norm(grid_points - pos, axis=1)
@@ -69,7 +69,9 @@ class Display():
             closest = a + t * ab
             return np.linalg.norm(p - closest)
 
-        for i1, i2 in self.edges:
+        # for i1, i2 in self.edges:
+        for i1, i2 in enumerate(tqdm(self.edges, desc="\t\t\tProgress")):
+        
             a = self.positions[i1]
             b = self.positions[i2]
             rad = self.edge_radius
@@ -86,6 +88,7 @@ class Display():
         vol_shape = (len(xs), len(ys), len(zs))
         self.vol_shape = vol_shape
         vol = voxels.reshape(vol_shape)
+
         # Pad for isosurface extraction
         vol_points = np.pad(vol, ((0,1), (0,1), (0,1)), mode='constant', constant_values=0)
         self.grid_origin = (xs[0], ys[0], zs[0])
@@ -110,20 +113,21 @@ class Display():
         pl = pv.Plotter(window_size=(1024, 768))
         elev_contours = self.contours.elevation()
         pl.add_mesh(elev_contours, scalars="Elevation", cmap="magma", smooth_shading=True)
-        # Optional: add skeleton as navy tubes
+        # Add skeleton as navy tubes
         for i1, i2 in self.edges:
             p1 = self.positions[i1]
             p2 = self.positions[i2]
             line = pv.Line(p1, p2)
             tube = line.tube(radius=0.2*self.node_radius)
             pl.add_mesh(tube, color="navy", opacity=0.4)
-        pl.set_background("darkgray")
+        # pl.set_background("darkgray")
+        pl.set_background(Config.THEME.value)
         pl.show()
 
     def save_surface(self, filename):
         if self.contours:
             self.contours.save(filename)
-            print(f"Surface saved to {filename}")
+            print(f"\tSurface saved to {filename}")
 
     def animate_bone_then_mesh_with_orbit(
         self,
@@ -142,7 +146,7 @@ class Display():
         3. Optionally finish with a camera orbit of the final mesh.
         """
         if self.positions is None or self.edges is None:
-            raise RuntimeError("You must call load_graph() first.")
+            raise RuntimeError("\tYou must call load_graph() first.")
 
         margin = 2 * max(self.node_radius, self.edge_radius)
         mins = self.positions.min(axis=0) - margin
@@ -159,12 +163,12 @@ class Display():
         pl.set_background("white")
         pl.enable_eye_dome_lighting()
         pl.show_axes()
-        pl.open_movie(path, framerate=15)
+        pl.open_movie(path, framerate=15, macro_block_size=1)
 
         # --- Step 1: Animate skeleton (bone) only ---
-        print("Animating skeleton (bone) growth...")
+        print("\t\tAnimating skeleton (bone) growth...")
         skeleton_tubes = []
-        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="                Progress")):
+        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="\t\t\tProgress")):
             if step % n_skip_bone != 0:
                 continue
             a = self.positions[i1]
@@ -180,9 +184,9 @@ class Display():
             pl.write_frame()
 
         # --- Step 2: Animate mesh only (no bone visible) ---
-        print("\nAnimating mesh growth(nodes)...")
+        print("\n\t\tAnimating mesh growth(nodes)...")
         voxels = np.zeros(len(grid_points), dtype=bool)
-        for idx, pos in enumerate(tqdm(self.positions, desc="                Progress")):
+        for idx, pos in enumerate(tqdm(self.positions, desc="\t\t\tProgress")):
             if idx % n_skip_mesh != 0:
                 continue
             dists = np.linalg.norm(grid_points - pos, axis=1)
@@ -221,8 +225,8 @@ class Display():
             closest = a + t * ab
             return np.linalg.norm(p - closest)
 
-        print("\nAnimating mesh growth(edges)...")
-        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="                Progress")):
+        print("\n\t\tAnimating mesh growth(edges)...")
+        for step, (i1, i2) in enumerate(tqdm(self.edges, desc="\t\t\tProgress")):
             if step % n_skip_mesh != 0:
                 continue
             a = self.positions[i1]
@@ -271,7 +275,7 @@ class Display():
         center = contours.center
         radius = max(contours.length, 10) * orbit_factor
         n_frames = orbit_frames
-        print("\nAnimating camera orbit around final mesh...")
+        print("\n\t\tAnimating camera orbit around final mesh...")
         for i in tqdm(range(n_frames), desc="                Progress"):
             angle = 2 * math.pi * i / n_frames
             cam_x = center[0] + radius * math.cos(angle)
@@ -285,4 +289,30 @@ class Display():
 
 
         pl.close()
-        print(f"Bone-then-mesh animation (with orbit) saved to {path}")
+        print(f"\t\t-Bone-then-mesh animation (with orbit) saved to {path}")
+
+
+    def create_static_image(self, filename, tube_color="navy", mesh_opacity=1.0, color_map="fire"):
+        """        
+        Create a static image of the final mesh with skeleton tubes.
+        """
+        if self.positions is None or self.edges is None:
+            raise RuntimeError("\tYou must call load_graph() first.")
+        if self.contours is None:
+            raise RuntimeError("\tYou must call extract_surface() first.")
+        pl = pv.Plotter(off_screen=True, window_size=(1920, 1080))
+        pl.set_background("white")
+        pl.enable_eye_dome_lighting()
+        pl.show_axes()
+        elev_contours = self.contours.elevation()
+        pl.add_mesh(elev_contours, scalars="Elevation", cmap=color_map, smooth_shading=True)
+        # pl.add_mesh(self.contours, scalars="Elevation", cmap=color_map, smooth_shading=True, lighting=True, opacity=mesh_opacity)
+        for i1, i2 in self.edges:
+            p1 = self.positions[i1]
+            p2 = self.positions[i2]
+            line = pv.Line(p1, p2)
+            tube = line.tube(radius=0.2 * self.node_radius)
+            pl.add_mesh(tube, color=tube_color, opacity=0.4)
+        pl.camera_position = "iso"
+        pl.show(screenshot=filename)
+        print(f"\tStatic image saved to {filename}") 

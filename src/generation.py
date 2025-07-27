@@ -166,22 +166,34 @@ class Generator:
         print("\t-Graph voxelized")
         display.extract_surface()
         print("\t-Graph surface extracted")
-        display.animate_bone_then_mesh_with_orbit(
-            path=saving_path_p + "cave_bone_then_mesh_orbit.mp4",
-            tube_color="navy",
-            mesh_opacity=1,
-            n_skip_bone=1,    # Skip edges for faster bone growth animation
-            n_skip_mesh=1,    # Skip for faster mesh growth (adjust as you want)
-            orbit_frames=36,
-            orbit_factor=1.3,)
-        print("\t-Graph animated")
-        display.plot()
-        print("\t-Graph plotted")
+        
+        if Config.ANIMATE.value:
+            # Animate the graph
+            print("\t-Starting graph animation")
+            display.animate_bone_then_mesh_with_orbit(
+                path=saving_path_p + "/cave_bone_then_mesh.mp4",
+                tube_color="navy",
+                mesh_opacity=1,
+                n_skip_bone=1,    # Skip edges for faster bone growth animation
+                n_skip_mesh=1,    # Skip for faster mesh growth (adjust as you want)
+                orbit_frames=36,
+                orbit_factor=1.3,)
+            print("\t-Graph animated and saved as a video")
 
-        # print("\t-Image created")
-        # if Config.SAVE_GRAPH_IMAGE.value:
-        #     display.save_image()
-        #     print("\t-Image saved")        
+            
+        if Config.GENERATE_GRAPH_IMAGE.value:
+            # Create a static image of the graph
+            display.create_static_image(saving_path_p + "/cave_graph.png", tube_color="navy", mesh_opacity=1)
+            print("\t-Graph static image created")
+
+
+        print("\t-Graph animated")
+        if self.visualization:
+            # Open the graph in a new window
+            display.plot()
+            print("\t-Graph displayed")
+        # display.plot()
+        print("\t-Graph plotted")     
         print(f"{Color.OKBLUE.value} == End of graph picture generation == {Color.ENDC.value}")
 
 
@@ -195,7 +207,7 @@ class Generator:
         print(f"\n{Color.OKBLUE.value} == Mesh generation start == {Color.ENDC.value}")
         result = None
         try:
-            if Config.OPEN_VISUALIZATION.value:
+            if Config.DEBUG.value:
                 result = subprocess.run(f"{blender_path} --python src/blender.py -- -g {graph_path_p} -index {index} -name {self.name}", shell=True, check=True)
             else:
                 result = subprocess.run(f"{blender_path} --background --python src/blender.py -- -g {graph_path_p} -index {index} -name {self.name}", shell=True, check=True)

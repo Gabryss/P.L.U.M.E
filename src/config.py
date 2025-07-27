@@ -16,14 +16,17 @@ class Config(Enum):
     NB_GENERATION = 1
     GENERATION_SIZE = (500,100,100)            # Size of the generated environment
     
-    #Graph image
+    #Graph
     IMAGE_FORMAT = ".png"
-    GENERATE_GRAPH_IMAGE = False
+    GENERATE_GRAPH_IMAGE = True              # Generate and save a graph visualization image
+    OPEN_VISUALIZATION = False               # Plot the graph in a 3D viewer (warning: this can be slow for large graphs and stop the generation)
     SAVE_GRAPH_IMAGE = True
     THEME = "white"                         # Light or dark mode. Available: white, dark
 
+    # Animate
+    ANIMATE = True                         # Animate the graph and save it as a video  (warning: this takes a lot of time)
+
     #Mesh
-    OPEN_VISUALIZATION = True               # Only open the last generation on sequential generation
     MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True                    # Use blender to generate the mesh
     SAVE_MESH = True                       # Save the mesh in data folder
@@ -37,13 +40,13 @@ class Config(Enum):
     MAX_RADIUS_NODE = 7.0                   # Distance between the nodes
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10   # Probability of connecting two close nodes
     SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin, mine
-    TEXTURE_SIZE = 1024                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
-    MAX_MESH_TRIANGLES = 1000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
+    TEXTURE_SIZE = 4096                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+    MAX_MESH_TRIANGLES = 100000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     FINAL_DECIMATION = False
     FINAL_DECIMATION_FACTOR = 0.8           # Percentage of final mesh decimation (after texture baking). 0.8 means keep 80% of the polys number of the model
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
-    HIGH_POLY = False                       # If false, the generation is significantly faster
+    HIGH_POLY = True                       # If false, the generation is significantly faster
     THREE_DIMENSION_GENERATION = True
     SLICE_MESH = False
     NUMBER_OF_CHUNKS = 3
@@ -63,6 +66,10 @@ class Config(Enum):
     MAX_OCTAVES = 1.0
     MAX_PERSISTENCE = 5.0
     MAX_LACUNARITY = 2.0
+
+    
+    # Blender
+    DEBUG = False
 
 
 class Color(Enum):
