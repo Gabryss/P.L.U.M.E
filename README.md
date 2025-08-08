@@ -50,11 +50,11 @@ Two different types of generation are distinguished: single and multi-layer gene
 <table>
   <tr>
     <td align="center">
-      <img src="doc/images/plume_graph_representation_single.png" height="250"><br>
+      <img src="doc/images/plume_graph_representation_single.png" ><br>
       <sub>Single layer generation</sub>
     </td>
     <td align="center">
-      <img src="doc/images/plume_graph_representation_multi.png" height="250"><br>
+      <img src="doc/images/plume_graph_representation_multi.png" ><br>
       <sub>Multi layer generation</sub>
     </td>
   </tr>
