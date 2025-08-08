@@ -28,14 +28,18 @@ The first stage is the graph generation, also known as the "skeleton" of the und
 The current implementation of PLUME uses a probabilistic distribution on a circle created around the selected node. This distribution provides an overall direction to the created node on the circle while incorporating some randomness. To prevent the graph from circling on itself, a forbidden zone has been implemented (Represented with a zero probability).
 
 <div align="center">
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_node_probability.png" style="height: 280px;" />
-    <figcaption>Probability distribution</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_graph_generation.png" style="height: 280px;" />
-    <figcaption>Graph generation</figcaption>
-  </figure>
+<table>
+  <tr>
+    <td align="center">
+      <img src="doc/images/plume_node_probability.png" height="280"><br>
+      <sub>Probability distribution</sub>
+    </td>
+    <td align="center">
+      <img src="doc/images/plume_graph_generation.png" height="280"><br>
+      <sub>Graph generation</sub>
+    </td>
+  </tr>
+</table>
 </div>
 
 
@@ -43,14 +47,18 @@ The current implementation of PLUME uses a probabilistic distribution on a circl
 Two different types of generation are distinguished: single and multi-layer generation. The single layer generates the graph on a 2D plane, whereas the multi-layer is a combination of several single layers on top of each other, connected by passages. The slope angle of those passages can be fine-tuned in the configuration file. 
 
 <div align="center">
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_graph_representation_single.png" style="height: 250px;" />
-    <figcaption>Single layer generation</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_graph_representation_multi.png" style="height: 250px;" />
-    <figcaption>Multi layer generation</figcaption>
-  </figure>
+<table>
+  <tr>
+    <td align="center">
+      <img src="doc/images/plume_graph_representation_single.png" height="250"><br>
+      <sub>Single layer generation</sub>
+    </td>
+    <td align="center">
+      <img src="doc/images/plume_graph_representation_multi.png" height="250"><br>
+      <sub>Multi layer generation</sub>
+    </td>
+  </tr>
+</table>
 </div>
 
 
@@ -81,19 +89,25 @@ Along with the first visual provided at the top of this readme, here are some mo
 The first picture shows a larger room with some elevation that appears to be challenging for the robots. On the other hand, the middle picture shows a narrow passage with only one light source and high contrast. The last picture displays the same environment as the second picture, but with different lighting conditions, showing more details about the structure and diminishing the overall contrast.
 
 <div align="center">
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/ISPARO_1.png" style="height: 160px;" />
-    <figcaption>Large room</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/ISPARO_test_6.png" style="height: 160px;" />
-    <figcaption>High contrast</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/ISPARO_test_light_area_250.png" style="height: 160px;" />
-    <figcaption>Medium contrast</figcaption>
-  </figure>
+<table>
+  <tr>
+    <td align="center">
+      <img src="doc/images/ISPARO_1.png"><br>
+      <sub>Large room</sub>
+    </td>
+    <td align="center">
+      <img src="doc/images/ISPARO_test_6.png"><br>
+      <sub>High contrast</sub>
+    </td>
+    <td align="center">
+      <img src="doc/images/ISPARO_test_light_area_250.png"><br>
+      <sub>Medium contrast</sub>
+    </td>
+  </tr>
+</table>
 </div>
+
+
 
 
 All those figures demonstrate the PLUME capabilities and the potential environment where robots and rovers can evolve.
