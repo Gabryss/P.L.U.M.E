@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Display a graph using Pyvista library
 """
@@ -70,7 +72,7 @@ class Display():
             return np.linalg.norm(p - closest)
 
         # for i1, i2 in self.edges:
-        for i1, i2 in enumerate(tqdm(self.edges, desc="\t\t\tProgress")):
+        for i1, i2 in tqdm(self.edges, desc="\t\t\tProgress"):
         
             a = self.positions[i1]
             b = self.positions[i2]

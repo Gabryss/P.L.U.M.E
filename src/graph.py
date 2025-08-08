@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from node import Node
 import random as rd
 import numpy as np

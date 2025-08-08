@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from graph import Graph
 from display import Display
 from algorithm import Algorithm

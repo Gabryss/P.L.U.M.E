@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from enum import Enum
 import os
 import sys
@@ -14,13 +16,18 @@ class Config(Enum):
     # ==== General settings ====
     # ==========================
     NB_GENERATION = 1
-    GENERATION_SIZE = (500,100,100)            # Size of the generated environment
+    GENERATION_SIZE = (500,100,100)         # Size of the generated environment
+    TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
+    THREE_DIMENSION_GENERATION = True
+    NB_NODES = 50                          # Number of nodes in the generation
+
+
     
     #Graph
     IMAGE_FORMAT = ".png"
-    GENERATE_GRAPH_IMAGE = True              # Generate and save a graph visualization image
-    OPEN_VISUALIZATION = False               # Plot the graph in a 3D viewer (warning: this can be slow for large graphs and stop the generation)
-    SAVE_GRAPH_IMAGE = True
+    GENERATE_GRAPH_IMAGE = True             # Generate and save a graph visualization image
+    OPEN_VISUALIZATION = True              # Plot the graph in a 3D viewer (warning: this can be slow for large graphs and stop the generation)
+    SAVE_GRAPH_IMAGE = True                 # Save the graph image in the data folder   
     THEME = "white"                         # Light or dark mode. Available: white, dark
 
     # Animate
@@ -29,27 +36,27 @@ class Config(Enum):
     #Mesh
     MESH_FORMAT = 'usd'                     # Available: obj, ply(no textures), usd, fbx    
     GENERATE_MESH = True                    # Use blender to generate the mesh
-    SAVE_MESH = True                       # Save the mesh in data folder
-    BAKE_TEXTURE = True                    # Create, bake and save the textures (Color, Normal and Roughness maps)
-    TYPE_OF_UNDERGROUND = "CAVE"            # Available: MINE (#Not available yet), CAVE
+    SAVE_MESH = True                        # Save the mesh in data folder
+
+    # Texture
+    BAKE_TEXTURE = True                     # Create, bake and save the textures (Color, Normal and Roughness maps)
+    TEXTURE_SIZE = 1024                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
+
 
     # ==== Advanced settings ====
     # ===========================
-    NB_NODES = 250                          # Number of nodes in the generation
     MAX_CREATED_NODE_ON_CIRCLE = 2          # Maximal number of nodes created per nodes
     MAX_RADIUS_NODE = 7.0                   # Distance between the nodes
     DEFAULT_LOOP_CLOSURE_PROBABILITY = 10   # Probability of connecting two close nodes
     SELECTED_ALGORITHM = "gaussian_perlin"  # Available: gaussian_perlin, mine
-    TEXTURE_SIZE = 4096                     # 32768(Don't try this), 16384 (64GB RAM or more is needed), 8192 (32GB RAM or more is needed), 4096, 1024 pixels
-    MAX_MESH_TRIANGLES = 100000000            # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
+    MAX_MESH_TRIANGLES = 100000000          # 1Million triangles: 1000000 (Upper threshold for vscode obj visualizer)
     FINAL_DECIMATION = False
     FINAL_DECIMATION_FACTOR = 0.8           # Percentage of final mesh decimation (after texture baking). 0.8 means keep 80% of the polys number of the model
     GPU_ACCELERATION = True                 # Use the GPU instead of the GPU (Spead up the texture baking)
     PARALLELIZATION = False                 # If true the prompt in the terminal might be inconsistent
-    HIGH_POLY = True                       # If false, the generation is significantly faster
-    THREE_DIMENSION_GENERATION = True
-    SLICE_MESH = False
-    NUMBER_OF_CHUNKS = 3
+    HIGH_POLY = True                        # If false, the generation is significantly faster
+    SLICE_MESH = True
+    NUMBER_OF_CHUNKS = 4
 
     #Gaussian
     MEAN = 0.0
@@ -69,7 +76,7 @@ class Config(Enum):
 
     
     # Blender
-    DEBUG = False
+    DEBUG = True
 
 
 class Color(Enum):
