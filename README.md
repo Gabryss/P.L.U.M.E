@@ -57,16 +57,18 @@ Two different types of generation are distinguished: single and multi-layer gene
 
 ### Mesh generation
 The second stage of the generation is the mesh generation using Blender. At this stage, a skin is created along the skeleton represented by the graph. Different smoothing and noise algorithm are then applied to the mesh further strengthening the details.
-<div align="center">
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_mesh_inside.png" style="height: 180px;" />
-    <figcaption>Inside of a room (wireframe view) - Blender</figcaption>
-  </figure>
-  <figure style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="doc/images/plume_mesh_top.png" style="height: 180px;" />
-    <figcaption>Top-down view - Blender</figcaption>
-  </figure>
-</div>
+<table>
+  <tr>
+    <td align="center">
+      <img src="doc/images/plume_mesh_inside.png" height="200"><br>
+      <sub>Inside of a room (wireframe view) - Blender</sub>
+    </td>
+    <td align="center">
+      <img src="doc/images/plume_mesh_top.png" height="200"><br>
+      <sub>Top-down view - Blender</sub>
+    </td>
+  </tr>
+</table>
 
 
 ### Texture generation
