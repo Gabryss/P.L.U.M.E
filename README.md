@@ -4,7 +4,7 @@ Procedural Layers Underground Modeling Engine: A generator that uses procedural 
 
 
 <div align="center">
-    <img width="700" src="doc/images/cave_rendering.png">
+    <img src="doc/images/cave_rendering.png">
     <div align="center">Inside of a cave</div>
 </div>
 
@@ -14,7 +14,7 @@ PLUME is a Blender-based pipeline that generates 3D meshes and high-quality text
 
 ### Overview
 <div align="center">
-    <img width="600" src="doc/images/PLUME_overview.png">
+    <img src="doc/images/PLUME_overview.png">
     <div align="center">Pipeline overview</div>
 </div>
 
@@ -31,11 +31,11 @@ The current implementation of PLUME uses a probabilistic distribution on a circl
 <table>
   <tr>
     <td align="center">
-      <img src="doc/images/plume_node_probability.png" height="280"><br>
+      <img src="doc/images/plume_node_probability.png" ><br>
       <sub>Probability distribution</sub>
     </td>
     <td align="center">
-      <img src="doc/images/plume_graph_generation.png" height="280"><br>
+      <img src="doc/images/plume_graph_generation.png" ><br>
       <sub>Graph generation</sub>
     </td>
   </tr>
@@ -69,11 +69,11 @@ The second stage of the generation is the mesh generation using Blender. At this
 <table>
   <tr>
     <td align="center">
-      <img src="doc/images/plume_mesh_inside.png" height="200"><br>
+      <img src="doc/images/plume_mesh_inside.png" ><br>
       <sub>Inside of a room (wireframe view) - Blender</sub>
     </td>
     <td align="center">
-      <img src="doc/images/plume_mesh_top.png" height="200"><br>
+      <img src="doc/images/plume_mesh_top.png" ><br>
       <sub>Top-down view - Blender</sub>
     </td>
   </tr>
@@ -212,7 +212,7 @@ The [`config.py`](./src/config.py) script is a configuration module providing es
 ## Usage
 PLUME was used to create a cave-like environment, which was later exported to the simulation software Gazebo. Following this, a SLAM algorithm utilizing LiDAR input was employed to map and position the robot within the environment.
 <p align="center">
-    <img width="600" src="doc/images/plume_gazebo.png">
+    <img src="doc/images/plume_gazebo.png">
     <div align="center">Cloud map of a PLUME generation - Foxglove GUI</div>
 </p>
 
