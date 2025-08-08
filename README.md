@@ -57,6 +57,7 @@ Two different types of generation are distinguished: single and multi-layer gene
 
 ### Mesh generation
 The second stage of the generation is the mesh generation using Blender. At this stage, a skin is created along the skeleton represented by the graph. Different smoothing and noise algorithm are then applied to the mesh further strengthening the details.
+<div align="center">
 <table>
   <tr>
     <td align="center">
@@ -69,7 +70,7 @@ The second stage of the generation is the mesh generation using Blender. At this
     </td>
   </tr>
 </table>
-
+</div>
 
 ### Texture generation
 The last stage of the generation is the texture baking using Blender. Textures have been generated procedurally along with the mesh (before slicing it to keep visual harmony), but they are baked along with it later. The resolution of the texture has a significant impact on the generation time, the result size, and the visual fidelity.
