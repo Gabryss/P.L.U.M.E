@@ -256,6 +256,6 @@ This project has been developed by researchers who are now involved in other res
 }
 ```
 
- The preprint can be found [here](https://example.com).
+ The preprint can be found [here](https://arxiv.org/abs/2508.20926).
 
 
